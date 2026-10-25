@@ -289,6 +289,7 @@
 
   // ================= CATALOG (LAMPA x TMDB) =================
   async function loadCatalog(reset = true) {
+    $('heroBanner').classList.toggle('hidden', !!state.searchQuery);
     if (reset) {
       state.page = 1;
       $('catalogGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Загрузка каталога...</div>';
@@ -384,22 +385,53 @@
 
   // Global search
   let searchTimer = null;
-  $('globalSearchInput').addEventListener('input', (e) => {
+  const searchInput = $('globalSearchInput');
+  const clearSearchBtn = $('clearSearchBtn');
+  const mainTopbar = $('mainTopbar');
+
+  searchInput.addEventListener('focus', () => {
+    mainTopbar.classList.add('search-focused');
+    clearSearchBtn.classList.remove('hidden');
+  });
+
+  searchInput.addEventListener('blur', () => {
+    setTimeout(() => {
+      mainTopbar.classList.remove('search-focused');
+      clearSearchBtn.classList.toggle('hidden', !searchInput.value.trim());
+    }, 180);
+  });
+
+  searchInput.addEventListener('input', (e) => {
     const val = e.target.value.trim();
-    $('clearSearchBtn').classList.toggle('hidden', !val);
+    clearSearchBtn.classList.toggle('hidden', !val && document.activeElement !== searchInput);
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => {
       state.searchQuery = val;
       if (state.currentView !== 'explore') switchView('explore');
       loadCatalog(true);
-    }, 380);
+    }, 350);
   });
 
-  $('clearSearchBtn').addEventListener('click', () => {
-    $('globalSearchInput').value = '';
-    $('clearSearchBtn').classList.add('hidden');
-    state.searchQuery = '';
+  $('globalSearchForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    clearTimeout(searchTimer);
+    const val = searchInput.value.trim();
+    state.searchQuery = val;
+    if (state.currentView !== 'explore') switchView('explore');
     loadCatalog(true);
+    searchInput.blur();
+  });
+
+  clearSearchBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    searchInput.value = '';
+    mainTopbar.classList.remove('search-focused');
+    clearSearchBtn.classList.add('hidden');
+    if (state.searchQuery) {
+      state.searchQuery = '';
+      loadCatalog(true);
+    }
+    searchInput.blur();
   });
 
   // ================= MOVIE MODAL =================

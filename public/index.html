@@ -19,7 +19,7 @@
 <body>
   <div id="app" class="app-shell">
     <!-- Top Header / Search Bar -->
-    <header class="topbar">
+    <header class="topbar" id="mainTopbar">
       <div class="brand" id="brandLogo" title="На главную">
         <div class="brand-icon">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -27,14 +27,14 @@
         <span class="brand-name">Rave<span>Lampa</span></span>
       </div>
 
-      <div class="search-box">
+      <form class="search-box" id="globalSearchForm" action="javascript:void(0);">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
           <circle cx="11" cy="11" r="7"></circle>
           <path d="M20 20l-4-4" stroke-linecap="round"></path>
         </svg>
-        <input type="text" id="globalSearchInput" placeholder="Поиск фильмов, сериалов, аниме..." autocomplete="off" />
-        <button id="clearSearchBtn" class="icon-btn tiny hidden" title="Очистить">✕</button>
-      </div>
+        <input type="search" id="globalSearchInput" enterkeyhint="search" placeholder="Поиск фильмов и сериалов..." autocomplete="off" />
+        <button type="button" id="clearSearchBtn" class="icon-btn tiny hidden" title="Очистить">✕</button>
+      </form>
 
       <div class="topbar-actions">
         <button id="customLinkBtn" class="pill-btn ghost" title="Вставить ссылку YouTube / MP4 / M3U8">
@@ -43,12 +43,12 @@
         </button>
 
         <button id="joinByCodeBtn" class="pill-btn ghost" title="Войти в комнату по коду">
-          <span># Код</span>
+          <span>#</span><span class="hide-sm">&nbsp;Код</span>
         </button>
 
         <!-- Active room mini-pill when browsing catalog while in a room -->
         <button id="returnToRoomBtn" class="pill-btn accent pulse hidden">
-          <span>🔴 В комнату</span>
+          <span>🔴</span><span class="hide-sm">&nbsp;В комнату</span>
         </button>
 
         <!-- User Avatar / Auth Button -->
