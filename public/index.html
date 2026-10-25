@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#090a0f" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>RaveLampa — Совместный просмотр</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <!-- Top Header / Search Bar -->
+    <header class="topbar">
+      <div class="brand" id="brandLogo" title="На главную">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <span class="brand-name">Rave<span>Lampa</span></span>
+      </div>
+
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M20 20l-4-4" stroke-linecap="round"></path>
+        </svg>
+        <input type="text" id="globalSearchInput" placeholder="Поиск фильмов, сериалов, аниме..." autocomplete="off" />
+        <button id="clearSearchBtn" class="icon-btn tiny hidden" title="Очистить">✕</button>
+      </div>
+
+      <div class="topbar-actions">
+        <button id="customLinkBtn" class="pill-btn ghost" title="Вставить ссылку YouTube / MP4 / M3U8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke-linecap="round"/></svg>
+          <span class="hide-sm">Ссылка</span>
+        </button>
+
+        <button id="joinByCodeBtn" class="pill-btn ghost" title="Войти в комнату по коду">
+          <span># Код</span>
+        </button>
+
+        <!-- Active room mini-pill when browsing catalog while in a room -->
+        <button id="returnToRoomBtn" class="pill-btn accent pulse hidden">
+          <span>🔴 В комнату</span>
+        </button>
+
+        <!-- User Avatar / Auth Button -->
+        <button id="userMenuBtn" class="user-chip">
+          <span id="headerUserAvatar" class="avatar-circle">👤</span>
+          <span id="headerUserName" class="hide-sm">Войти</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Layout: Sidebar (Desktop) / Bottom Nav (Mobile) + Content Area -->
+    <div class="main-body">
+      <nav class="nav-rail">
+        <button class="nav-item active" data-view="explore">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span>Каталог</span>
+        </button>
+        <button class="nav-item" data-view="rooms">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Комнаты</span>
+          <span id="publicRoomsBadge" class="nav-badge hidden">0</span>
+        </button>
+        <button class="nav-item" data-view="friends">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Друзья</span>
+          <span id="friendsReqBadge" class="nav-badge hidden">0</span>
+        </button>
+        <button class="nav-item" data-view="saved">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          <span>Моё</span>
+        </button>
+      </nav>
+
+      <!-- Views Container -->
+      <main class="view-container">
+        <!-- VIEW 1: EXPLORE (Lampa Catalog + Active Rave Rooms Strip) -->
+        <section id="view-explore" class="view-page active">
+          <!-- Hero Spotlight -->
+          <div id="heroBanner" class="hero-banner">
+            <div class="hero-backdrop" id="heroBackdrop"></div>
+            <div class="hero-gradient"></div>
+            <div class="hero-content">
+              <div class="hero-badges">
+                <span class="badge accent" id="heroType">Фильм</span>
+                <span class="badge star" id="heroRating">★ 8.5</span>
+                <span class="badge" id="heroYear">2025</span>
+              </div>
+              <h1 id="heroTitle" class="hero-title">Загрузка...</h1>
+              <div class="hero-actions">
+                <button id="heroWatchPartyBtn" class="btn primary">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                  <span>Смотреть вместе</span>
+                </button>
+                <button id="heroDetailsBtn" class="btn glass">
+                  <span>Подробнее</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Rave Rooms Strip (if any active) -->
+          <div id="liveRoomsStripWrap" class="section-block hidden">
+            <div class="section-head">
+              <div class="section-title">
+                <span class="live-dot"></span>
+                <span>Сейчас смотрят</span>
+              </div>
+              <button class="text-link" data-goto="rooms">Все комнаты →</button>
+            </div>
+            <div id="liveRoomsStrip" class="rooms-horizontal"></div>
+          </div>
+
+          <!-- Category Filter Pills (Lampa style, clean) -->
+          <div class="category-bar" id="categoryBar">
+            <button class="cat-pill active" data-cat="trending">🔥 В тренде</button>
+            <button class="cat-pill" data-cat="popular_movies">🎬 Фильмы</button>
+            <button class="cat-pill" data-cat="popular_tv">📺 Сериалы</button>
+            <button class="cat-pill" data-cat="anime">⛩️ Аниме</button>
+            <button class="cat-pill" data-cat="cartoons">🧸 Мультфильмы</button>
+            <button class="cat-pill" data-cat="top_movies">🏆 Топ фильмов</button>
+            <button class="cat-pill" data-cat="top_tv">⭐ Топ сериалов</button>
+          </div>
+
+          <!-- Movies Poster Grid -->
+          <div id="catalogGrid" class="poster-grid"></div>
+          <div class="load-more-wrap">
+            <button id="loadMoreCatalogBtn" class="btn glass">Показать ещё</button>
+          </div>
+        </section>
+
+        <!-- VIEW 2: ROOMS (Rave Public & Private Watch Parties) -->
+        <section id="view-rooms" class="view-page">
+          <div class="page-header">
+            <h2>Комнаты Rave</h2>
+            <div class="page-header-actions">
+              <button id="createCustomRoomBtn" class="btn primary">+ Создать комнату</button>
+            </div>
+          </div>
+          <div id="publicRoomsGrid" class="rooms-grid"></div>
+        </section>
+
+        <!-- VIEW 3: FRIENDS (Social, Presence, Invites) -->
+        <section id="view-friends" class="view-page">
+          <div class="page-header">
+            <h2>Друзья</h2>
+          </div>
+
+          <div class="friends-search-bar">
+            <input type="text" id="friendSearchInput" placeholder="Найти друга по логину или имени..." autocomplete="off" />
+            <button id="friendSearchBtn" class="btn primary">Найти</button>
+          </div>
+
+          <div id="friendSearchResults" class="friends-list hidden"></div>
+
+          <div id="incomingRequestsBlock" class="section-block hidden">
+            <div class="section-head"><div class="section-title">Входящие заявки</div></div>
+            <div id="incomingRequestsList" class="friends-list"></div>
+          </div>
+
+          <div class="section-block">
+            <div class="section-head"><div class="section-title">Мои друзья</div></div>
+            <div id="friendsList" class="friends-list"></div>
+          </div>
+        </section>
+
+        <!-- VIEW 4: SAVED (Bookmarks & History) -->
+        <section id="view-saved" class="view-page">
+          <div class="category-bar">
+            <button class="cat-pill active" data-saved-tab="bookmarks" id="tabBookmarksBtn">🔖 Закладки</button>
+            <button class="cat-pill" data-saved-tab="history" id="tabHistoryBtn">🕒 История</button>
+          </div>
+          <div id="savedGrid" class="poster-grid"></div>
+        </section>
+
+        <!-- VIEW 5: WATCH PARTY ROOM (Rave Player + Z01 Selector + Live Sync Chat) -->
+        <section id="view-room" class="view-page room-view">
+          <div class="room-layout">
+            <!-- Left / Top: Video Stage + Z01 Controls -->
+            <div class="room-stage">
+              <!-- Room Top Bar -->
+              <div class="room-topbar">
+                <button id="leaveRoomBtn" class="icon-btn" title="Выйти из комнаты">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="room-meta">
+                  <div class="room-title-row">
+                    <span id="roomTitleText" class="room-title-text">Комната</span>
+                    <span id="roomPrivacyBadge" class="badge tiny">Публичная</span>
+                  </div>
+                  <div id="roomSubText" class="room-sub-text">Выберите фильм или источник</div>
+                </div>
+                <div class="room-top-actions">
+                  <button id="copyRoomCodeBtn" class="pill-btn tiny" title="Скопировать ссылку и код комнаты">
+                    <span id="roomCodeLabel">#CODE</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  </button>
+                  <button id="inviteFriendsModalBtn" class="pill-btn tiny accent" title="Пригласить друзей">
+                    <span>+ Друг</span>
+                  </button>
+                  <button id="voiceToggleBtn" class="icon-btn voice-btn" title="Голосовой чат (WebRTC)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                  </button>
+                  <button id="roomSettingsBtn" class="icon-btn hidden" title="Настройки комнаты (Хост)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Video Player Container -->
+              <div class="player-wrapper" id="playerWrapper">
+                <video id="mainVideo" playsinline crossorigin="anonymous"></video>
+                <div id="youtubeContainer" class="youtube-container hidden"></div>
+
+                <!-- Empty state overlay when no stream is loaded yet -->
+                <div id="playerEmptyOverlay" class="player-overlay">
+                  <div class="player-empty-box">
+                    <div class="spinner hidden" id="playerLoadingSpinner"></div>
+                    <p id="playerStatusText">Выберите фильм из каталога или источник Z01 ниже</p>
+                    <div class="player-empty-actions">
+                      <button id="openCatalogFromRoomBtn" class="btn glass">Каталог фильмов</button>
+                      <button id="openLinkFromRoomBtn" class="btn glass">Вставить ссылку</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sync status badge -->
+                <div id="syncIndicator" class="sync-indicator hidden">Синхронизация...</div>
+
+                <!-- Floating Reactions Layer -->
+                <div id="reactionsLayer" class="reactions-layer"></div>
+              </div>
+
+              <!-- Quick Emoji Reaction Strip + Sync Resync Button -->
+              <div class="reaction-strip">
+                <div class="reaction-buttons">
+                  <button class="emoji-btn" data-emoji="🔥">🔥</button>
+                  <button class="emoji-btn" data-emoji="😂">😂</button>
+                  <button class="emoji-btn" data-emoji="❤️">❤️</button>
+                  <button class="emoji-btn" data-emoji="😱">😱</button>
+                  <button class="emoji-btn" data-emoji="🍿">🍿</button>
+                  <button class="emoji-btn" data-emoji="👏">👏</button>
+                  <button class="emoji-btn" data-emoji="😢">😢</button>
+                  <button class="emoji-btn" data-emoji="🤯">🤯</button>
+                </div>
+                <div class="player-quick-tools">
+                  <button id="toggleProxyStreamBtn" class="pill-btn tiny ghost" title="Переключить прокси потока (если видео не грузится)">
+                    <span>⚡ Прокси: Авто</span>
+                  </button>
+                  <button id="resyncPlayerBtn" class="pill-btn tiny ghost" title="Синхронизировать таймкод с комнатой">
+                    <span>🔄 Синхр.</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Z01 Online Selector Panel (Balancers, Seasons, Voices, Episodes, Qualities) -->
+              <div id="z01Panel" class="z01-panel hidden">
+                <div class="z01-segments" id="z01Segments">
+                  <!-- Populated dynamically: Source, Season, Voice, Quality -->
+                </div>
+                <!-- Dropdown / Grid for active segment (sources, voices, seasons) -->
+                <div id="z01DropdownGrid" class="z01-dropdown-grid hidden"></div>
+                <!-- Episodes strip for TV Series -->
+                <div id="z01EpisodesStrip" class="z01-episodes-strip hidden"></div>
+              </div>
+            </div>
+
+            <!-- Right / Bottom: Rave Chat & Participants Sidebar -->
+            <aside class="room-sidebar">
+              <div class="sidebar-tabs">
+                <button class="side-tab active" data-rtab="chat">💬 Чат</button>
+                <button class="side-tab" data-rtab="users">👥 Участники (<span id="roomUserCount">1</span>)</button>
+              </div>
+
+              <!-- Tab 1: Live Chat -->
+              <div id="rtab-chat" class="rtab-content active">
+                <div id="chatMessages" class="chat-messages"></div>
+                <form id="chatForm" class="chat-input-row">
+                  <input type="text" id="chatInput" placeholder="Написать в комнату..." autocomplete="off" />
+                  <button type="submit" class="send-btn" title="Отправить">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                  </button>
+                </form>
+              </div>
+
+              <!-- Tab 2: Participants List -->
+              <div id="rtab-users" class="rtab-content">
+                <div id="roomParticipantsList" class="participants-list"></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL 1: MOVIE DETAILS & START WATCH PARTY -->
+  <div id="movieModal" class="modal-backdrop hidden">
+    <div class="modal-card movie-modal-card">
+      <button class="modal-close" data-close="movieModal">✕</button>
+      <div class="movie-modal-hero" id="modalBackdrop">
+        <div class="movie-modal-gradient"></div>
+        <img id="modalPoster" class="movie-modal-poster" src="" alt="" />
+        <div class="movie-modal-info">
+          <div class="hero-badges">
+            <span class="badge accent" id="modalType">Фильм</span>
+            <span class="badge star" id="modalRating">★ 8.0</span>
+            <span class="badge" id="modalYear">2024</span>
+          </div>
+          <h2 id="modalTitle">Название</h2>
+          <div id="modalOrigTitle" class="modal-orig-title"></div>
+        </div>
+      </div>
+      <div class="movie-modal-body">
+        <p id="modalOverview" class="movie-overview"></p>
+        <div class="movie-modal-actions">
+          <button id="modalStartPublicRoomBtn" class="btn primary full">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <span>Создать комнату (Публичная)</span>
+          </button>
+          <button id="modalStartPrivateRoomBtn" class="btn glass full">
+            <span>🔒 Приватная комната (По ссылке)</span>
+          </button>
+          <button id="modalPlayInCurrentRoomBtn" class="btn accent-outline full hidden">
+            <span>▶️ Включить в текущей комнате</span>
+          </button>
+          <button id="modalBookmarkBtn" class="btn glass icon-only" title="В закладки">🔖</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: AUTH / PROFILE -->
+  <div id="authModal" class="modal-backdrop hidden">
+    <div class="modal-card auth-modal-card">
+      <button class="modal-close" data-close="authModal">✕</button>
+
+      <!-- Guest: Login / Register -->
+      <div id="authGuestView">
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-atab="login">Вход</button>
+          <button class="auth-tab" data-atab="register">Регистрация</button>
+        </div>
+
+        <form id="authForm" class="auth-form">
+          <div class="form-group">
+            <label>Логин</label>
+            <input type="text" id="authUsername" required placeholder="Например: alex" autocomplete="username" />
+          </div>
+          <div class="form-group" id="authDisplayNameGroup" style="display:none;">
+            <label>Имя в профиле</label>
+            <input type="text" id="authDisplayName" placeholder="Как вас видят друзья" />
+          </div>
+          <div class="form-group">
+            <label>Пароль</label>
+            <input type="password" id="authPassword" required placeholder="Минимум 4 символа" autocomplete="current-password" />
+          </div>
+          <div class="form-group" id="authAvatarGroup" style="display:none;">
+            <label>Аватар</label>
+            <div class="avatar-picker" id="registerAvatarPicker">
+              <button type="button" class="av-pick selected" data-av="🦊">🦊</button>
+              <button type="button" class="av-pick" data-av="🐱">🐱</button>
+              <button type="button" class="av-pick" data-av="🐼">🐼</button>
+              <button type="button" class="av-pick" data-av="🐯">🐯</button>
+              <button type="button" class="av-pick" data-av="🦁">🦁</button>
+              <button type="button" class="av-pick" data-av="🦄">🦄</button>
+              <button type="button" class="av-pick" data-av="👾">👾</button>
+              <button type="button" class="av-pick" data-av="🎬">🎬</button>
+            </div>
+          </div>
+          <div id="authError" class="form-error hidden"></div>
+          <button type="submit" class="btn primary full" id="authSubmitBtn">Войти</button>
+        </form>
+      </div>
+
+      <!-- Logged-in User Profile -->
+      <div id="authProfileView" class="hidden">
+        <h3>Профиль</h3>
+        <div class="profile-header-box">
+          <div id="profileBigAvatar" class="profile-big-avatar">🦊</div>
+          <div>
+            <div id="profileUsernameTag" class="profile-username">@user</div>
+          </div>
+        </div>
+        <form id="profileForm" class="auth-form">
+          <div class="form-group">
+            <label>Отображаемое имя</label>
+            <input type="text" id="profileDisplayName" required />
+          </div>
+          <div class="form-group">
+            <label>Аватар</label>
+            <div class="avatar-picker" id="profileAvatarPicker">
+              <button type="button" class="av-pick" data-av="🦊">🦊</button>
+              <button type="button" class="av-pick" data-av="🐱">🐱</button>
+              <button type="button" class="av-pick" data-av="🐼">🐼</button>
+              <button type="button" class="av-pick" data-av="🐯">🐯</button>
+              <button type="button" class="av-pick" data-av="🦁">🦁</button>
+              <button type="button" class="av-pick" data-av="🦄">🦄</button>
+              <button type="button" class="av-pick" data-av="👾">👾</button>
+              <button type="button" class="av-pick" data-av="🤖">🤖</button>
+              <button type="button" class="av-pick" data-av="🔥">🔥</button>
+              <button type="button" class="av-pick" data-av="🎬">🎬</button>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <button type="submit" class="btn primary">Сохранить</button>
+            <button type="button" id="logoutBtn" class="btn glass danger">Выйти</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: CUSTOM LINK / JOIN CODE / INVITE FRIENDS -->
+  <div id="customLinkModal" class="modal-backdrop hidden">
+    <div class="modal-card small-modal-card">
+      <button class="modal-close" data-close="customLinkModal">✕</button>
+      <h3>Своя ссылка на видео</h3>
+      <p class="modal-hint">Поддерживаются ссылки YouTube, прямые потоки HLS (.m3u8) и видео (.mp4)</p>
+      <form id="customLinkForm" class="auth-form">
+        <div class="form-group">
+          <label>Название (необязательно)</label>
+          <input type="text" id="customLinkTitle" placeholder="Видео по ссылке" />
+        </div>
+        <div class="form-group">
+          <label>URL видео</label>
+          <input type="url" id="customLinkUrl" required placeholder="https://..." />
+        </div>
+        <button type="submit" class="btn primary full">Запустить просмотр</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="joinCodeModal" class="modal-backdrop hidden">
+    <div class="modal-card small-modal-card">
+      <button class="modal-close" data-close="joinCodeModal">✕</button>
+      <h3>Войти по коду комнаты</h3>
+      <form id="joinCodeForm" class="auth-form">
+        <div class="form-group">
+          <input type="text" id="joinCodeInput" required placeholder="6-значный код (напр. AB12CD)" style="text-transform:uppercase;text-align:center;font-size:1.2rem;letter-spacing:0.15em;" maxlength="10" />
+        </div>
+        <button type="submit" class="btn primary full">Войти в комнату</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="inviteModal" class="modal-backdrop hidden">
+    <div class="modal-card small-modal-card">
+      <button class="modal-close" data-close="inviteModal">✕</button>
+      <h3>Пригласить в комнату</h3>
+      <div class="invite-share-box">
+        <input type="text" id="inviteShareUrl" readonly />
+        <button id="copyShareUrlBtn" class="btn primary">Копировать</button>
+      </div>
+      <div class="section-head"><div class="section-title">Друзья онлайн</div></div>
+      <div id="inviteFriendsList" class="friends-list compact"></div>
+    </div>
+  </div>
+
+  <!-- Audio container for WebRTC remote peers -->
+  <div id="remoteAudioContainer" style="display:none;"></div>
+
+  <!-- Toast Container (also shows interactive room invites) -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

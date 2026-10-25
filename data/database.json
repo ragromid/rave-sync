@@ -1,0 +1,64 @@
+{
+  "users": [
+    {
+      "id": "u_805b52bfc220",
+      "username": "rashid",
+      "displayName": "Rashid Sultanov",
+      "passwordHash": "172976c6027b79c49733971a942c9236:a0c481e2c07089fcf2ebaf7df8984b974da11da172f2e3e739868e5f91e73c7d273433cf0bbdddea3a711cb40a79c39a032419f1ec08afd1facbff5cb50dcd96",
+      "avatar": "🦊",
+      "color": "#1de9b6",
+      "bio": "",
+      "createdAt": 1792965608434
+    },
+    {
+      "id": "u_226eb830d92e",
+      "username": "test",
+      "displayName": "test",
+      "passwordHash": "67d6a3f17564579279ee0c6c137b83d9:0886c9afb940414361e912cb20b73b7d3b703682c25313290fd5744817b332e0afc3f553d20426c2502ece790156e0c0d762ef56062c4e1a3e05c2c50b9ec5b3",
+      "avatar": "🦄",
+      "color": "#00d2ff",
+      "bio": "",
+      "createdAt": 1792965927568
+    }
+  ],
+  "friendships": [],
+  "bookmarks": {},
+  "history": {
+    "u_805b52bfc220": [
+      {
+        "movie": {
+          "id": 1218925,
+          "tmdb_id": 1218925,
+          "imdb_id": "tt30472557",
+          "kinopoisk_id": "5430477",
+          "type": "movie",
+          "serial": 0,
+          "title": "Человек-бензопила. Фильм: История Резе",
+          "original_title": "劇場版 チェンソーマン レゼ篇",
+          "original_language": "ja",
+          "overview": "Молодой охотник на демонов Дэндзи, который ждал свидания со своей возлюбленной Макимой, попадает под ливень. Укрывшись от дождя, он случайно встречает девушку по имени Резе, работающую в соседнем кафе. Та добродушно ему улыбается, и разговор становится более непринужденным. После этой встречи повседневная жизнь Дэндзи начинает меняться.",
+          "release_date": "2025-09-19",
+          "year": "2025",
+          "vote_average": 8.5,
+          "poster": "https://imagetmdb.com/t/p/w500/f4Bv4JWv85zHSisuq7SD2WeuJGr.jpg",
+          "backdrop": "https://imagetmdb.com/t/p/w1280/gqTz24ZRsCP6AKjARmEivY7m0cK.jpg",
+          "poster_path": "/f4Bv4JWv85zHSisuq7SD2WeuJGr.jpg",
+          "backdrop_path": "/gqTz24ZRsCP6AKjARmEivY7m0cK.jpg",
+          "number_of_seasons": 0,
+          "runtime": 100,
+          "genres": [
+            "мультфильм",
+            "боевик",
+            "мелодрама",
+            "фэнтези"
+          ]
+        },
+        "balancer": "Filmix",
+        "season": 0,
+        "episode": 0,
+        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "updatedAt": 1792965688026
+      }
+    ]
+  }
+}
