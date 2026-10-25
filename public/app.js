@@ -3,10 +3,11 @@
 
   // ================= APPLICATION STATE =================
   const state = {
-    token: localStorage.getItem('ravelampa_token') || '',
+    token: '',
     user: null,
     bookmarks: [],
     history: [],
+    progress: {},
     friends: [],
     incomingRequests: [],
     outgoingRequests: [],
@@ -63,7 +64,7 @@
   async function api(path, options = {}) {
     const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
     if (state.token) headers['Authorization'] = `Bearer ${state.token}`;
-    const res = await fetch(path, { ...options, headers });
+    const res = await fetch(path, { credentials: 'same-origin', ...options, headers });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
     return data;
@@ -159,22 +160,34 @@
     }
   }
 
-  async function initAuth() {
-    if (!state.token) {
-      updateHeaderUser();
-      return;
+  function applyServerUserData(data) {
+    state.token = data.token || state.token || '';
+    state.user = data.user || null;
+    state.bookmarks = data.bookmarks || [];
+    state.history = data.history || [];
+    state.progress = data.progress || {};
+    if (state.user?.settings?.proxyMode) {
+      state.proxyMode = state.user.settings.proxyMode;
+      const labels = { auto: '⚡ Прокси: Авто', always: '🛡️ Прокси: Вкл', off: '🌐 Прокси: Выкл' };
+      const btnSpan = $('toggleProxyStreamBtn')?.querySelector('span');
+      if (btnSpan && labels[state.proxyMode]) btnSpan.textContent = labels[state.proxyMode];
     }
-    try {
-      const data = await api('/api/auth/me');
-      state.user = data.user;
-      state.bookmarks = data.bookmarks || [];
-      state.history = data.history || [];
-      updateHeaderUser();
+    updateHeaderUser();
+    if (state.token) {
       socket.emit('auth:identify', { token: state.token });
+    }
+  }
+
+  async function initAuth() {
+    try {
+      // Remove any legacy browser cache token so only server session is used
+      try { localStorage.removeItem('ravelampa_token'); } catch {}
+      const data = await api('/api/auth/me');
+      applyServerUserData(data);
       loadFriends();
     } catch {
       state.token = '';
-      localStorage.removeItem('ravelampa_token');
+      state.user = null;
       updateHeaderUser();
     }
   }
@@ -236,11 +249,7 @@
         method: 'POST',
         body: JSON.stringify({ username, password, displayName, avatar: selectedAv })
       });
-      state.token = data.token;
-      state.user = data.user;
-      localStorage.setItem('ravelampa_token', data.token);
-      updateHeaderUser();
-      socket.emit('auth:identify', { token: state.token });
+      applyServerUserData(data);
       $('authModal').classList.add('hidden');
       showToast(`Привет, ${state.user.displayName}!`);
       loadFriends();
@@ -268,13 +277,14 @@
     }
   });
 
-  $('logoutBtn').addEventListener('click', () => {
+  $('logoutBtn').addEventListener('click', async () => {
     if (state.room) leaveRoom();
+    try { await api('/api/auth/logout', { method: 'POST' }); } catch {}
     state.token = '';
     state.user = null;
     state.bookmarks = [];
     state.history = [];
-    localStorage.removeItem('ravelampa_token');
+    state.progress = {};
     updateHeaderUser();
     $('authModal').classList.add('hidden');
     showToast('Вы вышли из аккаунта');
@@ -748,8 +758,9 @@
         return;
       }
 
-      // If room already has a selected balancer, prefer it
-      const preferredKey = state.room?.media?.balancerKey;
+      // If room already has a selected balancer (or user has saved server-side progress), prefer it
+      const savedProg = state.progress?.[String(movie.id)];
+      const preferredKey = state.room?.media?.balancerKey || savedProg?.balancerKey;
       const targetSource = state.z01.sources.find(s => s.key === preferredKey) || firstSource;
       await selectZ01Balancer(targetSource.key, autoBroadcastFirstStream);
     } catch (e) {
@@ -888,18 +899,22 @@
         subtitles: resolved.subtitles || []
       };
 
-      // Save to user watch history
+      // Save to user watch history on server
       if (state.user && state.z01.movie) {
         api('/api/history', {
           method: 'POST',
           body: JSON.stringify({
             movie: state.z01.movie,
+            balancerKey: newMedia.balancerKey,
             balancer: newMedia.balancerName,
             season: newMedia.season,
             episode: newMedia.episode,
             voiceName: newMedia.voiceName
           })
-        }).then(r => { if (r.history) state.history = r.history; }).catch(() => {});
+        }).then(r => {
+          if (r.history) state.history = r.history;
+          if (r.progress) state.progress = r.progress;
+        }).catch(() => {});
       }
 
       if (broadcastToRoom && state.room) {
@@ -1081,6 +1096,14 @@
     state.proxyMode = modes[nextIdx];
     $('toggleProxyStreamBtn').querySelector('span').textContent = labels[state.proxyMode];
 
+    // Persist proxyMode preference on the server
+    if (state.user) {
+      api('/api/auth/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ settings: { proxyMode: state.proxyMode } })
+      }).catch(() => {});
+    }
+
     if (state.room && state.room.media && state.room.media.rawUrl) {
       const video = $('mainVideo');
       const curTime = video.currentTime || 0;
@@ -1210,6 +1233,26 @@
       currentTime: mainVideo.currentTime || 0,
       rate: mainVideo.playbackRate || 1
     });
+
+    // Save playback timecode on the server
+    if (state.user && state.room?.media?.movie?.id && mainVideo.currentTime > 5) {
+      const m = state.room.media;
+      api('/api/user/progress', {
+        method: 'POST',
+        body: JSON.stringify({
+          movieId: m.movie.id,
+          balancerKey: m.balancerKey,
+          balancerName: m.balancerName,
+          season: m.season,
+          episode: m.episode,
+          voiceName: m.voiceName,
+          currentTime: Math.floor(mainVideo.currentTime),
+          duration: Math.floor(mainVideo.duration || 0)
+        })
+      }).then(r => {
+        if (r.progress) state.progress[String(m.movie.id)] = r.progress;
+      }).catch(() => {});
+    }
   }
 
   mainVideo.addEventListener('play', () => emitPlayerSync('play'));

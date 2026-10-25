@@ -120,10 +120,41 @@ function notifyFriendsPresence(userId) {
   }
 }
 
-// Auth Middleware
+function parseCookies(cookieHeader) {
+  const out = {};
+  if (!cookieHeader) return out;
+  cookieHeader.split(';').forEach(part => {
+    const idx = part.indexOf('=');
+    if (idx > 0) {
+      const k = part.slice(0, idx).trim();
+      const v = part.slice(idx + 1).trim();
+      try { out[k] = decodeURIComponent(v); } catch { out[k] = v; }
+    }
+  });
+  return out;
+}
+
+function setAuthCookie(res, token) {
+  res.setHeader(
+    'Set-Cookie',
+    `ravelampa_token=${encodeURIComponent(token)}; Path=/; Max-Age=31536000; SameSite=Lax; HttpOnly`
+  );
+}
+
+function clearAuthCookie(res) {
+  res.setHeader(
+    'Set-Cookie',
+    'ravelampa_token=; Path=/; Max-Age=0; SameSite=Lax; HttpOnly'
+  );
+}
+
+// Auth Middleware (reads Server HttpOnly Cookie or Bearer token)
 function authMiddleware(req, res, next) {
+  const cookies = parseCookies(req.headers.cookie);
   const authHeader = req.headers.authorization || '';
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : (req.query.token || '');
+  const token = authHeader.startsWith('Bearer ')
+    ? authHeader.slice(7)
+    : (cookies.ravelampa_token || req.query.token || '');
   const payload = db.verifyToken(token);
   if (!payload || !payload.id) {
     return res.status(401).json({ error: 'Требуется авторизация' });
@@ -133,6 +164,7 @@ function authMiddleware(req, res, next) {
     return res.status(401).json({ error: 'Пользователь не найден' });
   }
   req.user = user;
+  req.token = token;
   next();
 }
 
@@ -141,7 +173,13 @@ function authMiddleware(req, res, next) {
 app.post('/api/auth/register', (req, res) => {
   try {
     const result = db.registerUser(req.body || {});
-    res.json(result);
+    setAuthCookie(res, result.token);
+    res.json({
+      ...result,
+      bookmarks: db.getBookmarks(result.user.id),
+      history: db.getWatchHistory(result.user.id),
+      progress: db.getUserProgress(result.user.id)
+    });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
@@ -150,23 +188,37 @@ app.post('/api/auth/register', (req, res) => {
 app.post('/api/auth/login', (req, res) => {
   try {
     const result = db.loginUser(req.body || {});
-    res.json(result);
+    setAuthCookie(res, result.token);
+    res.json({
+      ...result,
+      bookmarks: db.getBookmarks(result.user.id),
+      history: db.getWatchHistory(result.user.id),
+      progress: db.getUserProgress(result.user.id)
+    });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
 
+app.post('/api/auth/logout', (req, res) => {
+  clearAuthCookie(res);
+  res.json({ ok: true });
+});
+
 app.get('/api/auth/me', authMiddleware, (req, res) => {
   res.json({
     user: req.user,
+    token: req.token,
     bookmarks: db.getBookmarks(req.user.id),
-    history: db.getWatchHistory(req.user.id)
+    history: db.getWatchHistory(req.user.id),
+    progress: db.getUserProgress(req.user.id)
   });
 });
 
 app.put('/api/auth/profile', authMiddleware, (req, res) => {
   try {
-    const updated = db.updateUserProfile(req.user.id, req.body || {});
+    const { user: updated, token } = db.updateUserProfile(req.user.id, req.body || {});
+    setAuthCookie(res, token);
     // Also update user info in any active room
     for (const r of rooms.values()) {
       for (const [sid, p] of r.participants.entries()) {
@@ -182,7 +234,7 @@ app.put('/api/auth/profile', authMiddleware, (req, res) => {
       }
     }
     notifyFriendsPresence(req.user.id);
-    res.json({ user: updated });
+    res.json({ user: updated, token });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
@@ -280,7 +332,15 @@ app.get('/api/history', authMiddleware, (req, res) => {
 
 app.post('/api/history', authMiddleware, (req, res) => {
   const list = db.addWatchHistory(req.user.id, req.body || {});
-  res.json({ history: list });
+  res.json({
+    history: list,
+    progress: db.getUserProgress(req.user.id)
+  });
+});
+
+app.post('/api/user/progress', authMiddleware, (req, res) => {
+  const entry = db.updatePlaybackProgress(req.user.id, req.body || {});
+  res.json({ progress: entry });
 });
 
 // ================= CATALOG & Z01 STREAMING ROUTES =================
@@ -881,6 +941,8 @@ setInterval(() => {
 }, 10 * 60 * 1000);
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Rave x Lampa (Z01) server running at http://localhost:${PORT}`);
+db.initCloudDb().finally(() => {
+  server.listen(PORT, () => {
+    console.log(`Rave x Lampa (Z01) server running at http://localhost:${PORT}`);
+  });
 });
