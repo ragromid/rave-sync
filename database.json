@@ -41,6 +41,28 @@
         "reactionsSent": 0
       },
       "updatedAt": 1792965927568
+    },
+    {
+      "id": "u_80ab0d1134f5",
+      "username": "muraadzz_",
+      "displayName": "Murad",
+      "passwordHash": "cb3d7557ab8c9904e26d64225c78d156:d55b587749b605bfd760d6e97c055a53800440a322511b0050961fd63ca008addde1dea80633e6515ee0e704d1526898c88e196f156bbc08757e427944c185ea",
+      "avatar": "🐯",
+      "color": "#1de9b6",
+      "bio": "",
+      "settings": {
+        "proxyMode": "auto"
+      },
+      "stats": {
+        "watchSeconds": 0,
+        "moviesWatched": 0,
+        "episodesWatched": 0,
+        "roomsCreated": 0,
+        "messagesSent": 0,
+        "reactionsSent": 0
+      },
+      "createdAt": 1792993803285,
+      "updatedAt": 1792993803285
     }
   ],
   "friendships": [],
