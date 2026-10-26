@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040812336,
+      "lastSeenAt": 1793040823819,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040812991
+      "lastSeenAt": 1793040823658
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "kodik",
-        "balancer": "Kodik",
+        "balancerKey": "filmix",
+        "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "updatedAt": 1793040654338
+        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "updatedAt": 1793040416330
       }
     ]
   },
@@ -186,7 +186,7 @@
         "voiceName": "Flarrow Films",
         "currentTime": 131,
         "duration": 5971,
-        "updatedAt": 1793040790519
+        "updatedAt": 1793040788609
       }
     },
     "u_80ab0d1134f5": {
@@ -777,9 +777,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 149.72064712331357,
+        "currentTime": 0,
         "rate": 1,
-        "updatedAt": 1793040809027
+        "updatedAt": 1793040823819
       },
       "messages": [
         {
@@ -1345,7 +1345,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040809358
+          "createdAt": 1793040809358,
+          "read": false,
+          "updatedAt": 1793040809358
         },
         {
           "id": "m_d2e695e1ec",
@@ -1364,7 +1366,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040812049
+          "createdAt": 1793040812049,
+          "read": false,
+          "updatedAt": 1793040812049
         }
       ],
       "viewOnceStore": {}
