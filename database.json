@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041104121,
+      "lastSeenAt": 1793041122215,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -98,7 +98,7 @@
         "watchSeconds": 0,
         "moviesWatched": 0,
         "episodesWatched": 0,
-        "roomsCreated": 0,
+        "roomsCreated": 1,
         "messagesSent": 17,
         "reactionsSent": 0
       },
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041101236
+      "lastSeenAt": 1793041122279
     }
   ],
   "friendships": [
@@ -777,9 +777,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 310.4242076486842,
+        "currentTime": 327.9519479536543,
         "rate": 1,
-        "updatedAt": 1793041104102
+        "updatedAt": 1793041121942
       },
       "messages": [
         {
@@ -1602,6 +1602,35 @@
           "updatedAt": 1793040995666
         }
       ],
+      "viewOnceStore": {}
+    },
+    "V7YH2N": {
+      "code": "V7YH2N",
+      "name": "Комната Sabina",
+      "isPublic": true,
+      "hostId": "u_1333f556dd06",
+      "hostOnlyControl": false,
+      "createdAt": 1793041122279,
+      "participants": [
+        {
+          "socketId": "http_u_1333f556dd06",
+          "id": "u_1333f556dd06",
+          "username": "lillakatten",
+          "displayName": "Sabina",
+          "avatar": "🦊",
+          "color": "#e040fb",
+          "inVoice": false,
+          "muted": false
+        }
+      ],
+      "media": null,
+      "playback": {
+        "playing": false,
+        "currentTime": 0,
+        "rate": 1,
+        "updatedAt": 1793041122279
+      },
+      "messages": [],
       "viewOnceStore": {}
     }
   }
