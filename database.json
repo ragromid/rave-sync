@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793010505797,
-      "lastSeenAt": 1793010671150,
+      "lastSeenAt": 1793010673674,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -36,7 +36,7 @@
             "p256dh": "BGBSyGpzc3yvwpqpodI-0WSI--smntccRP6Qe0F5rIlOeKPvsKDsSmWLMV6WeAhtKYrTmLh2WCGKBCEO1ceAGbA",
             "auth": "LsQqD48zlHcMsQb22mz5Mg"
           },
-          "updatedAt": 1793010670035
+          "updatedAt": 1793010505797
         }
       ]
     },
@@ -526,60 +526,26 @@
   },
   "notifications": {
     "u_805b52bfc220": [],
-    "u_80ab0d1134f5": []
+    "u_80ab0d1134f5": [
+      {
+        "id": "ntf_34cd0434",
+        "createdAt": 1793010554301,
+        "type": "dm_message",
+        "msgId": "dm_6db7ef695271",
+        "fromId": "u_805b52bfc220",
+        "from": {
+          "id": "u_805b52bfc220",
+          "username": "rashid",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊",
+          "color": "#1de9b6"
+        },
+        "title": "Rashid Sultanov",
+        "body": "gandon ti"
+      }
+    ]
   },
   "savedRooms": {
-    "5ZVUJC": {
-      "code": "5ZVUJC",
-      "name": "Клэйфейс",
-      "isPublic": true,
-      "hostId": "u_805b52bfc220",
-      "hostOnlyControl": false,
-      "createdAt": 1792999099576,
-      "participants": [],
-      "media": {
-        "type": "z01",
-        "title": "Клэйфейс",
-        "poster": "https://imagetmdb.com/t/p/w500/r2ib7b2QRLRlb8g7K2QI2rfFgeA.jpg",
-        "backdrop": "https://imagetmdb.com/t/p/w1280/uL4cIrNi2uaUnWIOQQ28EVnkETG.jpg",
-        "movie": {
-          "id": 1400940,
-          "tmdb_id": 1400940,
-          "imdb_id": "tt34890576",
-          "kinopoisk_id": "",
-          "type": "movie",
-          "serial": 0,
-          "title": "Клэйфейс",
-          "original_title": "Clayface",
-          "original_language": "en",
-          "overview": "После травмы, обезобразившей его лицо, молодой актёр Мэтт Хейген соглашается пройти особое лечение. Однако научный эксперимент не даёт тех результатов, на которые рассчитывал Мэтт, и в результате его тело и кожа становятся гибкими и податливыми, как глина. Потерявший чувство личности и человечности актёр превращается в движимого жаждой мести монстра.",
-          "release_date": "2026-10-19",
-          "year": "2026",
-          "vote_average": 7.6,
-          "poster": "https://imagetmdb.com/t/p/w500/r2ib7b2QRLRlb8g7K2QI2rfFgeA.jpg",
-          "backdrop": "https://imagetmdb.com/t/p/w1280/uL4cIrNi2uaUnWIOQQ28EVnkETG.jpg",
-          "poster_path": "/r2ib7b2QRLRlb8g7K2QI2rfFgeA.jpg",
-          "backdrop_path": "/uL4cIrNi2uaUnWIOQQ28EVnkETG.jpg",
-          "number_of_seasons": 0,
-          "runtime": 109,
-          "genres": [
-            "ужасы",
-            "триллер",
-            "фантастика"
-          ]
-        },
-        "streamUrl": "",
-        "streamType": "hls"
-      },
-      "playback": {
-        "playing": false,
-        "currentTime": 0,
-        "rate": 1,
-        "updatedAt": 1792999099576
-      },
-      "messages": [],
-      "viewOnceStore": {}
-    },
     "393HNX": {
       "code": "393HNX",
       "name": "Cyberpunk: Edgerunners",
@@ -589,12 +555,12 @@
       "createdAt": 1793000732742,
       "participants": [
         {
-          "socketId": "http_u_805b52bfc220",
-          "id": "u_805b52bfc220",
-          "username": "rashid",
-          "displayName": "Rashid Sultanov",
-          "avatar": "🦊",
-          "color": "#1de9b6",
+          "socketId": "http_u_80ab0d1134f5",
+          "id": "u_80ab0d1134f5",
+          "username": "muraadzz_",
+          "displayName": "Murad",
+          "avatar": "🔥",
+          "color": "#7c5cff",
           "inVoice": false,
           "muted": false
         }
@@ -647,6 +613,57 @@
         "currentTime": 9751.041584042014,
         "rate": 1,
         "updatedAt": 1793010497287
+      },
+      "messages": [],
+      "viewOnceStore": {}
+    },
+    "5ZVUJC": {
+      "code": "5ZVUJC",
+      "name": "Клэйфейс",
+      "isPublic": true,
+      "hostId": "u_805b52bfc220",
+      "hostOnlyControl": false,
+      "createdAt": 1792999099576,
+      "participants": [],
+      "media": {
+        "type": "z01",
+        "title": "Клэйфейс",
+        "poster": "https://imagetmdb.com/t/p/w500/r2ib7b2QRLRlb8g7K2QI2rfFgeA.jpg",
+        "backdrop": "https://imagetmdb.com/t/p/w1280/uL4cIrNi2uaUnWIOQQ28EVnkETG.jpg",
+        "movie": {
+          "id": 1400940,
+          "tmdb_id": 1400940,
+          "imdb_id": "tt34890576",
+          "kinopoisk_id": "",
+          "type": "movie",
+          "serial": 0,
+          "title": "Клэйфейс",
+          "original_title": "Clayface",
+          "original_language": "en",
+          "overview": "После травмы, обезобразившей его лицо, молодой актёр Мэтт Хейген соглашается пройти особое лечение. Однако научный эксперимент не даёт тех результатов, на которые рассчитывал Мэтт, и в результате его тело и кожа становятся гибкими и податливыми, как глина. Потерявший чувство личности и человечности актёр превращается в движимого жаждой мести монстра.",
+          "release_date": "2026-10-19",
+          "year": "2026",
+          "vote_average": 7.6,
+          "poster": "https://imagetmdb.com/t/p/w500/r2ib7b2QRLRlb8g7K2QI2rfFgeA.jpg",
+          "backdrop": "https://imagetmdb.com/t/p/w1280/uL4cIrNi2uaUnWIOQQ28EVnkETG.jpg",
+          "poster_path": "/r2ib7b2QRLRlb8g7K2QI2rfFgeA.jpg",
+          "backdrop_path": "/uL4cIrNi2uaUnWIOQQ28EVnkETG.jpg",
+          "number_of_seasons": 0,
+          "runtime": 109,
+          "genres": [
+            "ужасы",
+            "триллер",
+            "фантастика"
+          ]
+        },
+        "streamUrl": "",
+        "streamType": "hls"
+      },
+      "playback": {
+        "playing": false,
+        "currentTime": 0,
+        "rate": 1,
+        "updatedAt": 1792999099576
       },
       "messages": [],
       "viewOnceStore": {}
