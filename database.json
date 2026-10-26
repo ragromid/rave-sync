@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041327700,
+      "lastSeenAt": 1793041340394,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041329912
+      "lastSeenAt": 1793041340452
     }
   ],
   "friendships": [
@@ -1708,6 +1708,16 @@
           "color": "#e040fb",
           "inVoice": false,
           "muted": false
+        },
+        {
+          "socketId": "http_u_805b52bfc220",
+          "id": "u_805b52bfc220",
+          "username": "rashid",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊",
+          "color": "#1de9b6",
+          "inVoice": false,
+          "muted": false
         }
       ],
       "media": {
@@ -1757,9 +1767,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 0.3275805972221376,
+        "currentTime": 10.223218391666864,
         "rate": 1,
-        "updatedAt": 1793041329155
+        "updatedAt": 1793041339171
       },
       "messages": [],
       "viewOnceStore": {}
