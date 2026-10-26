@@ -58,7 +58,7 @@
         "moviesWatched": 0,
         "episodesWatched": 0,
         "roomsCreated": 0,
-        "messagesSent": 1,
+        "messagesSent": 2,
         "reactionsSent": 0
       },
       "createdAt": 1792993803285,
@@ -123,6 +123,14 @@
         "toId": "u_805b52bfc220",
         "text": "Money?))",
         "createdAt": 1792993905515,
+        "read": false
+      },
+      {
+        "id": "dm_0b2c5b73790c",
+        "fromId": "u_80ab0d1134f5",
+        "toId": "u_805b52bfc220",
+        "text": "ya dalboeb",
+        "createdAt": 1792993914983,
         "read": false
       }
     ]
