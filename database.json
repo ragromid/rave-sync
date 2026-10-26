@@ -99,7 +99,7 @@
         "moviesWatched": 0,
         "episodesWatched": 0,
         "roomsCreated": 0,
-        "messagesSent": 12,
+        "messagesSent": 13,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040809988
+      "lastSeenAt": 1793040812049
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
-        "balancer": "Filmix",
+        "balancerKey": "kodik",
+        "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1793040416330
+        "voiceName": "Flarrow Films",
+        "updatedAt": 1793040654338
       }
     ]
   },
@@ -186,7 +186,7 @@
         "voiceName": "Flarrow Films",
         "currentTime": 131,
         "duration": 5971,
-        "updatedAt": 1793040788609
+        "updatedAt": 1793040790519
       }
     },
     "u_80ab0d1134f5": {
@@ -1324,7 +1324,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040785259
+          "createdAt": 1793040785259,
+          "read": false,
+          "updatedAt": 1793040785259
         },
         {
           "id": "m_e4c128bd4f",
@@ -1344,6 +1346,25 @@
           "replyTo": null,
           "reactions": {},
           "createdAt": 1793040809358
+        },
+        {
+          "id": "m_d2e695e1ec",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "чем в сериале",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793040812049
         }
       ],
       "viewOnceStore": {}
