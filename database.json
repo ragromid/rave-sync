@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793044520118,
+      "lastSeenAt": 1793044532369,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793044519913
+      "lastSeenAt": 1793044532977
     }
   ],
   "friendships": [
@@ -1767,9 +1767,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 3223.768138098333,
+        "currentTime": 3228.775564331333,
         "rate": 1,
-        "updatedAt": 1793044519240
+        "updatedAt": 1793044524412
       },
       "messages": [
         {
@@ -3587,7 +3587,11 @@
             "text": "Вспомнила как ты резко сказал что попробовать меня хочешь, и развел мне ноги в тот раз)",
             "hasPhoto": false
           },
-          "reactions": {},
+          "reactions": {
+            "❤️": [
+              "u_1333f556dd06"
+            ]
+          },
           "createdAt": 1793044519565
         }
       ],
