@@ -19,8 +19,8 @@
         "messagesSent": 15,
         "reactionsSent": 0
       },
-      "updatedAt": 1793002837494,
-      "lastSeenAt": 1793002837494,
+      "updatedAt": 1793010505797,
+      "lastSeenAt": 1793010505797,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -29,6 +29,14 @@
             "auth": "UL8Iy17oqZVhnySXjp7NeA"
           },
           "updatedAt": 1793002837494
+        },
+        {
+          "endpoint": "https://web.push.apple.com/QMGL0t5u0KwcBg0hh6kFw3U0jq0KiuWEe6VP0DwhDwZ7DKg-lRFYT058AGWd8QFAs1UooVYHGFS1Ynvi5x8D87k3rr_ufODBimmI-NqtuTnEY0-vGX5s3bLzxwo8qx_XvpHW9x9uuyxngJWLI29WSWoiLeX0AsQ5uyiFttzdg7A",
+          "keys": {
+            "p256dh": "BGBSyGpzc3yvwpqpodI-0WSI--smntccRP6Qe0F5rIlOeKPvsKDsSmWLMV6WeAhtKYrTmLh2WCGKBCEO1ceAGbA",
+            "auth": "LsQqD48zlHcMsQb22mz5Mg"
+          },
+          "updatedAt": 1793010505797
         }
       ]
     },
@@ -161,6 +169,18 @@
         "currentTime": 522,
         "duration": 1450,
         "updatedAt": 1793001267614
+      }
+    },
+    "u_80ab0d1134f5": {
+      "105248": {
+        "balancerKey": "veoveo",
+        "balancerName": "VeoVeo",
+        "season": 1,
+        "episode": 1,
+        "voiceName": "",
+        "currentTime": 9751,
+        "duration": 0,
+        "updatedAt": 1793010496477
       }
     }
   },
