@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1792993656702,
-      "lastSeenAt": 1793000744031
+      "lastSeenAt": 1793000747970
     },
     {
       "id": "u_80ab0d1134f5",
@@ -515,9 +515,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 3.3944295693353084,
+        "currentTime": 5.898866366990782,
         "rate": 1,
-        "updatedAt": 1793000744032
+        "updatedAt": 1793000746514
       },
       "messages": [],
       "viewOnceStore": {}
