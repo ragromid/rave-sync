@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040940259,
+      "lastSeenAt": 1793040958483,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 0,
         "episodesWatched": 0,
         "roomsCreated": 0,
-        "messagesSent": 16,
+        "messagesSent": 17,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040939509
+      "lastSeenAt": 1793040962639
     }
   ],
   "friendships": [
@@ -161,8 +161,8 @@
         "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
-        "updatedAt": 1793040247007
+        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "updatedAt": 1793040416330
       }
     ]
   },
@@ -184,9 +184,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Flarrow Films",
-        "currentTime": 158,
+        "currentTime": 131,
         "duration": 5971,
-        "updatedAt": 1793040871462
+        "updatedAt": 1793040788609
       }
     },
     "u_80ab0d1134f5": {
@@ -207,10 +207,10 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "currentTime": 158,
-        "duration": 5971,
-        "updatedAt": 1793040872994
+        "voiceName": "AnimeVost",
+        "currentTime": 5,
+        "duration": 6016,
+        "updatedAt": 1793040524978
       }
     }
   },
@@ -704,7 +704,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": true,
+      "isPublic": false,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -777,9 +777,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 0,
+        "currentTime": 203.91943304901332,
         "rate": 1,
-        "updatedAt": 1793040936669
+        "updatedAt": 1793040956672
       },
       "messages": [
         {
@@ -1535,6 +1535,25 @@
           "replyTo": null,
           "reactions": {},
           "createdAt": 1793040939345
+        },
+        {
+          "id": "m_f5fafdd96f",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "интересно с сем связано",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793040962639
         }
       ],
       "viewOnceStore": {}
