@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040995821,
+      "lastSeenAt": 1793040996864,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040994972
+      "lastSeenAt": 1793040996972
     }
   ],
   "friendships": [
@@ -179,14 +179,14 @@
         "updatedAt": 1793001267614
       },
       "1218925": {
-        "balancerKey": "kodik",
-        "balancerName": "Kodik",
+        "balancerKey": "filmix",
+        "balancerName": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "currentTime": 158,
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "currentTime": 203,
         "duration": 5971,
-        "updatedAt": 1793040871462
+        "updatedAt": 1793040996864
       }
     },
     "u_80ab0d1134f5": {
@@ -777,9 +777,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 203.91943304901332,
+        "currentTime": 203.98280717048053,
         "rate": 1,
-        "updatedAt": 1793040993935
+        "updatedAt": 1793040996803
       },
       "messages": [
         {
