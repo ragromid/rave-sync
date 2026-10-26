@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1792993656702,
-      "lastSeenAt": 1793001263749
+      "lastSeenAt": 1793001267614
     },
     {
       "id": "u_80ab0d1134f5",
@@ -137,9 +137,9 @@
         "season": 1,
         "episode": 1,
         "voiceName": "",
-        "currentTime": 22,
+        "currentTime": 522,
         "duration": 1450,
-        "updatedAt": 1793000763487
+        "updatedAt": 1793001267614
       }
     }
   },
@@ -548,9 +548,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 0.8905840420137798,
+        "currentTime": 522.2735840420138,
         "rate": 1,
-        "updatedAt": 1793000741492
+        "updatedAt": 1793001265720
       },
       "messages": [],
       "viewOnceStore": {}
