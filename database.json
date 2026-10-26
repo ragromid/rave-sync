@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040837932,
+      "lastSeenAt": 1793040858134,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040838545
+      "lastSeenAt": 1793040840073
     }
   ],
   "friendships": [
@@ -762,24 +762,24 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
-        "balancerName": "Filmix",
+        "balancerKey": "kodik",
+        "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "voiceName": "Flarrow Films",
         "quality": "720p",
-        "rawUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1313/Chainsaw.Man.Movie.2025.D.ru.FlarrowFilms.WEBDL.1080pp_720.mp4",
-        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fnl105.cdnsqu.com%2Fs%2FFHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg%2FUHD_1313%2FChainsaw.Man.Movie.2025.D.ru.FlarrowFilms.WEBDL.1080pp_720.mp4",
-        "recommendedUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1313/Chainsaw.Man.Movie.2025.D.ru.FlarrowFilms.WEBDL.1080pp_720.mp4",
-        "streamUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1313/Chainsaw.Man.Movie.2025.D.ru.FlarrowFilms.WEBDL.1080pp_720.mp4",
-        "streamType": "mp4",
+        "rawUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/b662c36aab4b2d08c6820fc04c53e092:2026102622/720.mp4:hls:manifest.m3u8",
+        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2Fb1c4c826-01f0-4162-a8e7-357892019fc4%2Fb662c36aab4b2d08c6820fc04c53e092%3A2026102622%2F720.mp4%3Ahls%3Amanifest.m3u8",
+        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/b662c36aab4b2d08c6820fc04c53e092:2026102622/720.mp4:hls:manifest.m3u8",
+        "streamUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/b662c36aab4b2d08c6820fc04c53e092:2026102622/720.mp4:hls:manifest.m3u8",
+        "streamType": "hls",
         "subtitles": []
       },
       "playback": {
         "playing": true,
         "currentTime": 0,
         "rate": 1,
-        "updatedAt": 1793040836227
+        "updatedAt": 1793040858134
       },
       "messages": [
         {
