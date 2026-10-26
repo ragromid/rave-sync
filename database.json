@@ -65,7 +65,15 @@
       "updatedAt": 1792993803285
     }
   ],
-  "friendships": [],
+  "friendships": [
+    {
+      "id": "fr_b44df18d90",
+      "fromId": "u_805b52bfc220",
+      "toId": "u_80ab0d1134f5",
+      "status": "pending",
+      "createdAt": 1792993812607
+    }
+  ],
   "bookmarks": {},
   "history": {
     "u_805b52bfc220": [
