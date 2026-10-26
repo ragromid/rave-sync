@@ -99,7 +99,7 @@
         "moviesWatched": 1,
         "episodesWatched": 0,
         "roomsCreated": 2,
-        "messagesSent": 18,
+        "messagesSent": 19,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041394580
+      "lastSeenAt": 1793041400632
     }
   ],
   "friendships": [
@@ -161,8 +161,8 @@
         "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
-        "updatedAt": 1793040247007
+        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "updatedAt": 1793040416330
       }
     ],
     "u_1333f556dd06": [
@@ -199,7 +199,7 @@
         "season": 0,
         "episode": 0,
         "voiceName": "PantsuVoice",
-        "updatedAt": 1793041249790
+        "updatedAt": 1793041326035
       }
     ]
   },
@@ -221,9 +221,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "PantsuVoice",
-        "currentTime": 47,
+        "currentTime": 126,
         "duration": 6015,
-        "updatedAt": 1793041348946
+        "updatedAt": 1793041363519
       }
     },
     "u_80ab0d1134f5": {
@@ -245,9 +245,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "PantsuVoice",
-        "currentTime": 126,
+        "currentTime": 44,
         "duration": 6015,
-        "updatedAt": 1793041361285
+        "updatedAt": 1793041344230
       }
     }
   },
@@ -741,7 +741,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": true,
+      "isPublic": false,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -1789,7 +1789,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793041378788
+          "createdAt": 1793041378788,
+          "read": false,
+          "updatedAt": 1793041378788
         },
         {
           "id": "m_f4184a22b8",
@@ -1809,6 +1811,25 @@
           "replyTo": null,
           "reactions": {},
           "createdAt": 1793041393404
+        },
+        {
+          "id": "m_fe76afcb1b",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "тоже)",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793041400632
         }
       ],
       "viewOnceStore": {}
