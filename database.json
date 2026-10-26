@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041617217,
+      "lastSeenAt": 1793041619733,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041617171
+      "lastSeenAt": 1793041619625
     }
   ],
   "friendships": [
@@ -161,8 +161,8 @@
         "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1793040416330
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "updatedAt": 1793040247007
       }
     ],
     "u_1333f556dd06": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "updatedAt": 1793041602479
+        "voiceName": "PantsuVoice",
+        "updatedAt": 1793041249790
       }
     ]
   },
@@ -221,9 +221,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "PantsuVoice",
-        "currentTime": 417,
+        "currentTime": 321,
         "duration": 6015,
-        "updatedAt": 1793041588332
+        "updatedAt": 1793041493539
       }
     },
     "u_80ab0d1134f5": {
@@ -245,9 +245,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "PantsuVoice",
-        "currentTime": 7,
+        "currentTime": 370,
         "duration": 5971,
-        "updatedAt": 1793041616060
+        "updatedAt": 1793041618801
       }
     }
   },
@@ -741,7 +741,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": false,
+      "isPublic": true,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -1756,20 +1756,20 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "PantsuVoice",
+        "voiceName": "Flarrow Films",
         "quality": "720p",
-        "rawUrl": "https://cloud2.solodcdn.com/useruploads/5ebd128c-134e-405d-a6f6-49577b175aa2/4aeeae0f975a83cebe375365b54a4418:2026102702/720.mp4:hls:manifest.m3u8",
-        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2F5ebd128c-134e-405d-a6f6-49577b175aa2%2F4aeeae0f975a83cebe375365b54a4418%3A2026102702%2F720.mp4%3Ahls%3Amanifest.m3u8",
-        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/5ebd128c-134e-405d-a6f6-49577b175aa2/4aeeae0f975a83cebe375365b54a4418:2026102702/720.mp4:hls:manifest.m3u8",
-        "streamUrl": "https://cloud2.solodcdn.com/useruploads/5ebd128c-134e-405d-a6f6-49577b175aa2/4aeeae0f975a83cebe375365b54a4418:2026102702/720.mp4:hls:manifest.m3u8",
+        "rawUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/43f4d0b6a600d5f952b0bc7e47063837:2026102702/720.mp4:hls:manifest.m3u8",
+        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2Fb1c4c826-01f0-4162-a8e7-357892019fc4%2F43f4d0b6a600d5f952b0bc7e47063837%3A2026102702%2F720.mp4%3Ahls%3Amanifest.m3u8",
+        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/43f4d0b6a600d5f952b0bc7e47063837:2026102702/720.mp4:hls:manifest.m3u8",
+        "streamUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/43f4d0b6a600d5f952b0bc7e47063837:2026102702/720.mp4:hls:manifest.m3u8",
         "streamType": "hls",
         "subtitles": []
       },
       "playback": {
         "playing": true,
-        "currentTime": 8.778937177333216,
+        "currentTime": 370.783553738,
         "rate": 1,
-        "updatedAt": 1793041617104
+        "updatedAt": 1793041619625
       },
       "messages": [
         {
@@ -1987,7 +1987,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793041582547
+          "createdAt": 1793041582547,
+          "read": false,
+          "updatedAt": 1793041582547
         }
       ],
       "viewOnceStore": {}
