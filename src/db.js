@@ -225,6 +225,15 @@ function signToken(user) {
   return `${header}.${body}.${sig}`;
 }
 
+const DEFAULT_STATS = {
+  watchSeconds: 0,
+  moviesWatched: 0,
+  episodesWatched: 0,
+  roomsCreated: 0,
+  messagesSent: 0,
+  reactionsSent: 0
+};
+
 function verifyToken(token) {
   if (!token || typeof token !== 'string') return null;
   const parts = token.split('.');
@@ -242,9 +251,11 @@ function verifyToken(token) {
         displayName: payload.displayName || payload.username,
         passwordHash: '',
         avatar: payload.avatar || '🦊',
+        avatarUrl: '',
         color: payload.color || '#7c5cff',
         bio: '',
         settings: { proxyMode: 'auto' },
+        stats: { ...DEFAULT_STATS },
         createdAt: payload.iat || Date.now()
       });
       saveDb();
@@ -257,14 +268,28 @@ function verifyToken(token) {
 
 function publicUser(u) {
   if (!u) return null;
+  const historyList = db.history[u.id] || [];
+  const bookmarksList = db.bookmarks[u.id] || [];
+  const friendsCount = db.friendships.filter(
+    f => f.status === 'accepted' && (f.fromId === u.id || f.toId === u.id)
+  ).length;
+
+  const stats = { ...DEFAULT_STATS, ...(u.stats || {}) };
   return {
     id: u.id,
     username: u.username,
     displayName: u.displayName || u.username,
     avatar: u.avatar || '🎬',
+    avatarUrl: u.avatarUrl || '',
     color: u.color || '#7c5cff',
     bio: u.bio || '',
     settings: u.settings || { proxyMode: 'auto' },
+    stats: {
+      ...stats,
+      historyCount: historyList.length,
+      bookmarksCount: bookmarksList.length,
+      friendsCount
+    },
     createdAt: u.createdAt
   };
 }
@@ -324,18 +349,30 @@ function getUserById(id) {
   return publicUser(u);
 }
 
-function updateUserProfile(userId, { displayName, avatar, color, bio, settings }) {
+function updateUserProfile(userId, { displayName, avatar, avatarUrl, color, bio, settings }) {
   const u = db.users.find(x => x.id === userId);
   if (!u) throw new Error('Пользователь не найден');
   if (displayName !== undefined) u.displayName = String(displayName).trim().slice(0, 30) || u.username;
   if (avatar !== undefined) u.avatar = String(avatar).slice(0, 8);
+  if (avatarUrl !== undefined) {
+    const cleanUrl = String(avatarUrl || '').trim();
+    if (cleanUrl.length <= 250000) u.avatarUrl = cleanUrl;
+  }
   if (color !== undefined) u.color = String(color).slice(0, 20);
-  if (bio !== undefined) u.bio = String(bio).trim().slice(0, 120);
+  if (bio !== undefined) u.bio = String(bio).trim().slice(0, 160);
   if (settings && typeof settings === 'object') {
     u.settings = { ...(u.settings || {}), ...settings };
   }
   saveDb();
   return { user: publicUser(u), token: signToken(u) };
+}
+
+function incrementUserStat(userId, field, amount = 1) {
+  const u = db.users.find(x => x.id === userId);
+  if (!u) return;
+  if (!u.stats) u.stats = { ...DEFAULT_STATS };
+  u.stats[field] = Math.max(0, (u.stats[field] || 0) + amount);
+  saveDb();
 }
 
 function searchUsers(query, excludeUserId) {
@@ -451,10 +488,17 @@ function addWatchHistory(userId, entry) {
   const list = db.history[userId];
   const movieId = String(entry.movie.id);
   const idx = list.findIndex(x => String(x.movie.id) === movieId);
+  const isNewEntry = idx === -1;
   const record = { ...entry, updatedAt: Date.now() };
   if (idx >= 0) list.splice(idx, 1);
   list.unshift(record);
   if (list.length > 50) list.length = 50;
+
+  if (isNewEntry) {
+    incrementUserStat(userId, entry.movie.type === 'tv' || entry.season ? 'episodesWatched' : 'moviesWatched', 1);
+  } else if (entry.episode && db.progress[userId]?.[movieId]?.episode !== entry.episode) {
+    incrementUserStat(userId, 'episodesWatched', 1);
+  }
 
   // Also save per-movie playback progress (balancer, season, episode, voice, timecode) on the server
   if (!db.progress[userId]) db.progress[userId] = {};
@@ -474,8 +518,11 @@ function addWatchHistory(userId, entry) {
   return list;
 }
 
-function updatePlaybackProgress(userId, { movieId, balancerKey, balancerName, season, episode, voiceName, currentTime, duration }) {
+function updatePlaybackProgress(userId, { movieId, balancerKey, balancerName, season, episode, voiceName, currentTime, duration, watchedDeltaSec }) {
   if (!userId || !movieId) return null;
+  if (typeof watchedDeltaSec === 'number' && watchedDeltaSec > 0 && watchedDeltaSec <= 120) {
+    incrementUserStat(userId, 'watchSeconds', Math.round(watchedDeltaSec));
+  }
   if (!db.progress[userId]) db.progress[userId] = {};
   const key = String(movieId);
   const prev = db.progress[userId][key] || {};
@@ -508,6 +555,7 @@ module.exports = {
   verifyToken,
   getUserById,
   updateUserProfile,
+  incrementUserStat,
   searchUsers,
   sendFriendRequest,
   respondFriendRequest,

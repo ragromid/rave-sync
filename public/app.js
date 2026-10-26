@@ -48,7 +48,10 @@
     ytPlayer: null,
     ytReady: false,
     suppressSyncEmit: false,
+    justLoadedMediaUntil: 0,
     lastSyncAt: 0,
+    mobileRoomTab: 'chat',
+    unreadChatCount: 0,
 
     // WebRTC Voice Chat
     voiceActive: false,
@@ -60,6 +63,25 @@
 
   // ================= HELPERS & API =================
   const $ = (id) => document.getElementById(id);
+
+  // Prevent iOS/Android Home Screen PWA from shifting the viewport upward when virtual keyboard opens/closes
+  function lockMobileViewport() {
+    const vv = window.visualViewport;
+    const h = vv ? vv.height : window.innerHeight;
+    document.documentElement.style.setProperty('--app-height', `${Math.round(h)}px`);
+    if (window.scrollY !== 0 || window.scrollX !== 0) {
+      window.scrollTo(0, 0);
+    }
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', lockMobileViewport);
+    window.visualViewport.addEventListener('scroll', lockMobileViewport);
+  }
+  window.addEventListener('resize', lockMobileViewport);
+  document.addEventListener('focusout', () => {
+    setTimeout(lockMobileViewport, 80);
+  });
+  lockMobileViewport();
 
   async function api(path, options = {}) {
     const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
@@ -76,6 +98,32 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+
+  function avatarInnerHtml(u, fallbackEmoji = '🦊') {
+    if (u && u.avatarUrl) {
+      return `<img class="avatar-img" src="${esc(u.avatarUrl)}" alt="" />`;
+    }
+    return esc((u && u.avatar) || fallbackEmoji);
+  }
+
+  function setAvatarElement(el, u, fallbackEmoji = '🦊') {
+    if (!el) return;
+    el.style.background = (u && u.color) || '#7c5cff';
+    if (u && u.avatarUrl) {
+      el.innerHTML = `<img class="avatar-img" src="${esc(u.avatarUrl)}" alt="" />`;
+    } else {
+      el.textContent = (u && u.avatar) || fallbackEmoji;
+    }
+  }
+
+  function formatWatchTime(seconds) {
+    const sec = Math.max(0, Number(seconds) || 0);
+    const mins = Math.floor(sec / 60);
+    if (mins < 60) return `${mins} мин`;
+    const hrs = Math.floor(mins / 60);
+    const remMins = mins % 60;
+    return remMins > 0 ? `${hrs} ч ${remMins} м` : `${hrs} ч`;
   }
 
   function showToast(text, actionLabel, onAction, duration = 4500) {
@@ -147,11 +195,11 @@
 
   // ================= AUTH & PROFILE =================
   let authMode = 'login';
+  let pendingAvatarUrl = null; // null = unchanged, '' = removed, 'data:image/...' = new photo
 
   function updateHeaderUser() {
     if (state.user) {
-      $('headerUserAvatar').textContent = state.user.avatar || '🦊';
-      $('headerUserAvatar').style.background = state.user.color || '#7c5cff';
+      setAvatarElement($('headerUserAvatar'), state.user, '🦊');
       $('headerUserName').textContent = state.user.displayName;
     } else {
       $('headerUserAvatar').textContent = '👤';
@@ -192,19 +240,48 @@
     }
   }
 
-  function openAuthModal() {
+  function populateProfileStats(user) {
+    const st = user?.stats || {};
+    $('statWatchTime').textContent = formatWatchTime(st.watchSeconds || 0);
+    const watchedTotal = (st.moviesWatched || 0) + (st.episodesWatched || 0) || (st.historyCount || state.history.length || 0);
+    $('statWatchedCount').textContent = watchedTotal;
+    $('statRoomsCreated').textContent = st.roomsCreated || 0;
+    $('statMessagesSent').textContent = st.messagesSent || 0;
+    $('statReactionsSent').textContent = st.reactionsSent || 0;
+    const friendsCnt = st.friendsCount ?? state.friends.length ?? 0;
+    const bmCnt = st.bookmarksCount ?? state.bookmarks.length ?? 0;
+    $('statSocialCount').textContent = `${friendsCnt} / ${bmCnt}`;
+  }
+
+  async function openAuthModal() {
     const modal = $('authModal');
     modal.classList.remove('hidden');
     if (state.user) {
       $('authGuestView').classList.add('hidden');
       $('authProfileView').classList.remove('hidden');
-      $('profileBigAvatar').textContent = state.user.avatar;
-      $('profileBigAvatar').style.background = state.user.color || '#7c5cff';
+      pendingAvatarUrl = null;
+      setAvatarElement($('profileBigAvatar'), state.user, '🦊');
+      $('removePhotoBtn').classList.toggle('hidden', !state.user.avatarUrl);
       $('profileUsernameTag').textContent = `@${state.user.username}`;
-      $('profileDisplayName').value = state.user.displayName;
+      $('profileDisplayName').value = state.user.displayName || '';
+      $('profileBio').value = state.user.bio || '';
+
       document.querySelectorAll('#profileAvatarPicker .av-pick').forEach(b => {
         b.classList.toggle('selected', b.dataset.av === state.user.avatar);
       });
+      document.querySelectorAll('#profileColorPicker .color-swatch').forEach(sw => {
+        sw.classList.toggle('selected', sw.dataset.color === (state.user.color || '#7c5cff'));
+      });
+
+      populateProfileStats(state.user);
+      // Refresh latest stats from server in background
+      try {
+        const fresh = await api('/api/auth/me');
+        if (fresh.user) {
+          state.user = fresh.user;
+          populateProfileStats(state.user);
+        }
+      } catch {}
     } else {
       $('authGuestView').classList.remove('hidden');
       $('authProfileView').classList.add('hidden');
@@ -212,6 +289,53 @@
   }
 
   $('userMenuBtn').addEventListener('click', openAuthModal);
+
+  // Custom photo upload with client-side square crop & compression (160x160 JPEG)
+  $('uploadPhotoBtn').addEventListener('click', () => {
+    $('profilePhotoInput').click();
+  });
+
+  $('profilePhotoInput').addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const size = 160;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const minSide = Math.min(img.width, img.height);
+        const sx = (img.width - minSide) / 2;
+        const sy = (img.height - minSide) / 2;
+        ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+        pendingAvatarUrl = dataUrl;
+        $('profileBigAvatar').innerHTML = `<img class="avatar-img" src="${esc(dataUrl)}" alt="" />`;
+        $('removePhotoBtn').classList.remove('hidden');
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  });
+
+  $('removePhotoBtn').addEventListener('click', () => {
+    pendingAvatarUrl = '';
+    const selectedEmoji = document.querySelector('#profileAvatarPicker .av-pick.selected')?.dataset.av || state.user?.avatar || '🦊';
+    $('profileBigAvatar').textContent = selectedEmoji;
+    $('removePhotoBtn').classList.add('hidden');
+  });
+
+  $('profileColorPicker').addEventListener('click', (e) => {
+    const sw = e.target.closest('.color-swatch');
+    if (!sw) return;
+    document.querySelectorAll('#profileColorPicker .color-swatch').forEach(b => b.classList.remove('selected'));
+    sw.classList.add('selected');
+    $('profileBigAvatar').style.background = sw.dataset.color;
+  });
 
   document.querySelectorAll('.auth-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -231,6 +355,9 @@
       if (!btn) return;
       picker.querySelectorAll('.av-pick').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
+      if (picker.id === 'profileAvatarPicker' && (pendingAvatarUrl === '' || (!pendingAvatarUrl && !state.user?.avatarUrl))) {
+        $('profileBigAvatar').textContent = btn.dataset.av;
+      }
     });
   });
 
@@ -262,20 +389,55 @@
   $('profileForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const displayName = $('profileDisplayName').value.trim();
+    const bio = $('profileBio').value.trim();
     const avatar = document.querySelector('#profileAvatarPicker .av-pick.selected')?.dataset.av || state.user.avatar;
+    const color = document.querySelector('#profileColorPicker .color-swatch.selected')?.dataset.color || state.user.color || '#7c5cff';
+    const payload = { displayName, bio, avatar, color };
+    if (pendingAvatarUrl !== null) {
+      payload.avatarUrl = pendingAvatarUrl;
+    }
     try {
       const data = await api('/api/auth/profile', {
         method: 'PUT',
-        body: JSON.stringify({ displayName, avatar })
+        body: JSON.stringify(payload)
       });
       state.user = data.user;
       updateHeaderUser();
+      if (state.token) socket.emit('auth:identify', { token: state.token });
       $('authModal').classList.add('hidden');
       showToast('Профиль обновлён');
     } catch (err) {
       showToast(err.message);
     }
   });
+
+  // Public User Card Modal (inspect any user's profile & stats)
+  async function openUserCard(userId) {
+    if (!userId) return;
+    if (state.user && userId === state.user.id) {
+      openAuthModal();
+      return;
+    }
+    try {
+      const data = await api(`/api/users/${encodeURIComponent(userId)}`);
+      const u = data.user;
+      if (!u) return;
+      setAvatarElement($('ucAvatar'), u, '🦊');
+      $('ucDisplayName').textContent = u.displayName;
+      $('ucUsername').textContent = `@${u.username}`;
+      $('ucBio').textContent = u.bio || 'Смотрит фильмы в RaveLampa 🍿';
+      const st = u.stats || {};
+      $('ucStatsGrid').innerHTML = `
+        <div class="stat-card"><div class="stat-val">${esc(formatWatchTime(st.watchSeconds || 0))}</div><div class="stat-label">⏱️ В просмотре</div></div>
+        <div class="stat-card"><div class="stat-val">${(st.moviesWatched || 0) + (st.episodesWatched || 0)}</div><div class="stat-label">🎬 Просмотрено</div></div>
+        <div class="stat-card"><div class="stat-val">${st.roomsCreated || 0}</div><div class="stat-label">🎉 Комнат</div></div>
+        <div class="stat-card"><div class="stat-val">${st.messagesSent || 0}</div><div class="stat-label">💬 Сообщений</div></div>
+        <div class="stat-card"><div class="stat-val">${st.reactionsSent || 0}</div><div class="stat-label">🔥 Реакций</div></div>
+        <div class="stat-card"><div class="stat-val">${st.friendsCount || 0}</div><div class="stat-label">👥 Друзей</div></div>
+      `;
+      $('userCardModal').classList.remove('hidden');
+    } catch {}
+  }
 
   $('logoutBtn').addEventListener('click', async () => {
     if (state.room) leaveRoom();
@@ -564,7 +726,7 @@
     const el = document.createElement('div');
     el.className = 'room-card';
     const bannerImg = r.media?.backdrop || r.media?.poster || '';
-    const avatarsHtml = (r.participants || []).slice(0, 5).map(p => `<span title="${esc(p.displayName)}">${esc(p.avatar || '🦊')}</span>`).join('');
+    const avatarsHtml = (r.participants || []).slice(0, 5).map(p => `<span title="${esc(p.displayName)}" style="background:${esc(p.color || 'var(--bg-elevated)')}">${avatarInnerHtml(p)}</span>`).join('');
     const epInfo = r.media?.season && r.media?.episode ? ` · S${r.media.season}E${r.media.episode}` : '';
     const subInfo = r.media?.title ? `${r.media.title}${epInfo}` : 'Выбирают фильм...';
 
@@ -1140,6 +1302,7 @@
 
   function loadMediaIntoPlayer(media, playback = { playing: true, currentTime: 0 }) {
     destroyPlayers();
+    $('unmuteSyncBtn').classList.add('hidden');
     if (!media || (!media.streamUrl && !media.youtubeId)) {
       setPlayerOverlay(true, false, 'Выберите фильм из каталога или источник Z01 ниже');
       return;
@@ -1148,6 +1311,7 @@
     setPlayerOverlay(false, false, '');
     const video = $('mainVideo');
     video.controls = true;
+    state.justLoadedMediaUntil = Date.now() + 2600;
 
     const epTag = media.season && media.episode ? ` · Сезон ${media.season}, Серия ${media.episode}` : '';
     const balTag = media.balancerName ? ` [${media.balancerName}]` : '';
@@ -1169,18 +1333,32 @@
     const streamUrl = pickStreamUrl(media);
     const isHls = media.streamType === 'hls' || /\.m3u8(\?|$)/i.test(streamUrl);
 
+    const tryAutoplaySynced = () => {
+      if (!playback.playing) return;
+      video.play().then(() => {
+        $('unmuteSyncBtn').classList.toggle('hidden', !video.muted);
+      }).catch(() => {
+        // Browser blocked unmuted autoplay on second device: play muted so video frames stay 100% synced!
+        video.muted = true;
+        $('unmuteSyncBtn').classList.remove('hidden');
+        video.play().catch(() => {
+          showToast('Нажмите Play на плеере для синхронного запуска');
+        });
+      });
+    };
+
     const onLoaded = () => {
       state.suppressSyncEmit = true;
-      if (playback.currentTime && Math.abs(video.currentTime - playback.currentTime) > 1.5) {
-        video.currentTime = playback.currentTime;
+      state.justLoadedMediaUntil = Date.now() + 2200;
+      if (playback.currentTime && Math.abs(video.currentTime - playback.currentTime) > 1.0) {
+        try { video.currentTime = playback.currentTime; } catch {}
       }
-      if (playback.playing) {
-        video.play().catch(() => {
-          // Autoplay with sound blocked by browser until user interaction; try muted or show prompt
-          showToast('Нажмите Play на плеере для включения звука');
-        });
-      }
-      setTimeout(() => { state.suppressSyncEmit = false; }, 450);
+      tryAutoplaySynced();
+      setTimeout(() => {
+        state.suppressSyncEmit = false;
+        // Request fresh timecode from server right after stream buffer initializes
+        if (state.room) socket.emit('player:request_sync');
+      }, 650);
     };
 
     if (isHls && window.Hls && window.Hls.isSupported()) {
@@ -1194,7 +1372,7 @@
       hls.on(window.Hls.Events.MANIFEST_PARSED, onLoaded);
       hls.on(window.Hls.Events.ERROR, (_, data) => {
         if (data.fatal) {
-          // Automatic fallback to backend stream proxy if direct stream had a CORS/network error!
+          // Automatic fallback to backend stream proxy if direct stream had a CORS/network/IP error!
           if (media.proxyUrl && streamUrl !== media.proxyUrl) {
             console.log('Direct HLS failed, switching to backend stream proxy...');
             media.recommendedUrl = media.proxyUrl;
@@ -1217,14 +1395,29 @@
     }
   }
 
+  $('unmuteSyncBtn').addEventListener('click', () => {
+    const video = $('mainVideo');
+    video.muted = false;
+    $('unmuteSyncBtn').classList.add('hidden');
+    video.play().catch(() => {});
+    socket.emit('player:request_sync');
+  });
+
   // Bind HTML5 Video Events for Real-Time Room Synchronization
   const mainVideo = $('mainVideo');
 
   function emitPlayerSync(action) {
     if (!state.room || state.suppressSyncEmit) return;
     if (!state.room.media || state.room.media.streamType === 'youtube') return;
+
+    // Guard: if this device just loaded the stream at 0:00 while the room is already ahead, request sync instead of resetting room!
+    if (Date.now() < state.justLoadedMediaUntil && (mainVideo.currentTime || 0) < 2) {
+      socket.emit('player:request_sync');
+      return;
+    }
+
     const now = Date.now();
-    if (action === 'timeupdate' && now - state.lastSyncAt < 4000) return;
+    if (action === 'timeupdate' && now - state.lastSyncAt < 3000) return;
     state.lastSyncAt = now;
 
     socket.emit('player:sync', {
@@ -1256,26 +1449,49 @@
   }
 
   mainVideo.addEventListener('play', () => emitPlayerSync('play'));
-  mainVideo.addEventListener('pause', () => emitPlayerSync('pause'));
+  mainVideo.addEventListener('pause', () => {
+    if (mainVideo.seeking) return;
+    emitPlayerSync('pause');
+  });
   mainVideo.addEventListener('seeked', () => emitPlayerSync('seek'));
   mainVideo.addEventListener('ratechange', () => emitPlayerSync('rate'));
+  mainVideo.addEventListener('volumechange', () => {
+    if (!mainVideo.muted) $('unmuteSyncBtn').classList.add('hidden');
+  });
+
+  // Periodic 2.5s Heartbeat for tight multi-device sync + watch time stats
+  setInterval(() => {
+    if (!state.room || !state.room.media || state.room.media.streamType === 'youtube') return;
+    if (mainVideo.paused || state.suppressSyncEmit) return;
+    if (Date.now() < state.justLoadedMediaUntil && (mainVideo.currentTime || 0) < 2) return;
+    socket.emit('player:heartbeat', {
+      playing: !mainVideo.paused,
+      currentTime: mainVideo.currentTime || 0,
+      rate: mainVideo.playbackRate || 1,
+      watchDelta: 2.5
+    });
+  }, 2500);
 
   $('resyncPlayerBtn').addEventListener('click', () => {
     socket.emit('player:request_sync');
     showToast('Синхронизировано с комнатой');
   });
 
-  function applyRemoteSync(data) {
+  function applyRemoteSync(data, isHeartbeat = false) {
     if (!state.room || !state.room.media || state.room.media.streamType === 'youtube') return;
     if (!mainVideo.src && !state.hls) return;
 
-    state.suppressSyncEmit = true;
-    const targetTime = data.currentTime || 0;
+    const targetTime = Number(data.currentTime) || 0;
     const drift = Math.abs((mainVideo.currentTime || 0) - targetTime);
+    const threshold = isHeartbeat ? 1.8 : 1.2;
 
-    if (drift > 1.8 || data.action === 'seek' || data.action === 'resync') {
-      mainVideo.currentTime = targetTime;
-      showSyncBadge(data.actor ? `${data.actor.avatar} ${data.actor.displayName} перемотал(а)` : 'Синхронизация...');
+    state.suppressSyncEmit = true;
+
+    if (drift > threshold || data.action === 'seek' || data.action === 'resync') {
+      try { mainVideo.currentTime = targetTime; } catch {}
+      if (!isHeartbeat && data.actor) {
+        showSyncBadge(`${data.actor.avatar || '🍿'} ${data.actor.displayName} перемотал(а)`);
+      }
     }
 
     if (data.rate && mainVideo.playbackRate !== data.rate) {
@@ -1283,14 +1499,20 @@
     }
 
     if (data.playing && mainVideo.paused) {
-      mainVideo.play().catch(() => {});
-      if (data.actor) showSyncBadge(`${data.actor.avatar} ${data.actor.displayName} нажал(а) Play`);
-    } else if (!data.playing && !mainVideo.paused) {
+      mainVideo.play().then(() => {
+        $('unmuteSyncBtn').classList.toggle('hidden', !mainVideo.muted);
+      }).catch(() => {
+        mainVideo.muted = true;
+        $('unmuteSyncBtn').classList.remove('hidden');
+        mainVideo.play().catch(() => {});
+      });
+      if (!isHeartbeat && data.actor) showSyncBadge(`${data.actor.avatar || '▶️'} ${data.actor.displayName} нажал(а) Play`);
+    } else if (!data.playing && !mainVideo.paused && !isHeartbeat) {
       mainVideo.pause();
-      if (data.actor) showSyncBadge(`${data.actor.avatar} ${data.actor.displayName} поставил(а) на паузу`);
+      if (data.actor) showSyncBadge(`${data.actor.avatar || '⏸️'} ${data.actor.displayName} поставил(а) на паузу`);
     }
 
-    setTimeout(() => { state.suppressSyncEmit = false; }, 400);
+    setTimeout(() => { state.suppressSyncEmit = false; }, 450);
   }
 
   let syncBadgeTimer = null;
@@ -1314,6 +1536,7 @@
   socket.on('room:joined', async (room) => {
     state.room = room;
     switchView('room');
+    setMobileRoomTab('chat');
 
     // Update URL query param so user can share or refresh
     const url = new URL(window.location.href);
@@ -1367,11 +1590,15 @@
   });
 
   socket.on('player:sync', (data) => {
-    applyRemoteSync(data);
+    applyRemoteSync(data, false);
+  });
+
+  socket.on('player:heartbeat', (data) => {
+    applyRemoteSync(data, true);
   });
 
   socket.on('chat:message', (msg) => {
-    appendChatMessage(msg);
+    appendChatMessage(msg, true);
   });
 
   socket.on('room:reaction', ({ emoji }) => {
@@ -1413,21 +1640,25 @@
 
   function renderRoomParticipants(list) {
     $('roomUserCount').textContent = list.length;
+    const mobCnt = $('roomUserCountMobile');
+    if (mobCnt) mobCnt.textContent = list.length;
     const container = $('roomParticipantsList');
     container.innerHTML = '';
     list.forEach(p => {
       const isHost = state.room && p.id === state.room.hostId;
       const row = document.createElement('div');
       row.className = 'user-row';
+      row.style.cursor = 'pointer';
       row.innerHTML = `
         <div class="user-row-left">
-          <div class="avatar-circle" style="background:${esc(p.color || '#7c5cff')}">${esc(p.avatar || '🦊')}</div>
+          <div class="avatar-circle" style="background:${esc(p.color || '#7c5cff')}">${avatarInnerHtml(p)}</div>
           <div>
             <div class="user-row-name">${esc(p.displayName)} ${isHost ? '👑' : ''}</div>
             <div class="user-row-sub">@${esc(p.username)} ${p.inVoice ? '· 🎙️ В голосе' : ''}</div>
           </div>
         </div>
       `;
+      row.addEventListener('click', () => openUserCard(p.id));
       container.appendChild(row);
     });
   }
@@ -1435,10 +1666,26 @@
   function renderRoomMessages(messages) {
     const box = $('chatMessages');
     box.innerHTML = '';
-    messages.forEach(m => appendChatMessage(m));
+    messages.forEach(m => appendChatMessage(m, false));
   }
 
-  function appendChatMessage(msg) {
+  function spawnVideoChatPill(msg) {
+    if (!msg || msg.system || !msg.user) return;
+    const overlay = $('videoChatOverlay');
+    if (!overlay) return;
+    const pill = document.createElement('div');
+    pill.className = 'vchat-pill';
+    pill.innerHTML = `<strong>${esc(msg.user.displayName)}:</strong> <span>${esc(msg.text)}</span>`;
+    overlay.appendChild(pill);
+    while (overlay.children.length > 3) {
+      overlay.firstElementChild.remove();
+    }
+    setTimeout(() => {
+      if (pill.parentNode) pill.remove();
+    }, 4500);
+  }
+
+  function appendChatMessage(msg, isLive = false) {
     const box = $('chatMessages');
     const el = document.createElement('div');
     if (msg.system) {
@@ -1447,12 +1694,27 @@
     } else {
       el.className = 'chat-msg';
       el.innerHTML = `
-        <div class="chat-av" style="background:${esc(msg.user?.color || '#7c5cff')}">${esc(msg.user?.avatar || '🦊')}</div>
+        <div class="chat-av" style="background:${esc(msg.user?.color || '#7c5cff')}" data-uid="${esc(msg.user?.id || '')}">${avatarInnerHtml(msg.user)}</div>
         <div class="chat-bubble">
           <div class="chat-author" style="color:${esc(msg.user?.color || '#9175ff')}">${esc(msg.user?.displayName || 'Гость')}</div>
           <div class="chat-text">${esc(msg.text)}</div>
         </div>
       `;
+      const avEl = el.querySelector('.chat-av');
+      if (avEl && msg.user?.id) {
+        avEl.addEventListener('click', () => openUserCard(msg.user.id));
+      }
+      if (isLive) {
+        spawnVideoChatPill(msg);
+        if (state.mobileRoomTab !== 'chat') {
+          state.unreadChatCount++;
+          const badge = $('chatUnreadBadge');
+          if (badge) {
+            badge.textContent = state.unreadChatCount;
+            badge.classList.remove('hidden');
+          }
+        }
+      }
     }
     box.appendChild(el);
     box.scrollTop = box.scrollHeight;
@@ -1467,7 +1729,36 @@
     input.value = '';
   });
 
-  // Sidebar tabs (Chat / Participants)
+  // Mobile Room Quick Switcher (💬 Чат | 🎞️ Озвучка / Серии | 👥 Зрители)
+  function setMobileRoomTab(tabName) {
+    state.mobileRoomTab = tabName;
+    const layout = document.querySelector('.room-layout');
+    document.querySelectorAll('.m-rtab').forEach(b => {
+      b.classList.toggle('active', b.dataset.mrtab === tabName);
+    });
+    if (tabName === 'z01') {
+      layout?.classList.add('mobile-tab-z01');
+      $('z01Panel').classList.remove('hidden');
+    } else {
+      layout?.classList.remove('mobile-tab-z01');
+      const rtab = tabName === 'users' ? 'users' : 'chat';
+      document.querySelectorAll('.side-tab').forEach(t => t.classList.toggle('active', t.dataset.rtab === rtab));
+      document.querySelectorAll('.rtab-content').forEach(c => c.classList.remove('active'));
+      $(`rtab-${rtab}`)?.classList.add('active');
+      if (rtab === 'chat') {
+        state.unreadChatCount = 0;
+        $('chatUnreadBadge')?.classList.add('hidden');
+        const box = $('chatMessages');
+        if (box) box.scrollTop = box.scrollHeight;
+      }
+    }
+  }
+
+  document.querySelectorAll('.m-rtab').forEach(btn => {
+    btn.addEventListener('click', () => setMobileRoomTab(btn.dataset.mrtab));
+  });
+
+  // Desktop Sidebar tabs (Chat / Participants)
   document.querySelectorAll('.side-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.side-tab').forEach(t => t.classList.toggle('active', t === tab));
@@ -1528,8 +1819,8 @@
         const row = document.createElement('div');
         row.className = 'user-row';
         row.innerHTML = `
-          <div class="user-row-left">
-            <div class="avatar-circle" style="background:${esc(req.user.color)}">${esc(req.user.avatar)}</div>
+          <div class="user-row-left" style="cursor:pointer;">
+            <div class="avatar-circle" style="background:${esc(req.user.color)}">${avatarInnerHtml(req.user)}</div>
             <div>
               <div class="user-row-name">${esc(req.user.displayName)}</div>
               <div class="user-row-sub">@${esc(req.user.username)}</div>
@@ -1540,6 +1831,7 @@
             <button class="pill-btn tiny" data-decline="${esc(req.id)}">✕</button>
           </div>
         `;
+        row.querySelector('.user-row-left').onclick = () => openUserCard(req.user.id);
         row.querySelector('[data-accept]').onclick = () => respondFriend(req.id, true);
         row.querySelector('[data-decline]').onclick = () => respondFriend(req.id, false);
         incList.appendChild(row);
@@ -1564,9 +1856,9 @@
         : (f.online ? 'В сети' : 'Не в сети');
 
       row.innerHTML = `
-        <div class="user-row-left">
+        <div class="user-row-left" style="cursor:pointer;">
           <span class="status-dot ${f.online ? 'online' : ''}"></span>
-          <div class="avatar-circle" style="background:${esc(f.color)}">${esc(f.avatar)}</div>
+          <div class="avatar-circle" style="background:${esc(f.color)}">${avatarInnerHtml(f)}</div>
           <div>
             <div class="user-row-name">${esc(f.displayName)}</div>
             <div class="user-row-sub">${esc(roomStatus)}</div>
@@ -1577,6 +1869,7 @@
           ${state.room && f.online ? `<button class="pill-btn tiny" data-invite-friend="${esc(f.id)}">Позвать</button>` : ''}
         </div>
       `;
+      row.querySelector('.user-row-left').onclick = () => openUserCard(f.id);
       const joinBtn = row.querySelector('[data-join-friend]');
       if (joinBtn) joinBtn.onclick = () => joinRoomByCode(f.currentRoom.code);
       const invBtn = row.querySelector('[data-invite-friend]');
@@ -1614,8 +1907,8 @@
         const row = document.createElement('div');
         row.className = 'user-row';
         row.innerHTML = `
-          <div class="user-row-left">
-            <div class="avatar-circle" style="background:${esc(u.color)}">${esc(u.avatar)}</div>
+          <div class="user-row-left" style="cursor:pointer;">
+            <div class="avatar-circle" style="background:${esc(u.color)}">${avatarInnerHtml(u)}</div>
             <div>
               <div class="user-row-name">${esc(u.displayName)}</div>
               <div class="user-row-sub">@${esc(u.username)}</div>
@@ -1623,6 +1916,7 @@
           </div>
           <button class="pill-btn tiny accent">+ Добавить</button>
         `;
+        row.querySelector('.user-row-left').onclick = () => openUserCard(u.id);
         row.querySelector('button').onclick = async () => {
           try {
             await api('/api/friends/request', {
@@ -1663,7 +1957,7 @@
       row.innerHTML = `
         <div class="user-row-left">
           <span class="status-dot ${f.online ? 'online' : ''}"></span>
-          <div class="avatar-circle" style="background:${esc(f.color)}">${esc(f.avatar)}</div>
+          <div class="avatar-circle" style="background:${esc(f.color)}">${avatarInnerHtml(f)}</div>
           <div class="user-row-name">${esc(f.displayName)}</div>
         </div>
         <button class="pill-btn tiny accent">Пригласить</button>

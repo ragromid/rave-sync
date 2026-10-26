@@ -227,6 +227,8 @@ app.put('/api/auth/profile', authMiddleware, (req, res) => {
             ...p,
             displayName: updated.displayName,
             avatar: updated.avatar,
+            avatarUrl: updated.avatarUrl || '',
+            bio: updated.bio || '',
             color: updated.color
           });
           io.to(r.code).emit('room:participants', Array.from(r.participants.values()));
@@ -243,6 +245,12 @@ app.put('/api/auth/profile', authMiddleware, (req, res) => {
 app.get('/api/users/search', authMiddleware, (req, res) => {
   const results = db.searchUsers(req.query.q || '', req.user.id);
   res.json({ users: results });
+});
+
+app.get('/api/users/:id', authMiddleware, (req, res) => {
+  const u = db.getUserById(req.params.id);
+  if (!u) return res.status(404).json({ error: 'Пользователь не найден' });
+  res.json({ user: u, presence: getUserPresence(u.id) });
 });
 
 // ================= FRIENDS & INVITES ROUTES =================
@@ -419,12 +427,14 @@ app.post('/api/z01/resolve', async (req, res) => {
         proxy: buildProxyStreamUrl(qv, resolved.headers)
       };
     }
+    const needsProxy =
+      (resolved.headers && Object.keys(resolved.headers).length > 0) ||
+      /srcIp=|werkecdn|rstprgapipt|okcdn|vkvd|geosaitebi|^http:\/\//i.test(resolved.url || '');
     res.json({
       ...resolved,
       proxyUrl,
       proxiedQualities,
-      // Prefer proxy if custom headers are required by balancer (e.g. VK Video, Geosaitebi)
-      recommendedUrl: (resolved.headers && Object.keys(resolved.headers).length > 0) ? proxyUrl : resolved.url
+      recommendedUrl: needsProxy ? proxyUrl : resolved.url
     });
   } catch (e) {
     res.status(500).json({ error: e.message || 'Не удалось извлечь видеопоток' });
@@ -585,6 +595,7 @@ app.post('/api/rooms', authMiddleware, (req, res) => {
     messages: []
   };
   rooms.set(code, room);
+  db.incrementUserStat(req.user.id, 'roomsCreated', 1);
   res.json({ room: serializeRoom(room, false) });
 });
 
@@ -685,6 +696,8 @@ io.on('connection', (socket) => {
       username: currentUser.username,
       displayName: currentUser.displayName,
       avatar: currentUser.avatar,
+      avatarUrl: currentUser.avatarUrl || '',
+      bio: currentUser.bio || '',
       color: currentUser.color,
       inVoice: false,
       muted: false
@@ -719,9 +732,21 @@ io.on('connection', (socket) => {
       });
     }
 
+    const effectiveNow = getEffectiveTime(room.playback);
+
+    // Prevent a newly joined or unmuting device at 0:00 from resetting a room that is already playing past 5s
+    if (action === 'play' && typeof currentTime === 'number' && currentTime < 2 && effectiveNow > 5 && room.playback.playing) {
+      return socket.emit('player:sync', {
+        ...room.playback,
+        currentTime: effectiveNow,
+        serverTime: Date.now(),
+        action: 'resync'
+      });
+    }
+
     room.playback = {
       playing: typeof playing === 'boolean' ? playing : room.playback.playing,
-      currentTime: typeof currentTime === 'number' && !isNaN(currentTime) ? Math.max(0, currentTime) : getEffectiveTime(room.playback),
+      currentTime: typeof currentTime === 'number' && !isNaN(currentTime) ? Math.max(0, currentTime) : effectiveNow,
       rate: typeof rate === 'number' ? rate : (room.playback.rate || 1),
       updatedAt: Date.now()
     };
@@ -735,6 +760,30 @@ io.on('connection', (socket) => {
         displayName: currentUser.displayName,
         avatar: currentUser.avatar
       }
+    });
+  });
+
+  // Continuous heartbeat from host / active player to keep all devices tightly in sync
+  socket.on('player:heartbeat', ({ currentTime, playing, rate }) => {
+    const meta = socketMeta.get(socket.id);
+    if (!meta || !meta.roomCode || !currentUser) return;
+    const room = rooms.get(meta.roomCode);
+    if (!room) return;
+
+    // Only accept authoritative heartbeat from host (or anyone if host isn't in room)
+    if (room.hostId !== currentUser.id) return;
+    if (typeof currentTime !== 'number' || isNaN(currentTime)) return;
+
+    room.playback = {
+      playing: typeof playing === 'boolean' ? playing : room.playback.playing,
+      currentTime: Math.max(0, currentTime),
+      rate: typeof rate === 'number' ? rate : (room.playback.rate || 1),
+      updatedAt: Date.now()
+    };
+
+    socket.to(room.code).emit('player:heartbeat', {
+      ...room.playback,
+      serverTime: Date.now()
     });
   });
 
@@ -821,11 +870,13 @@ io.on('connection', (socket) => {
         id: currentUser.id,
         displayName: currentUser.displayName,
         avatar: currentUser.avatar,
+        avatarUrl: currentUser.avatarUrl || '',
         color: currentUser.color
       },
       text: clean,
       createdAt: Date.now()
     };
+    db.incrementUserStat(currentUser.id, 'messagesSent', 1);
     room.messages.push(msg);
     if (room.messages.length > 100) room.messages.shift();
     io.to(room.code).emit('chat:message', msg);
@@ -838,6 +889,7 @@ io.on('connection', (socket) => {
     const room = rooms.get(meta.roomCode);
     if (!room) return;
 
+    db.incrementUserStat(currentUser.id, 'reactionsSent', 1);
     io.to(room.code).emit('room:reaction', {
       id: 'rx_' + crypto.randomBytes(3).toString('hex'),
       emoji: String(emoji || '🔥').slice(0, 8),
