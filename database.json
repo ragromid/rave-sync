@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040247385,
+      "lastSeenAt": 1793040283902,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 0
+      "lastSeenAt": 1793040284092
     }
   ],
   "friendships": [
@@ -704,6 +704,16 @@
           "color": "#1de9b6",
           "inVoice": false,
           "muted": false
+        },
+        {
+          "socketId": "http_u_1333f556dd06",
+          "id": "u_1333f556dd06",
+          "username": "lillakatten",
+          "displayName": "Sabina",
+          "avatar": "🦊",
+          "color": "#e040fb",
+          "inVoice": false,
+          "muted": false
         }
       ],
       "media": {
@@ -752,10 +762,10 @@
         "subtitles": []
       },
       "playback": {
-        "playing": true,
-        "currentTime": 0,
+        "playing": false,
+        "currentTime": 9.035888418653453,
         "rate": 1,
-        "updatedAt": 1793040247249
+        "updatedAt": 1793040259883
       },
       "messages": [],
       "viewOnceStore": {}
