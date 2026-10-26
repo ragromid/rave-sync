@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040540099,
+      "lastSeenAt": 1793040568689,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 0,
         "episodesWatched": 0,
         "roomsCreated": 0,
-        "messagesSent": 5,
+        "messagesSent": 6,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040539391
+      "lastSeenAt": 1793040569289
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "kodik",
-        "balancer": "Kodik",
+        "balancerKey": "filmix",
+        "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "AnimeVost",
-        "updatedAt": 1793040516339
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "updatedAt": 1793040247007
       }
     ]
   },
@@ -179,14 +179,14 @@
         "updatedAt": 1793001267614
       },
       "1218925": {
-        "balancerKey": "kodik",
-        "balancerName": "Kodik",
+        "balancerKey": "filmix",
+        "balancerName": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "AnimeVost",
-        "currentTime": 54,
+        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "currentTime": 64,
         "duration": 5999,
-        "updatedAt": 1793040516339
+        "updatedAt": 1793040509333
       }
     },
     "u_80ab0d1134f5": {
@@ -704,7 +704,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": false,
+      "isPublic": true,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -777,9 +777,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 19.53808760032704,
+        "currentTime": 49.54688752968588,
         "rate": 1,
-        "updatedAt": 1793040538189
+        "updatedAt": 1793040568243
       },
       "messages": [
         {
@@ -1020,6 +1020,25 @@
           "createdAt": 1793040533452,
           "read": false,
           "updatedAt": 1793040533452
+        },
+        {
+          "id": "m_663cb96e62",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "Ощущение словно впервые что то смотрим вместе)",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793040569178
         }
       ],
       "viewOnceStore": {}
