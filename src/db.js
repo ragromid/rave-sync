@@ -51,12 +51,22 @@ function loadLocalDb() {
 
 function mergeDb(base, incoming) {
   if (!incoming || typeof incoming !== 'object') return base;
+  const userMap = new Map();
+  for (const u of (Array.isArray(base?.users) ? base.users : [])) {
+    if (u && u.id) userMap.set(u.id, u);
+  }
+  for (const u of (Array.isArray(incoming.users) ? incoming.users : [])) {
+    if (u && u.id) {
+      const prev = userMap.get(u.id) || {};
+      userMap.set(u.id, { ...prev, ...u, passwordHash: u.passwordHash || prev.passwordHash || '' });
+    }
+  }
   const out = {
-    users: Array.isArray(incoming.users) ? incoming.users : [],
-    friendships: Array.isArray(incoming.friendships) ? incoming.friendships : [],
-    bookmarks: incoming.bookmarks && typeof incoming.bookmarks === 'object' ? incoming.bookmarks : {},
-    history: incoming.history && typeof incoming.history === 'object' ? incoming.history : {},
-    progress: incoming.progress && typeof incoming.progress === 'object' ? incoming.progress : {}
+    users: Array.from(userMap.values()),
+    friendships: Array.isArray(incoming.friendships) ? incoming.friendships : (base?.friendships || []),
+    bookmarks: { ...(base?.bookmarks || {}), ...(incoming.bookmarks && typeof incoming.bookmarks === 'object' ? incoming.bookmarks : {}) },
+    history: { ...(base?.history || {}), ...(incoming.history && typeof incoming.history === 'object' ? incoming.history : {}) },
+    progress: { ...(base?.progress || {}), ...(incoming.progress && typeof incoming.progress === 'object' ? incoming.progress : {}) }
   };
   return out;
 }
@@ -548,6 +558,66 @@ function getUserProgress(userId) {
   return db.progress[userId] || {};
 }
 
+// ================= ADMIN MANAGEMENT FUNCTIONS =================
+
+function adminListUsers() {
+  return db.users.map(u => ({
+    ...publicUser(u),
+    isAdmin: !!u.isAdmin,
+    hasPassword: !!u.passwordHash
+  }));
+}
+
+function adminResetPassword(userId, newPassword) {
+  const u = db.users.find(x => x.id === userId || x.username === String(userId).toLowerCase());
+  if (!u) throw new Error('Пользователь не найден');
+  if (!newPassword || String(newPassword).length < 4) {
+    throw new Error('Новый пароль должен быть не менее 4 символов');
+  }
+  u.passwordHash = hashPassword(String(newPassword));
+  saveDb();
+  return publicUser(u);
+}
+
+function adminUpdateUser(userId, { username, displayName, bio, avatar, color, isAdmin }) {
+  const u = db.users.find(x => x.id === userId);
+  if (!u) throw new Error('Пользователь не найден');
+  if (username !== undefined) {
+    const clean = String(username || '').trim().toLowerCase();
+    if (!/^[a-z0-9_.-]{3,24}$/.test(clean)) {
+      throw new Error('Логин должен быть от 3 до 24 символов (латиница, цифры, _ . -)');
+    }
+    const conflict = db.users.find(x => x.username === clean && x.id !== u.id);
+    if (conflict) throw new Error('Этот логин уже занят другим пользователем');
+    u.username = clean;
+  }
+  if (displayName !== undefined) u.displayName = String(displayName).trim().slice(0, 30) || u.username;
+  if (bio !== undefined) u.bio = String(bio).trim().slice(0, 160);
+  if (avatar !== undefined) u.avatar = String(avatar).slice(0, 8);
+  if (color !== undefined) u.color = String(color).slice(0, 20);
+  if (isAdmin !== undefined) u.isAdmin = !!isAdmin;
+  saveDb();
+  return { ...publicUser(u), isAdmin: !!u.isAdmin };
+}
+
+function adminDeleteUser(userId) {
+  const idx = db.users.findIndex(x => x.id === userId);
+  if (idx === -1) throw new Error('Пользователь не найден');
+  const removed = db.users.splice(idx, 1)[0];
+  db.friendships = db.friendships.filter(f => f.fromId !== userId && f.toId !== userId);
+  delete db.bookmarks[userId];
+  delete db.history[userId];
+  delete db.progress[userId];
+  saveDb();
+  return removed;
+}
+
+function adminImpersonateUser(userId) {
+  const u = db.users.find(x => x.id === userId || x.username === String(userId).toLowerCase());
+  if (!u) throw new Error('Пользователь не найден');
+  return { user: publicUser(u), token: signToken(u) };
+}
+
 module.exports = {
   initCloudDb,
   registerUser,
@@ -566,5 +636,10 @@ module.exports = {
   addWatchHistory,
   updatePlaybackProgress,
   getWatchHistory,
-  getUserProgress
+  getUserProgress,
+  adminListUsers,
+  adminResetPassword,
+  adminUpdateUser,
+  adminDeleteUser,
+  adminImpersonateUser
 };

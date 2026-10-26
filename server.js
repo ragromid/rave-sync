@@ -351,6 +351,136 @@ app.post('/api/user/progress', authMiddleware, (req, res) => {
   res.json({ progress: entry });
 });
 
+// ================= ADMIN PANEL & USER MANAGEMENT ROUTES =================
+
+const ADMIN_KEY = process.env.ADMIN_KEY || 'admin2026';
+
+function setAdminCookie(res, key) {
+  res.setHeader(
+    'Set-Cookie',
+    `ravelampa_admin_key=${encodeURIComponent(key)}; Path=/; Max-Age=31536000; SameSite=Lax; HttpOnly`
+  );
+}
+
+function adminMiddleware(req, res, next) {
+  const cookies = parseCookies(req.headers.cookie);
+  const providedKey = req.headers['x-admin-key'] || cookies.ravelampa_admin_key || req.query.key || '';
+  if (providedKey === ADMIN_KEY) {
+    return next();
+  }
+  // Also allow logged-in users with isAdmin === true
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : (cookies.ravelampa_token || '');
+  const payload = db.verifyToken(token);
+  if (payload && payload.id) {
+    const allUsers = db.adminListUsers();
+    const u = allUsers.find(x => x.id === payload.id);
+    if (u && u.isAdmin) return next();
+  }
+  return res.status(403).json({ error: 'Неверный ключ администратора' });
+}
+
+app.get('/admin', (req, res) => {
+  if (req.query.key === ADMIN_KEY) {
+    setAdminCookie(res, ADMIN_KEY);
+  }
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.post('/api/admin/login', (req, res) => {
+  const { key } = req.body || {};
+  if (String(key || '').trim() !== ADMIN_KEY) {
+    return res.status(403).json({ error: 'Неверный мастер-ключ администратора' });
+  }
+  setAdminCookie(res, ADMIN_KEY);
+  res.json({ ok: true });
+});
+
+app.get('/api/admin/overview', adminMiddleware, (req, res) => {
+  const users = db.adminListUsers().map(u => ({
+    ...u,
+    ...getUserPresence(u.id)
+  }));
+  const activeRooms = Array.from(rooms.values()).map(r => serializeRoom(r, true));
+  res.json({
+    users,
+    rooms: activeRooms,
+    stats: {
+      totalUsers: users.length,
+      onlineUsers: users.filter(u => u.online).length,
+      activeRooms: activeRooms.length
+    }
+  });
+});
+
+app.post('/api/admin/users', adminMiddleware, (req, res) => {
+  try {
+    const { username, password, displayName, isAdmin } = req.body || {};
+    const { user } = db.registerUser({ username, password, displayName });
+    if (isAdmin) db.adminUpdateUser(user.id, { isAdmin: true });
+    res.json({ user: db.getUserById(user.id) });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post('/api/admin/users/:id/password', adminMiddleware, (req, res) => {
+  try {
+    const { password } = req.body || {};
+    const user = db.adminResetPassword(req.params.id, password);
+    res.json({ ok: true, user });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.put('/api/admin/users/:id', adminMiddleware, (req, res) => {
+  try {
+    const user = db.adminUpdateUser(req.params.id, req.body || {});
+    res.json({ ok: true, user });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post('/api/admin/users/:id/impersonate', adminMiddleware, (req, res) => {
+  try {
+    const { user, token } = db.adminImpersonateUser(req.params.id);
+    setAuthCookie(res, token);
+    res.json({ ok: true, user, token });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.delete('/api/admin/users/:id', adminMiddleware, (req, res) => {
+  try {
+    const userId = req.params.id;
+    db.adminDeleteUser(userId);
+    const sids = userSockets.get(userId);
+    if (sids) {
+      for (const sid of sids) {
+        const s = io.sockets.sockets.get(sid);
+        if (s) s.disconnect(true);
+      }
+      userSockets.delete(userId);
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.delete('/api/admin/rooms/:code', adminMiddleware, (req, res) => {
+  const code = String(req.params.code || '').toUpperCase();
+  if (rooms.has(code)) {
+    io.to(code).emit('toast', { text: 'Комната закрыта администратором' });
+    rooms.delete(code);
+    broadcastPublicRooms();
+  }
+  res.json({ ok: true });
+});
+
 // ================= CATALOG & Z01 STREAMING ROUTES =================
 
 app.get('/api/catalog/feed', async (req, res) => {

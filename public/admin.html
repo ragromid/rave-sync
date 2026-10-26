@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <title>RaveLampa — Админ-панель</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-main: #090a0f;
+      --bg-elevated: #12141f;
+      --bg-card: #171a29;
+      --border: rgba(255, 255, 255, 0.09);
+      --accent: #7c5cff;
+      --accent-pink: #ff3e80;
+      --accent-cyan: #5ce1e6;
+      --text-main: #f4f6fb;
+      --text-muted: #8f96b2;
+      --success: #2ee59d;
+      --danger: #ff4d6a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-main);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+    header {
+      background: rgba(18, 20, 31, 0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.15rem;
+      text-decoration: none;
+      color: #fff;
+    }
+    .brand-badge {
+      padding: 3px 9px;
+      border-radius: 99px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-pink));
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .container {
+      max-width: 1060px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn:hover { background: rgba(255, 255, 255, 0.12); }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--accent), #6241ea);
+      border-color: transparent;
+      color: #fff;
+    }
+    .btn.success {
+      background: rgba(46, 229, 157, 0.16);
+      border-color: rgba(46, 229, 157, 0.4);
+      color: var(--success);
+    }
+    .btn.danger {
+      background: rgba(255, 77, 106, 0.14);
+      border-color: rgba(255, 77, 106, 0.35);
+      color: var(--danger);
+    }
+    .login-card {
+      max-width: 400px;
+      margin: 70px auto;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      height: 40px;
+      padding: 0 13px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+    }
+    input:focus { border-color: var(--accent); }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .stat-box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .stat-box .num {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .stat-box .lbl {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .panel {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 22px;
+    }
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .users-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .user-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .u-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 220px;
+    }
+    .u-av {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .u-av img { width: 100%; height: 100%; object-fit: cover; }
+    .u-name { font-weight: 700; font-size: 0.96rem; display: flex; align-items: center; gap: 6px; }
+    .u-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+    .u-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #555;
+      display: inline-block;
+    }
+    .dot.online { background: var(--success); box-shadow: 0 0 6px var(--success); }
+    .create-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      align-items: center;
+    }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 6, 10, 0.8);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+    .modal-box {
+      width: 100%;
+      max-width: 400px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .hidden { display: none !important; }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1d2136;
+      border: 1px solid var(--accent);
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.86rem;
+      z-index: 200;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span>RaveLampa</span>
+      <span class="brand-badge">ADMIN</span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <a href="/" class="btn">← На сайт</a>
+      <button id="refreshBtn" class="btn">🔄 Обновить</button>
+    </div>
+  </header>
+
+  <!-- Admin Login Gate -->
+  <div id="loginGate" class="login-card hidden">
+    <h3>Вход в Админ-панель</h3>
+    <p style="font-size:0.84rem;color:var(--text-muted);">Введите мастер-ключ администратора для управления пользователями и сброса паролей.</p>
+    <form id="loginForm" style="display:flex;flex-direction:column;gap:12px;">
+      <input type="password" id="adminKeyInput" placeholder="Мастер-ключ (по умолч. admin2026)" required />
+      <div id="loginErr" style="color:var(--danger);font-size:0.82rem;" class="hidden"></div>
+      <button type="submit" class="btn primary" style="height:40px;">Войти в админку</button>
+    </form>
+  </div>
+
+  <!-- Admin Dashboard Content -->
+  <div id="dashboard" class="container hidden">
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="num" id="stTotalUsers">0</div>
+        <div class="lbl">👥 Всего пользователей</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="stOnlineUsers">0</div>
+        <div class="lbl">🟢 Сейчас онлайн</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="stActiveRooms">0</div>
+        <div class="lbl">🍿 Активных комнат</div>
+      </div>
+    </div>
+
+    <!-- Create User Panel -->
+    <div class="panel">
+      <div class="panel-head">
+        <h3>➕ Создать нового пользователя</h3>
+      </div>
+      <form id="createUserForm" class="create-row">
+        <input type="text" id="newUsername" placeholder="Логин (напр. alex)" required />
+        <input type="text" id="newDisplayName" placeholder="Отображаемое имя" />
+        <input type="text" id="newPassword" placeholder="Пароль (мин. 4 симв.)" required />
+        <button type="submit" class="btn primary" style="height:40px;">Создать аккаунт</button>
+      </form>
+    </div>
+
+    <!-- Users Management List -->
+    <div class="panel">
+      <div class="panel-head">
+        <h3>👥 Пользователи (<span id="uCount">0</span>)</h3>
+        <input type="text" id="userFilterInput" placeholder="Быстрый поиск по логину или имени..." style="max-width:300px;" />
+      </div>
+      <div id="usersList" class="users-list"></div>
+    </div>
+
+    <!-- Active Rooms List -->
+    <div class="panel">
+      <div class="panel-head">
+        <h3>🍿 Активные комнаты</h3>
+      </div>
+      <div id="roomsList" class="users-list"></div>
+    </div>
+  </div>
+
+  <!-- Password Reset / Edit Modal -->
+  <div id="editModal" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <h3 id="editModalTitle">Управление пользователем</h3>
+      <input type="hidden" id="editUserId" />
+      <div>
+        <label style="font-size:0.76rem;color:var(--text-muted);">Логин</label>
+        <input type="text" id="editUsername" />
+      </div>
+      <div>
+        <label style="font-size:0.76rem;color:var(--text-muted);">Отображаемое имя</label>
+        <input type="text" id="editDisplayName" />
+      </div>
+      <div>
+        <label style="font-size:0.76rem;color:var(--text-muted);">О себе (био)</label>
+        <input type="text" id="editBio" />
+      </div>
+      <div>
+        <label style="font-size:0.76rem;color:var(--accent-cyan);font-weight:700;">Новый пароль (оставьте пустым, если не меняете)</label>
+        <input type="text" id="editNewPassword" placeholder="Введите новый пароль (мин. 4 симв.)" />
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;">
+        <input type="checkbox" id="editIsAdmin" /> Права администратора
+      </label>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button type="button" id="saveEditBtn" class="btn primary" style="flex:1;">Сохранить</button>
+        <button type="button" id="closeEditBtn" class="btn">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      let adminKey = localStorage.getItem('ravelampa_admin_key') || '';
+      let allUsers = [];
+
+      const $ = (id) => document.getElementById(id);
+      const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+      function toast(msg) {
+        const el = document.createElement('div');
+        el.className = 'toast';
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 3500);
+      }
+
+      async function adminApi(path, options = {}) {
+        const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+        if (adminKey) headers['x-admin-key'] = adminKey;
+        const res = await fetch(path, { credentials: 'same-origin', ...options, headers });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+        return data;
+      }
+
+      async function loadOverview() {
+        try {
+          const data = await adminApi('/api/admin/overview');
+          $('loginGate').classList.add('hidden');
+          $('dashboard').classList.remove('hidden');
+
+          $('stTotalUsers').textContent = data.stats?.totalUsers || 0;
+          $('stOnlineUsers').textContent = data.stats?.onlineUsers || 0;
+          $('stActiveRooms').textContent = data.stats?.activeRooms || 0;
+
+          allUsers = data.users || [];
+          renderUsers();
+          renderRooms(data.rooms || []);
+        } catch (e) {
+          $('dashboard').classList.add('hidden');
+          $('loginGate').classList.remove('hidden');
+        }
+      }
+
+      function renderUsers() {
+        const q = $('userFilterInput').value.trim().toLowerCase();
+        const filtered = allUsers.filter(u => !q || u.username.toLowerCase().includes(q) || (u.displayName || '').toLowerCase().includes(q));
+        $('uCount').textContent = filtered.length;
+        const list = $('usersList');
+        list.innerHTML = '';
+
+        if (!filtered.length) {
+          list.innerHTML = '<div style="color:var(--text-muted);padding:16px 0;">Пользователи не найдены</div>';
+          return;
+        }
+
+        filtered.forEach(u => {
+          const card = document.createElement('div');
+          card.className = 'user-card';
+          const avHtml = u.avatarUrl ? `<img src="${esc(u.avatarUrl)}" alt="" />` : esc(u.avatar || '🦊');
+          const watchMins = Math.floor((u.stats?.watchSeconds || 0) / 60);
+          const roomTxt = u.currentRoom ? ` · 🍿 Комната #${u.currentRoom.code}` : '';
+          card.innerHTML = `
+            <div class="u-left">
+              <div class="u-av" style="background:${esc(u.color || '#7c5cff')}">${avHtml}</div>
+              <div>
+                <div class="u-name">
+                  <span class="dot ${u.online ? 'online' : ''}"></span>
+                  <span>${esc(u.displayName)}</span>
+                  <span style="color:var(--text-muted);font-weight:500;">@${esc(u.username)}</span>
+                  ${u.isAdmin ? '<span class="brand-badge">ADMIN</span>' : ''}
+                </div>
+                <div class="u-sub">
+                  ⏱️ ${watchMins} мин · 🎬 ${(u.stats?.moviesWatched || 0) + (u.stats?.episodesWatched || 0)} просм. · 💬 ${u.stats?.messagesSent || 0} сообщ.${esc(roomTxt)}
+                </div>
+              </div>
+            </div>
+            <div class="u-actions">
+              <button class="btn success" data-impersonate="${esc(u.id)}" title="Мгновенно войти в этот аккаунт без пароля">🚀 Войти под юзером</button>
+              <button class="btn primary" data-reset="${esc(u.id)}">🔑 Сменить пароль / Изм.</button>
+              <button class="btn danger" data-del="${esc(u.id)}">🗑️</button>
+            </div>
+          `;
+
+          card.querySelector('[data-impersonate]').onclick = async () => {
+            try {
+              await adminApi(`/api/admin/users/${encodeURIComponent(u.id)}/impersonate`, { method: 'POST' });
+              toast(`Вы вошли как ${u.displayName}! Перенаправляем...`);
+              setTimeout(() => { window.location.href = '/'; }, 500);
+            } catch (err) {
+              toast(err.message);
+            }
+          };
+
+          card.querySelector('[data-reset]').onclick = () => openEditModal(u);
+
+          card.querySelector('[data-del]').onclick = async () => {
+            if (!confirm(`Удалить пользователя @${u.username}?`)) return;
+            try {
+              await adminApi(`/api/admin/users/${encodeURIComponent(u.id)}`, { method: 'DELETE' });
+              toast(`Пользователь @${u.username} удалён`);
+              loadOverview();
+            } catch (err) {
+              toast(err.message);
+            }
+          };
+
+          list.appendChild(card);
+        });
+      }
+
+      function renderRooms(rooms) {
+        const list = $('roomsList');
+        list.innerHTML = '';
+        if (!rooms.length) {
+          list.innerHTML = '<div style="color:var(--text-muted);padding:8px 0;">Нет активных комнат</div>';
+          return;
+        }
+        rooms.forEach(r => {
+          const row = document.createElement('div');
+          row.className = 'user-card';
+          row.innerHTML = `
+            <div>
+              <div class="u-name">#${esc(r.code)} — ${esc(r.name)} (${r.participantCount || 0} чел.)</div>
+              <div class="u-sub">${esc(r.media?.title || 'Без видео')} · ${r.isPublic ? 'Публичная' : 'Приватная'}</div>
+            </div>
+            <div class="u-actions">
+              <a href="/?room=${esc(r.code)}" class="btn">Войти</a>
+              <button class="btn danger" data-close-room="${esc(r.code)}">Закрыть комнату</button>
+            </div>
+          `;
+          row.querySelector('[data-close-room]').onclick = async () => {
+            await adminApi(`/api/admin/rooms/${encodeURIComponent(r.code)}`, { method: 'DELETE' });
+            toast(`Комната #${r.code} закрыта`);
+            loadOverview();
+          };
+          list.appendChild(row);
+        });
+      }
+
+      function openEditModal(u) {
+        $('editUserId').value = u.id;
+        $('editModalTitle').textContent = `Редактирование @${u.username}`;
+        $('editUsername').value = u.username;
+        $('editDisplayName').value = u.displayName || '';
+        $('editBio').value = u.bio || '';
+        $('editNewPassword').value = '';
+        $('editIsAdmin').checked = !!u.isAdmin;
+        $('editModal').classList.remove('hidden');
+        $('editNewPassword').focus();
+      }
+
+      $('closeEditBtn').onclick = () => $('editModal').classList.add('hidden');
+
+      $('saveEditBtn').onclick = async () => {
+        const id = $('editUserId').value;
+        const username = $('editUsername').value.trim();
+        const displayName = $('editDisplayName').value.trim();
+        const bio = $('editBio').value.trim();
+        const newPassword = $('editNewPassword').value;
+        const isAdmin = $('editIsAdmin').checked;
+
+        try {
+          await adminApi(`/api/admin/users/${encodeURIComponent(id)}`, {
+            method: 'PUT',
+            body: JSON.stringify({ username, displayName, bio, isAdmin })
+          });
+          if (newPassword && newPassword.trim().length > 0) {
+            await adminApi(`/api/admin/users/${encodeURIComponent(id)}/password`, {
+              method: 'POST',
+              body: JSON.stringify({ password: newPassword.trim() })
+            });
+          }
+          $('editModal').classList.add('hidden');
+          toast('Данные пользователя и пароль сохранены!');
+          loadOverview();
+        } catch (err) {
+          toast(err.message);
+        }
+      };
+
+      $('loginForm').onsubmit = async (e) => {
+        e.preventDefault();
+        $('loginErr').classList.add('hidden');
+        const key = $('adminKeyInput').value.trim();
+        try {
+          await adminApi('/api/admin/login', {
+            method: 'POST',
+            body: JSON.stringify({ key })
+          });
+          adminKey = key;
+          localStorage.setItem('ravelampa_admin_key', key);
+          loadOverview();
+        } catch (err) {
+          $('loginErr').textContent = err.message;
+          $('loginErr').classList.remove('hidden');
+        }
+      };
+
+      $('createUserForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const username = $('newUsername').value.trim();
+        const displayName = $('newDisplayName').value.trim();
+        const password = $('newPassword').value;
+        try {
+          await adminApi('/api/admin/users', {
+            method: 'POST',
+            body: JSON.stringify({ username, displayName, password })
+          });
+          $('newUsername').value = '';
+          $('newDisplayName').value = '';
+          $('newPassword').value = '';
+          toast(`Пользователь @${username} создан!`);
+          loadOverview();
+        } catch (err) {
+          toast(err.message);
+        }
+      };
+
+      $('userFilterInput').oninput = renderUsers;
+      $('refreshBtn').onclick = loadOverview;
+
+      loadOverview();
+    })();
+  </script>
+</body>
+</html>
