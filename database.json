@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793044145610,
+      "lastSeenAt": 1793044180399,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 1,
         "episodesWatched": 0,
         "roomsCreated": 2,
-        "messagesSent": 51,
+        "messagesSent": 52,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793044146137
+      "lastSeenAt": 1793044181190
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
-        "balancer": "Filmix",
+        "balancerKey": "kodik",
+        "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1793040416330
+        "voiceName": "Flarrow Films",
+        "updatedAt": 1793040858095
       }
     ],
     "u_1333f556dd06": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "PantsuVoice",
-        "updatedAt": 1793041326035
+        "voiceName": "AnimeVost",
+        "updatedAt": 1793041148694
       }
     ]
   },
@@ -221,9 +221,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Flarrow Films",
-        "currentTime": 2520,
+        "currentTime": 2686,
         "duration": 5971,
-        "updatedAt": 1793043811015
+        "updatedAt": 1793043978653
       }
     },
     "u_80ab0d1134f5": {
@@ -245,9 +245,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Flarrow Films",
-        "currentTime": 720,
+        "currentTime": 662,
         "duration": 5971,
-        "updatedAt": 1793041992359
+        "updatedAt": 1793041922642
       }
     }
   },
@@ -1767,9 +1767,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 2854.0246412479996,
+        "currentTime": 2888.8270232479995,
         "rate": 1,
-        "updatedAt": 1793044146137
+        "updatedAt": 1793044181190
       },
       "messages": [
         {
@@ -3391,7 +3391,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793043930747
+          "createdAt": 1793043930747,
+          "read": false,
+          "updatedAt": 1793043930747
         },
         {
           "id": "m_926db0be34",
@@ -3415,7 +3417,9 @@
             "hasPhoto": false
           },
           "reactions": {},
-          "createdAt": 1793043961501
+          "createdAt": 1793043961501,
+          "read": false,
+          "updatedAt": 1793043961501
         },
         {
           "id": "m_40f1e5ac37",
@@ -3434,7 +3438,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793043990741
+          "createdAt": 1793043990741,
+          "read": false,
+          "updatedAt": 1793043990741
         },
         {
           "id": "m_e7cef25a6a",
@@ -3457,7 +3463,28 @@
               "u_805b52bfc220"
             ]
           },
-          "createdAt": 1793044004167
+          "createdAt": 1793044004167,
+          "read": false,
+          "updatedAt": 1793044004167
+        },
+        {
+          "id": "m_a19ebb3a7c",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "чего",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793044181095
         }
       ],
       "viewOnceStore": {}
