@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040244435,
+      "lastSeenAt": 1793040247385,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -157,12 +157,11 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
         "balancer": "Filmix",
         "season": 0,
         "episode": 0,
         "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1793040242771
+        "updatedAt": 1792965688026
       }
     ]
   },
@@ -177,16 +176,6 @@
         "currentTime": 522,
         "duration": 1450,
         "updatedAt": 1793001267614
-      },
-      "1218925": {
-        "balancerKey": "filmix",
-        "balancerName": "Filmix",
-        "season": 1,
-        "episode": 1,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "currentTime": 0,
-        "duration": 0,
-        "updatedAt": 1793040242771
       }
     },
     "u_80ab0d1134f5": {
@@ -701,7 +690,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": true,
+      "isPublic": false,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -753,12 +742,12 @@
         "balancerName": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
         "quality": "720p",
-        "rawUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1212/Chainsaw.Man.The.Movie.Reze.Arc.2025.D.ru.ForceMedia.WEBDL.1080pp_720.mp4",
-        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fnl105.cdnsqu.com%2Fs%2FFHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg%2FUHD_1212%2FChainsaw.Man.The.Movie.Reze.Arc.2025.D.ru.ForceMedia.WEBDL.1080pp_720.mp4",
-        "recommendedUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1212/Chainsaw.Man.The.Movie.Reze.Arc.2025.D.ru.ForceMedia.WEBDL.1080pp_720.mp4",
-        "streamUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1212/Chainsaw.Man.The.Movie.Reze.Arc.2025.D.ru.ForceMedia.WEBDL.1080pp_720.mp4",
+        "rawUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1313/Chainsaw.Man.Movie.2025.D.ru.FlarrowFilms.WEBDL.1080pp_720.mp4",
+        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fnl105.cdnsqu.com%2Fs%2FFHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg%2FUHD_1313%2FChainsaw.Man.Movie.2025.D.ru.FlarrowFilms.WEBDL.1080pp_720.mp4",
+        "recommendedUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1313/Chainsaw.Man.Movie.2025.D.ru.FlarrowFilms.WEBDL.1080pp_720.mp4",
+        "streamUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1313/Chainsaw.Man.Movie.2025.D.ru.FlarrowFilms.WEBDL.1080pp_720.mp4",
         "streamType": "mp4",
         "subtitles": []
       },
@@ -766,7 +755,7 @@
         "playing": true,
         "currentTime": 0,
         "rate": 1,
-        "updatedAt": 1793040242645
+        "updatedAt": 1793040247249
       },
       "messages": [],
       "viewOnceStore": {}
