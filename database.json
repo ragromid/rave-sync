@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040367298,
+      "lastSeenAt": 1793040368647,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 0,
         "episodesWatched": 0,
         "roomsCreated": 0,
-        "messagesSent": 1,
+        "messagesSent": 2,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040366250
+      "lastSeenAt": 1793040369246
     }
   ],
   "friendships": [
@@ -183,9 +183,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
-        "currentTime": 692,
+        "currentTime": 545,
         "duration": 5971,
-        "updatedAt": 1793040360589
+        "updatedAt": 1793040368110
       }
     },
     "u_80ab0d1134f5": {
@@ -763,10 +763,10 @@
         "subtitles": []
       },
       "playback": {
-        "playing": false,
-        "currentTime": 545.5724348176819,
+        "playing": true,
+        "currentTime": 208.98794,
         "rate": 1,
-        "updatedAt": 1793040367298
+        "updatedAt": 1793040368366
       },
       "messages": [
         {
@@ -852,6 +852,25 @@
           "createdAt": 1793040349975,
           "read": false,
           "updatedAt": 1793040349975
+        },
+        {
+          "id": "m_a094143ff8",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "нинаю)",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793040368095
         }
       ],
       "viewOnceStore": {}
