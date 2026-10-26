@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793010505797,
-      "lastSeenAt": 1793010505797,
+      "lastSeenAt": 1793010506378,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -480,40 +480,7 @@
     "ntf_b80933e5": 1792999871201
   },
   "notifications": {
-    "u_805b52bfc220": [
-      {
-        "id": "ntf_c94bb6a5",
-        "createdAt": 1793003023801,
-        "type": "dm_message",
-        "msgId": "dm_6c5cceaab673",
-        "fromId": "u_80ab0d1134f5",
-        "from": {
-          "id": "u_80ab0d1134f5",
-          "username": "muraadzz_",
-          "displayName": "Murad",
-          "avatar": "🔥",
-          "color": "#7c5cff"
-        },
-        "title": "Murad",
-        "body": "эээ"
-      },
-      {
-        "id": "ntf_c4788613",
-        "createdAt": 1793003048142,
-        "type": "dm_message",
-        "msgId": "dm_625e864808e4",
-        "fromId": "u_80ab0d1134f5",
-        "from": {
-          "id": "u_80ab0d1134f5",
-          "username": "muraadzz_",
-          "displayName": "Murad",
-          "avatar": "🔥",
-          "color": "#7c5cff"
-        },
-        "title": "Murad",
-        "body": "шлюха"
-      }
-    ]
+    "u_805b52bfc220": []
   },
   "savedRooms": {
     "5ZVUJC": {
