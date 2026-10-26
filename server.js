@@ -80,9 +80,11 @@ function hydrateRoomsFromDb() {
   }
 }
 
-// Middleware to ensure Cloud DB is loaded before API requests (crucial on Vercel Serverless cold starts)
+// Middleware to ensure Cloud DB is loaded before DB-backed API requests (crucial on Vercel Serverless cold starts)
 app.use(async (req, res, next) => {
-  if (req.path.startsWith('/api/') || req.path === '/admin') {
+  const p = req.path || '';
+  const isStatelessMediaRoute = p.startsWith('/api/catalog') || p.startsWith('/api/z01') || p.startsWith('/api/stream');
+  if (!isStatelessMediaRoute && (p.startsWith('/api/') || p === '/admin')) {
     await db.ensureCloudLoaded();
     hydrateRoomsFromDb();
   }

@@ -59,7 +59,10 @@
     peers: new Map() // socketId -> RTCPeerConnection
   };
 
-  const socket = io();
+  const isVercelHost = /\.vercel\.app$/i.test(window.location.hostname);
+  const socket = (!isVercelHost && typeof window.io === 'function')
+    ? window.io({ reconnectionAttempts: 5 })
+    : { connected: false, on() {}, emit() {} };
 
   // ================= HELPERS & API =================
   const $ = (id) => document.getElementById(id);
@@ -2869,9 +2872,9 @@
 
   // ================= INITIALIZATION =================
   async function boot() {
-    await initAuth();
     loadCatalog(true);
     loadPublicRooms();
+    await initAuth();
 
     // Check URL for ?room=CODE
     const params = new URLSearchParams(window.location.search);
