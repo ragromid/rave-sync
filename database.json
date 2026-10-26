@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793042390952,
+      "lastSeenAt": 1793042399838,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793042391734
+      "lastSeenAt": 1793042399281
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
-        "balancer": "Filmix",
+        "balancerKey": "kodik",
+        "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1793040416330
+        "voiceName": "Flarrow Films",
+        "updatedAt": 1793040858095
       }
     ],
     "u_1333f556dd06": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "PantsuVoice",
-        "updatedAt": 1793041326035
+        "voiceName": "AnimeVost",
+        "updatedAt": 1793041148694
       }
     ]
   },
@@ -221,9 +221,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Flarrow Films",
-        "currentTime": 845,
+        "currentTime": 1075,
         "duration": 5971,
-        "updatedAt": 1793042118988
+        "updatedAt": 1793042353983
       }
     },
     "u_80ab0d1134f5": {
@@ -245,9 +245,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Flarrow Films",
-        "currentTime": 720,
+        "currentTime": 662,
         "duration": 5971,
-        "updatedAt": 1793041992359
+        "updatedAt": 1793041922642
       }
     }
   },
@@ -2581,7 +2581,9 @@
             "hasPhoto": false
           },
           "reactions": {},
-          "createdAt": 1793042294568
+          "createdAt": 1793042294568,
+          "read": false,
+          "updatedAt": 1793042294568
         },
         {
           "id": "m_d6e4cd95a6",
@@ -2600,7 +2602,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793042337666
+          "createdAt": 1793042337666,
+          "read": false,
+          "updatedAt": 1793042337666
         },
         {
           "id": "m_91c975290e",
@@ -2619,7 +2623,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793042348430
+          "createdAt": 1793042348430,
+          "read": false,
+          "updatedAt": 1793042348430
         },
         {
           "id": "m_b8706da93a",
