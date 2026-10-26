@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793044571291,
+      "lastSeenAt": 1793044580302,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 1,
         "episodesWatched": 0,
         "roomsCreated": 2,
-        "messagesSent": 54,
+        "messagesSent": 55,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793044571844
+      "lastSeenAt": 1793044580612
     }
   ],
   "friendships": [
@@ -1767,32 +1767,11 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 3275.830241202333,
+        "currentTime": 3283.341748774666,
         "rate": 1,
-        "updatedAt": 1793044571844
+        "updatedAt": 1793044579342
       },
       "messages": [
-        {
-          "id": "m_b68be02ec6",
-          "system": false,
-          "user": {
-            "id": "u_1333f556dd06",
-            "displayName": "Sabina",
-            "avatar": "🦊",
-            "avatarUrl": "",
-            "color": "#e040fb"
-          },
-          "text": "Показывает?",
-          "imageUrl": "",
-          "hasPhoto": false,
-          "viewOnce": false,
-          "viewed": false,
-          "replyTo": null,
-          "reactions": {},
-          "createdAt": 1793041378788,
-          "read": false,
-          "updatedAt": 1793041378788
-        },
         {
           "id": "m_f4184a22b8",
           "system": false,
@@ -3627,6 +3606,25 @@
           "createdAt": 1793044550058,
           "read": false,
           "updatedAt": 1793044550058
+        },
+        {
+          "id": "m_5d1f6ce596",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "Дату думаю",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793044580613
         }
       ],
       "viewOnceStore": {}
