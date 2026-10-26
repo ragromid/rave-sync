@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041472400,
+      "lastSeenAt": 1793041480037,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041475398
+      "lastSeenAt": 1793041480319
     }
   ],
   "friendships": [
@@ -245,9 +245,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "PantsuVoice",
-        "currentTime": 286,
+        "currentTime": 308,
         "duration": 6015,
-        "updatedAt": 1793041473451
+        "updatedAt": 1793041478692
       }
     }
   },
@@ -1767,9 +1767,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 298.36477648633326,
+        "currentTime": 309.4022269163333,
         "rate": 1,
-        "updatedAt": 1793041475399
+        "updatedAt": 1793041479385
       },
       "messages": [
         {
@@ -1903,7 +1903,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793041468276
+          "createdAt": 1793041468276,
+          "read": false,
+          "updatedAt": 1793041468276
         }
       ],
       "viewOnceStore": {}
