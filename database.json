@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041214101,
+      "lastSeenAt": 1793041250048,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041214042
+      "lastSeenAt": 1793041250150
     }
   ],
   "friendships": [
@@ -814,9 +814,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 418.101076525346,
+        "currentTime": 453.1572932669956,
         "rate": 1,
-        "updatedAt": 1793041211789
+        "updatedAt": 1793041247060
       },
       "messages": [
         {
@@ -1746,20 +1746,20 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "AnimeVost",
+        "voiceName": "PantsuVoice",
         "quality": "720p",
-        "rawUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/939a4538683d454c0567d64f855d2646:2026102701/720.mp4:hls:manifest.m3u8",
-        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2Fab71b0b2-d64f-41b7-b388-335074b36330%2F939a4538683d454c0567d64f855d2646%3A2026102701%2F720.mp4%3Ahls%3Amanifest.m3u8",
-        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/939a4538683d454c0567d64f855d2646:2026102701/720.mp4:hls:manifest.m3u8",
-        "streamUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/939a4538683d454c0567d64f855d2646:2026102701/720.mp4:hls:manifest.m3u8",
+        "rawUrl": "https://cloud2.solodcdn.com/useruploads/5ebd128c-134e-405d-a6f6-49577b175aa2/4aeeae0f975a83cebe375365b54a4418:2026102702/720.mp4:hls:manifest.m3u8",
+        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2F5ebd128c-134e-405d-a6f6-49577b175aa2%2F4aeeae0f975a83cebe375365b54a4418%3A2026102702%2F720.mp4%3Ahls%3Amanifest.m3u8",
+        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/5ebd128c-134e-405d-a6f6-49577b175aa2/4aeeae0f975a83cebe375365b54a4418:2026102702/720.mp4:hls:manifest.m3u8",
+        "streamUrl": "https://cloud2.solodcdn.com/useruploads/5ebd128c-134e-405d-a6f6-49577b175aa2/4aeeae0f975a83cebe375365b54a4418:2026102702/720.mp4:hls:manifest.m3u8",
         "streamType": "hls",
         "subtitles": []
       },
       "playback": {
         "playing": true,
-        "currentTime": 510.306180814,
+        "currentTime": 0,
         "rate": 1,
-        "updatedAt": 1793041213977
+        "updatedAt": 1793041249986
       },
       "messages": [],
       "viewOnceStore": {}
