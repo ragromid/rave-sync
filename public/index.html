@@ -52,6 +52,11 @@
           <span>🔴</span><span class="hide-sm">&nbsp;В комнату</span>
         </button>
 
+        <!-- Notification Bell / Permission Button -->
+        <button id="notifBellBtn" class="pill-btn ghost" title="Уведомления">
+          <span id="notifBellIcon">🔔</span>
+        </button>
+
         <!-- User Avatar / Auth Button -->
         <button id="userMenuBtn" class="user-chip">
           <span id="headerUserAvatar" class="avatar-circle">👤</span>
@@ -59,6 +64,24 @@
         </button>
       </div>
     </header>
+
+    <!-- Notification Permission Request Banner -->
+    <div id="notifPermissionBanner" class="notif-perm-banner hidden">
+      <div class="notif-perm-left">
+        <span class="notif-perm-icon">🔔</span>
+        <div class="notif-perm-text">
+          <strong>Включить уведомления RaveLampa?</strong>
+          <span>Получайте мгновенные уведомления о сообщениях друзей, фото и приглашениях в комнаты</span>
+        </div>
+      </div>
+      <div class="notif-perm-actions">
+        <button type="button" id="notifAllowBtn" class="pill-btn tiny accent">Разрешить</button>
+        <button type="button" id="notifDismissBtn" class="pill-btn tiny ghost">Позже</button>
+      </div>
+    </div>
+
+    <!-- Telegram-Style Top Floating Notification Cards -->
+    <div id="tgTopNotifContainer" class="tg-top-notif-container"></div>
 
     <!-- Main Layout: Sidebar (Desktop) / Bottom Nav (Mobile) + Content Area -->
     <div class="main-body">

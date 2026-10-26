@@ -151,6 +151,192 @@
     }, duration);
   }
 
+  // ================= TELEGRAM-STYLE NOTIFICATIONS & PERMISSION ENGINE =================
+  let swRegistration = null;
+  let audioCtx = null;
+  let notifBannerDismissed = false;
+  const notifiedDmIds = new Set();
+  const notifiedReqIds = new Set();
+  let initialFriendsLoaded = false;
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      swRegistration = reg;
+    }).catch(() => {});
+
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      const msg = event.data;
+      if (msg && msg.type === 'RAVELAMPA_NOTIFICATION_CLICK') {
+        const d = msg.data || {};
+        if (d.roomCode) {
+          joinRoomByCode(d.roomCode);
+        } else if (d.friendId) {
+          if (state.currentView === 'room') {
+            setMobileRoomTab('dms');
+            openRoomDmChat(d.friendId);
+          } else {
+            switchView('friends');
+            openFriendChat(d.friendId);
+          }
+        } else if (d.view) {
+          switchView(d.view);
+        }
+      }
+    });
+  }
+
+  function playNotificationSound(kind = 'message') {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      if (!audioCtx) audioCtx = new Ctx();
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      if (kind === 'invite') {
+        osc.frequency.setValueAtTime(587.33, now); // D5
+        osc.frequency.setValueAtTime(880, now + 0.11); // A5
+      } else {
+        osc.frequency.setValueAtTime(659.25, now); // E5
+        osc.frequency.setValueAtTime(783.99, now + 0.08); // G5
+      }
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.exponentialRampToValueAtTime(0.14, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.3);
+    } catch {}
+  }
+
+  function updateNotificationBellUi() {
+    const hasNotifApi = 'Notification' in window;
+    const perm = hasNotifApi ? Notification.permission : 'denied';
+    const bellIcon = $('notifBellIcon');
+    const bellBtn = $('notifBellBtn');
+    const banner = $('notifPermissionBanner');
+
+    if (bellIcon && bellBtn) {
+      if (perm === 'granted') {
+        bellIcon.textContent = '🔔';
+        bellBtn.title = 'Уведомления включены (нажмите для проверки)';
+      } else {
+        bellIcon.textContent = '🔕';
+        bellBtn.title = 'Нажмите, чтобы разрешить уведомления';
+      }
+    }
+
+    if (banner) {
+      if (hasNotifApi && perm === 'default' && state.user && !notifBannerDismissed) {
+        banner.classList.remove('hidden');
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+  }
+
+  async function requestBrowserNotificationPermission() {
+    if (!('Notification' in window)) {
+      showToast('Ваш браузер не поддерживает системные уведомления, работают встроенные уведомления');
+      return;
+    }
+    try {
+      const perm = await Notification.requestPermission();
+      updateNotificationBellUi();
+      if (perm === 'granted') {
+        playNotificationSound('invite');
+        triggerAppNotification({
+          title: 'Уведомления включены! 🔔',
+          body: 'Теперь вы будете получать сообщения от друзей и приглашения в комнаты как в Telegram.',
+          user: state.user || { avatar: '🔔', color: '#7c5cff' },
+          forceSystem: true
+        });
+      } else if (perm === 'denied') {
+        showToast('Уведомления запрещены в настройках браузера (разрешите их рядом с адресной строкой 🔒)');
+      }
+    } catch {}
+  }
+
+  $('notifAllowBtn')?.addEventListener('click', requestBrowserNotificationPermission);
+  $('notifDismissBtn')?.addEventListener('click', () => {
+    notifBannerDismissed = true;
+    $('notifPermissionBanner')?.classList.add('hidden');
+  });
+  $('notifBellBtn')?.addEventListener('click', () => {
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+      requestBrowserNotificationPermission();
+    } else {
+      playNotificationSound('message');
+      showToast('🔔 Уведомления и звук активны!');
+    }
+  });
+
+  function showTelegramTopCard({ title, body, user, onClick }) {
+    const container = $('tgTopNotifContainer');
+    if (!container) return;
+    const card = document.createElement('div');
+    card.className = 'tg-notif-card';
+    const avHtml = avatarInnerHtml(user, '🔔');
+    const avBg = (user && user.color) || '#7c5cff';
+    card.innerHTML = `
+      <div class="avatar-circle" style="background:${esc(avBg)};width:38px;height:38px;font-size:1.1rem;flex-shrink:0;">${avHtml}</div>
+      <div class="tg-notif-body">
+        <div class="tg-notif-title">${esc(title)}</div>
+        <div class="tg-notif-sub">${esc(body)}</div>
+      </div>
+      <button type="button" class="tg-notif-close" title="Закрыть">✕</button>
+    `;
+    card.querySelector('.tg-notif-close').onclick = (e) => {
+      e.stopPropagation();
+      card.remove();
+    };
+    card.onclick = () => {
+      card.remove();
+      if (typeof onClick === 'function') onClick();
+    };
+    container.appendChild(card);
+    while (container.children.length > 3) {
+      container.firstElementChild.remove();
+    }
+    setTimeout(() => {
+      if (card.parentNode) card.remove();
+    }, 6000);
+  }
+
+  function triggerAppNotification({ title, body, user, onClick, data = {}, kind = 'message', forceSystem = false }) {
+    playNotificationSound(kind);
+    showTelegramTopCard({ title, body, user, onClick });
+
+    if ('Notification' in window && Notification.permission === 'granted') {
+      if (forceSystem || document.hidden || !document.hasFocus()) {
+        const opts = {
+          body,
+          tag: data.tag || 'ravelampa-' + Date.now(),
+          data,
+          renotify: true
+        };
+        if (swRegistration && typeof swRegistration.showNotification === 'function') {
+          swRegistration.showNotification(title, opts).catch(() => {
+            try { new Notification(title, opts); } catch {}
+          });
+        } else {
+          try {
+            const n = new Notification(title, opts);
+            n.onclick = () => {
+              window.focus();
+              n.close();
+              if (typeof onClick === 'function') onClick();
+            };
+          } catch {}
+        }
+      }
+    }
+  }
+
   // ================= VIEW NAVIGATION =================
   function switchView(viewName) {
     state.currentView = viewName;
@@ -224,6 +410,7 @@
       if (btnSpan && labels[state.proxyMode]) btnSpan.textContent = labels[state.proxyMode];
     }
     updateHeaderUser();
+    updateNotificationBellUi();
     if (state.token) {
       socket.emit('auth:identify', { token: state.token });
     }
@@ -1710,12 +1897,14 @@
   });
 
   socket.on('room:invite_received', ({ from, room }) => {
-    showToast(
-      `${from.avatar} ${from.displayName} зовёт смотреть «${room.mediaTitle}»!`,
-      'Войти в комнату',
-      () => joinRoomByCode(room.code),
-      9000
-    );
+    triggerAppNotification({
+      title: `${from.displayName} зовёт в комнату! 🍿`,
+      body: `Смотреть вместе: «${room.mediaTitle}»`,
+      user: from,
+      kind: 'invite',
+      data: { roomCode: room.code, tag: 'invite-' + room.code },
+      onClick: () => joinRoomByCode(room.code)
+    });
   });
 
   socket.on('friends:update', () => {
@@ -2499,12 +2688,27 @@
     const el = createRichMessageElement(msg, 'room', 'room', null);
     if (!msg.system && isLive) {
       spawnVideoChatPill(msg);
-      if (state.mobileRoomTab !== 'chat') {
-        state.unreadChatCount++;
-        const badge = $('chatUnreadBadge');
-        if (badge) {
-          badge.textContent = state.unreadChatCount;
-          badge.classList.remove('hidden');
+      const isOwn = state.user && msg.user?.id === state.user.id;
+      if (!isOwn && (document.hidden || state.mobileRoomTab !== 'chat')) {
+        if (state.mobileRoomTab !== 'chat') {
+          state.unreadChatCount++;
+          const badge = $('chatUnreadBadge');
+          if (badge) {
+            badge.textContent = state.unreadChatCount;
+            badge.classList.remove('hidden');
+          }
+        }
+        if (document.hidden) {
+          const preview = msg.text || (msg.viewOnce ? '🔥 Одноразовое фото' : '📷 Фотография');
+          triggerAppNotification({
+            title: `${msg.user?.displayName || 'Участник'} (в комнате)`,
+            body: preview,
+            user: msg.user,
+            data: { roomCode: state.room?.code, tag: 'roomchat-' + msg.id },
+            onClick: () => setMobileRoomTab('chat')
+          });
+        } else {
+          playNotificationSound('message');
         }
       }
     }
@@ -2666,6 +2870,23 @@
     });
   }
 
+  async function inviteFriendToCurrentRoom(friendId) {
+    if (!state.room || !friendId) return;
+    if (socket.connected) {
+      socket.emit('room:invite', { friendId });
+    } else {
+      try {
+        await api(`/api/rooms/${encodeURIComponent(state.room.code)}/invite`, {
+          method: 'POST',
+          body: JSON.stringify({ friendId })
+        });
+        showToast('🍿 Приглашение отправлено другу!');
+      } catch (e) {
+        showToast(e.message);
+      }
+    }
+  }
+
   async function loadFriends() {
     if (!state.user) {
       $('friendsList').innerHTML = '<div style="color:var(--text-muted);padding:20px 0;">Войдите в аккаунт, чтобы добавлять друзей и переписываться с ними.</div>';
@@ -2673,8 +2894,80 @@
     }
     try {
       const data = await api('/api/friends');
-      state.friends = data.friends || [];
-      state.incomingRequests = data.incoming || [];
+      const newFriends = data.friends || [];
+      const newIncoming = data.incoming || [];
+      const serverNotifs = data.notifications || [];
+
+      // Detect new incoming DMs & friend requests for notifications
+      for (const f of newFriends) {
+        if (f.lastMessage && f.lastMessage.id && f.lastMessage.fromId !== state.user.id) {
+          if (!initialFriendsLoaded) {
+            notifiedDmIds.add(f.lastMessage.id);
+          } else if (!notifiedDmIds.has(f.lastMessage.id)) {
+            notifiedDmIds.add(f.lastMessage.id);
+            const isViewing = (state.currentView === 'friends' && activeDmFriendId === f.id && !document.hidden) ||
+                              (state.currentView === 'room' && roomActiveDmFriendId === f.id && !$('roomDmChatView')?.classList.contains('hidden') && !document.hidden);
+            if (!isViewing) {
+              triggerAppNotification({
+                title: f.displayName,
+                body: f.lastMessage.text || 'Новое сообщение',
+                user: f,
+                data: { friendId: f.id, tag: 'dm-' + f.id },
+                onClick: () => {
+                  if (state.currentView === 'room') {
+                    setMobileRoomTab('dms');
+                    openRoomDmChat(f.id);
+                  } else {
+                    switchView('friends');
+                    openFriendChat(f.id);
+                  }
+                }
+              });
+            }
+          }
+        }
+      }
+
+      for (const req of newIncoming) {
+        if (!initialFriendsLoaded) {
+          notifiedReqIds.add(req.id);
+        } else if (!notifiedReqIds.has(req.id)) {
+          notifiedReqIds.add(req.id);
+          triggerAppNotification({
+            title: 'Новая заявка в друзья 👋',
+            body: `${req.user.displayName} (@${req.user.username}) хочет добавить вас в друзья`,
+            user: req.user,
+            kind: 'invite',
+            data: { view: 'friends', tag: 'freq-' + req.id },
+            onClick: () => switchView('friends')
+          });
+        }
+      }
+
+      for (const n of serverNotifs) {
+        if (n.type === 'room_invite' && n.invitePayload) {
+          const { from, room } = n.invitePayload;
+          triggerAppNotification({
+            title: `${from.displayName} зовёт в комнату! 🍿`,
+            body: `Смотреть вместе: «${room.mediaTitle}»`,
+            user: from,
+            kind: 'invite',
+            data: { roomCode: room.code, tag: 'invite-' + room.code },
+            onClick: () => joinRoomByCode(room.code)
+          });
+        } else if (n.title) {
+          triggerAppNotification({
+            title: n.title,
+            body: n.body || '',
+            kind: 'invite',
+            onClick: () => switchView('friends')
+          });
+        }
+      }
+
+      initialFriendsLoaded = true;
+      state.friends = newFriends;
+      state.incomingRequests = newIncoming;
       state.outgoingRequests = data.outgoing || [];
 
       updateDmBadges();
@@ -2687,6 +2980,11 @@
       }
     } catch {}
   }
+
+  // Background poll every 4.5s for new notifications, DMs, friend requests & online status
+  setInterval(() => {
+    if (state.user) loadFriends();
+  }, 4500);
 
   function renderFriendsView() {
     // Incoming requests
@@ -2782,9 +3080,9 @@
     }
 
     const invBtn = $('dmInviteRoomBtn');
-    if (state.room && friend.online) {
+    if (state.room) {
       invBtn.classList.remove('hidden');
-      invBtn.onclick = () => socket.emit('room:invite', { friendId: friend.id });
+      invBtn.onclick = () => inviteFriendToCurrentRoom(friend.id);
     } else {
       invBtn.classList.add('hidden');
     }
@@ -2939,7 +3237,7 @@
       f.unreadCount = 0;
       setAvatarElement($('roomDmFriendAvatar'), f, '🦊');
       $('roomDmFriendName').textContent = f.displayName;
-      $('roomDmInviteBtn').onclick = () => socket.emit('room:invite', { friendId: f.id });
+      $('roomDmInviteBtn').onclick = () => inviteFriendToCurrentRoom(f.id);
     }
     updateDmBadges();
     renderRoomDmFriendsList();
@@ -3004,14 +3302,18 @@
     }
 
     if (msg.fromId !== state.user.id) {
-      if (isViewingInFriendsPage || isViewingInRoomSidebar) {
+      notifiedDmIds.add(msg.id);
+      if ((isViewingInFriendsPage || isViewingInRoomSidebar) && !document.hidden) {
         socket.emit('dm:read', { friendId: otherId });
+        playNotificationSound('message');
       } else {
         if (friend) friend.unreadCount = (friend.unreadCount || 0) + 1;
-        showToast(
-          `💌 ${msg.sender?.displayName || 'Друг'}: ${previewText}`,
-          'Ответить',
-          () => {
+        triggerAppNotification({
+          title: msg.sender?.displayName || friend?.displayName || 'Друг',
+          body: previewText,
+          user: msg.sender || friend,
+          data: { friendId: otherId, tag: 'dm-' + otherId },
+          onClick: () => {
             if (state.currentView === 'room') {
               setMobileRoomTab('dms');
               openRoomDmChat(otherId);
@@ -3019,9 +3321,8 @@
               switchView('friends');
               openFriendChat(otherId);
             }
-          },
-          6500
-        );
+          }
+        });
       }
     }
 
@@ -3126,7 +3427,7 @@
         <button class="pill-btn tiny accent">Пригласить</button>
       `;
       row.querySelector('button').onclick = () => {
-        socket.emit('room:invite', { friendId: f.id });
+        inviteFriendToCurrentRoom(f.id);
       };
       list.appendChild(row);
     });
@@ -3250,9 +3551,11 @@
 
   // ================= INITIALIZATION =================
   async function boot() {
+    updateNotificationBellUi();
     loadCatalog(true);
     loadPublicRooms();
     await initAuth();
+    updateNotificationBellUi();
 
     // Check URL for ?room=CODE
     const params = new URLSearchParams(window.location.search);

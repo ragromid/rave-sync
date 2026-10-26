@@ -599,6 +599,7 @@ function getFriendsData(userId) {
             ...u,
             unreadCount,
             lastMessage: lastMsg ? {
+              id: lastMsg.id,
               text: lastPreview,
               fromId: lastMsg.fromId,
               createdAt: lastMsg.createdAt
@@ -976,11 +977,38 @@ function getSavedRoomsSnapshot() {
   return db.savedRooms || {};
 }
 
+function pushUserNotification(toUserId, notif) {
+  if (!toUserId || !notif) return;
+  if (!db.notifications) db.notifications = {};
+  if (!Array.isArray(db.notifications[toUserId])) db.notifications[toUserId] = [];
+  db.notifications[toUserId].push({
+    id: 'ntf_' + crypto.randomBytes(4).toString('hex'),
+    createdAt: Date.now(),
+    ...notif
+  });
+  if (db.notifications[toUserId].length > 25) {
+    db.notifications[toUserId] = db.notifications[toUserId].slice(-25);
+  }
+  saveDb(true);
+}
+
+function popUserNotifications(userId) {
+  if (!userId || !db.notifications || !Array.isArray(db.notifications[userId]) || db.notifications[userId].length === 0) {
+    return [];
+  }
+  const items = db.notifications[userId].slice();
+  db.notifications[userId] = [];
+  saveDb(false);
+  return items;
+}
+
 module.exports = {
   initCloudDb,
   ensureCloudLoaded,
   saveRoomsSnapshot,
   getSavedRoomsSnapshot,
+  pushUserNotification,
+  popUserNotifications,
   registerUser,
   loginUser,
   verifyToken,

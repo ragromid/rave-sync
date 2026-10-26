@@ -346,7 +346,8 @@ app.get('/api/friends', authMiddleware, (req, res) => {
   res.json({
     friends: friendsWithPresence,
     incoming: data.incoming,
-    outgoing: data.outgoing
+    outgoing: data.outgoing,
+    notifications: db.popUserNotifications(req.user.id)
   });
 });
 
@@ -355,7 +356,7 @@ app.post('/api/friends/request', authMiddleware, (req, res) => {
     const { target } = req.body || {};
     const result = db.sendFriendRequest(req.user.id, target);
     const targetSockets = userSockets.get(result.friend.id);
-    if (targetSockets) {
+    if (targetSockets && targetSockets.size > 0) {
       for (const sid of targetSockets) {
         io.to(sid).emit('friends:update');
         io.to(sid).emit('toast', {
@@ -363,6 +364,12 @@ app.post('/api/friends/request', authMiddleware, (req, res) => {
           text: `${req.user.avatar} ${req.user.displayName} отправил(а) заявку в друзья`
         });
       }
+    } else {
+      db.pushUserNotification(result.friend.id, {
+        type: 'friend_request',
+        title: 'Заявка в друзья',
+        body: `${req.user.avatar} ${req.user.displayName} хочет добавить вас в друзья`
+      });
     }
     res.json(result);
   } catch (e) {
@@ -375,7 +382,7 @@ app.post('/api/friends/respond', authMiddleware, (req, res) => {
     const { requestId, accept } = req.body || {};
     const rel = db.respondFriendRequest(req.user.id, requestId, !!accept);
     const otherSockets = userSockets.get(rel.fromId);
-    if (otherSockets) {
+    if (otherSockets && otherSockets.size > 0) {
       for (const sid of otherSockets) {
         io.to(sid).emit('friends:update');
         if (accept) {
@@ -385,6 +392,12 @@ app.post('/api/friends/respond', authMiddleware, (req, res) => {
           });
         }
       }
+    } else if (accept) {
+      db.pushUserNotification(rel.fromId, {
+        type: 'friend_accepted',
+        title: 'Новый друг!',
+        body: `${req.user.avatar} ${req.user.displayName} принял(а) вашу заявку в друзья`
+      });
     }
     res.json({ ok: true });
   } catch (e) {
@@ -1205,6 +1218,49 @@ app.delete('/api/rooms/:code/chat/:messageId', authMiddleware, (req, res) => {
     persistRoomsToDb();
     io.to(code).emit('chat:deleted', { id: removed.id });
     res.json({ id: removed.id, deleted: true });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post('/api/rooms/:code/invite', authMiddleware, (req, res) => {
+  try {
+    hydrateRoomsFromDb();
+    const code = String(req.params.code || '').trim().toUpperCase();
+    const room = rooms.get(code);
+    if (!room) return res.status(404).json({ error: 'Комната не найдена' });
+    const { friendId } = req.body || {};
+    if (!friendId) return res.status(400).json({ error: 'Не указан друг' });
+
+    const invitePayload = {
+      from: {
+        id: req.user.id,
+        displayName: req.user.displayName,
+        avatar: req.user.avatar
+      },
+      room: {
+        code: room.code,
+        name: room.name,
+        mediaTitle: room.media?.title || room.name,
+        poster: room.media?.poster || ''
+      }
+    };
+
+    const targetSockets = userSockets.get(friendId);
+    if (targetSockets && targetSockets.size > 0) {
+      for (const sid of targetSockets) {
+        io.to(sid).emit('room:invite_received', invitePayload);
+      }
+    } else {
+      db.pushUserNotification(friendId, {
+        type: 'room_invite',
+        title: '🍿 Приглашение в комнату!',
+        body: `${req.user.avatar} ${req.user.displayName} зовёт смотреть «${invitePayload.room.mediaTitle}»`,
+        roomCode: room.code,
+        invitePayload
+      });
+    }
+    res.json({ ok: true });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }

@@ -1974,6 +1974,113 @@ button {
   text-align: center;
 }
 
+/* Notification Permission Banner & Telegram Top Notification Cards */
+.notif-perm-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 18px;
+  background: linear-gradient(90deg, rgba(124, 92, 255, 0.22), rgba(24, 37, 51, 0.96));
+  border-bottom: 1px solid rgba(124, 92, 255, 0.4);
+  flex-shrink: 0;
+  z-index: 40;
+}
+.notif-perm-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.notif-perm-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+.notif-perm-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.78rem;
+  min-width: 0;
+}
+.notif-perm-text strong {
+  color: #fff;
+  font-size: 0.83rem;
+}
+.notif-perm-text span {
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.notif-perm-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.tg-top-notif-container {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 300;
+  width: min(390px, calc(100vw - 24px));
+  pointer-events: none;
+}
+.tg-notif-card {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: rgba(23, 33, 43, 0.97);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(100, 210, 255, 0.32);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
+  cursor: pointer;
+  animation: tgNotifSlideDown 0.22s cubic-bezier(0.18, 0.89, 0.32, 1.2);
+}
+@keyframes tgNotifSlideDown {
+  from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.tg-notif-body {
+  flex: 1;
+  min-width: 0;
+}
+.tg-notif-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tg-notif-sub {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tg-notif-close {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 /* Photo Viewer & View-Once Timer Bar */
 .photo-viewer-card {
   max-width: 680px;
