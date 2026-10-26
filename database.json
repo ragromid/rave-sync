@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040520646,
+      "lastSeenAt": 1793040525673,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040519667
+      "lastSeenAt": 1793040525160
     }
   ],
   "friendships": [
@@ -576,15 +576,7 @@
         "body": "кончи мне в рот"
       }
     ],
-    "u_805b52bfc220": [
-      {
-        "id": "ntf_8f07358b",
-        "createdAt": 1793040427437,
-        "type": "friend_accepted",
-        "title": "Новый друг!",
-        "body": "🦊 Sabina принял(а) вашу заявку в друзья"
-      }
-    ]
+    "u_805b52bfc220": []
   },
   "savedRooms": {
     "393HNX": {
@@ -774,9 +766,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 2.977971838984279,
+        "currentTime": 7.018121061343884,
         "rate": 1,
-        "updatedAt": 1793040520646
+        "updatedAt": 1793040525673
       },
       "messages": [
         {
