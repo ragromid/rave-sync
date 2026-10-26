@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041165799,
+      "lastSeenAt": 1793041170494,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041163733
+      "lastSeenAt": 1793041170472
     }
   ],
   "friendships": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "AnimeVost",
-        "updatedAt": 1793041148694
+        "voiceName": "AniStar",
+        "updatedAt": 1793041170472
       }
     ]
   },
@@ -244,10 +244,10 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "AnimeVost",
+        "voiceName": "AniStar",
         "currentTime": 329,
         "duration": 6016,
-        "updatedAt": 1793041155049
+        "updatedAt": 1793041170472
       }
     }
   },
@@ -814,9 +814,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 370.5210506249991,
+        "currentTime": 375.5288377709916,
         "rate": 1,
-        "updatedAt": 1793041164231
+        "updatedAt": 1793041169208
       },
       "messages": [
         {
@@ -1757,9 +1757,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 0,
+        "currentTime": 3.428775583333392,
         "rate": 1,
-        "updatedAt": 1793041163733
+        "updatedAt": 1793041168878
       },
       "messages": [],
       "viewOnceStore": {}
