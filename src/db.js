@@ -728,11 +728,13 @@ function toggleDmReaction(userId, friendId, messageId, emoji) {
     msg.reactions[cleanEmoji].push(userId);
   }
   saveDb(true);
+  const sender = getUserById(msg.fromId);
   return {
+    ...msg,
+    id: msg.id,
     messageId: msg.id,
-    fromId: msg.fromId,
-    toId: msg.toId,
-    reactions: msg.reactions
+    imageUrl: msg.viewOnce ? '' : (msg.imageUrl || ''),
+    sender
   };
 }
 
@@ -748,15 +750,72 @@ function consumeDmViewOnce(userId, friendId, messageId) {
   }
   const dataUrl = msg.imageUrl;
   msg.viewed = true;
+  msg.viewedAt = Date.now();
   msg.imageUrl = ''; // Permanently wipe photo after 1 view
   saveDb(true);
+  const sender = getUserById(msg.fromId);
+  const updatedMsg = {
+    ...msg,
+    id: msg.id,
+    imageUrl: '',
+    viewed: true,
+    sender
+  };
   return {
     messageId: msg.id,
     fromId: msg.fromId,
     toId: msg.toId,
     imageUrl: dataUrl,
-    viewed: true
+    viewed: true,
+    message: updatedMsg
   };
+}
+
+function editDirectMessage(userId, friendId, messageId, newText) {
+  if (!db.dms) db.dms = {};
+  const pairKey = getDmPairKey(userId, friendId);
+  const msgs = db.dms[pairKey] || [];
+  const msg = msgs.find(m => m.id === messageId);
+  if (!msg) throw new Error('Сообщение не найдено');
+  if (msg.fromId !== userId) throw new Error('Можно редактировать только свои сообщения');
+  const clean = String(newText || '').trim().slice(0, 1000);
+  if (!clean && !msg.hasImage && !msg.imageUrl) throw new Error('Текст сообщения не может быть пустым');
+  msg.text = clean;
+  msg.editedAt = Date.now();
+  saveDb(true);
+  const sender = getUserById(msg.fromId);
+  return {
+    ...msg,
+    imageUrl: msg.viewOnce ? '' : (msg.imageUrl || ''),
+    sender
+  };
+}
+
+function deleteDirectMessage(userId, friendId, messageId) {
+  if (!db.dms) db.dms = {};
+  const pairKey = getDmPairKey(userId, friendId);
+  const msgs = db.dms[pairKey] || [];
+  const idx = msgs.findIndex(m => m.id === messageId);
+  if (idx === -1) throw new Error('Сообщение не найдено');
+  if (msgs[idx].fromId !== userId) throw new Error('Можно удалять только свои сообщения');
+  const removed = msgs.splice(idx, 1)[0];
+  saveDb(true);
+  return { id: removed.id, fromId: removed.fromId, toId: removed.toId, deleted: true };
+}
+
+const userLastSeen = new Map();
+function touchUserOnline(userId) {
+  if (!userId) return;
+  userLastSeen.set(userId, Date.now());
+  const u = db.users.find(x => x.id === userId);
+  if (u) u.lastSeenAt = Date.now();
+}
+
+function isUserRecentlyActive(userId, windowMs = 40000) {
+  const mem = userLastSeen.get(userId) || 0;
+  const u = db.users.find(x => x.id === userId);
+  const ts = Math.max(mem, u?.lastSeenAt || 0);
+  return ts > 0 && (Date.now() - ts) < windowMs;
 }
 
 function toggleBookmark(userId, movie) {
@@ -937,6 +996,10 @@ module.exports = {
   sendDirectMessage,
   toggleDmReaction,
   consumeDmViewOnce,
+  editDirectMessage,
+  deleteDirectMessage,
+  touchUserOnline,
+  isUserRecentlyActive,
   markDirectMessagesRead,
   toggleBookmark,
   getBookmarks,

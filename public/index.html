@@ -638,11 +638,52 @@
   <!-- Shared file input for chat photos -->
   <input type="file" id="chatPhotoInput" accept="image/*" hidden />
 
+  <!-- TELEGRAM-STYLE FLOATING REACTION & MESSAGE CONTEXT MENU -->
+  <div id="tgMsgOverlay" class="tg-msg-overlay hidden">
+    <div id="tgMsgPopup" class="tg-msg-popup">
+      <div id="tgReactionStrip" class="tg-reaction-strip">
+        <button type="button" class="tg-rx-btn" data-tg-rx="❤️">❤️</button>
+        <button type="button" class="tg-rx-btn" data-tg-rx="🔥">🔥</button>
+        <button type="button" class="tg-rx-btn" data-tg-rx="😂">😂</button>
+        <button type="button" class="tg-rx-btn" data-tg-rx="👍">👍</button>
+        <button type="button" class="tg-rx-btn" data-tg-rx="😱">😱</button>
+        <button type="button" class="tg-rx-btn" data-tg-rx="😢">😢</button>
+        <button type="button" class="tg-rx-btn" data-tg-rx="🥰">🥰</button>
+        <button type="button" class="tg-rx-btn" data-tg-rx="🎉">🎉</button>
+        <button type="button" class="tg-rx-btn" data-tg-rx="👎">👎</button>
+        <button type="button" class="tg-rx-btn" data-tg-rx="💩">💩</button>
+        <button type="button" class="tg-rx-btn" data-tg-rx="🍌">🍌</button>
+        <button type="button" class="tg-rx-btn" data-tg-rx="🤡">🤡</button>
+      </div>
+      <div class="tg-menu-card">
+        <button type="button" class="tg-menu-item" id="tgMenuReplyBtn">
+          <span class="tg-menu-icon">↩️</span>
+          <span>Ответить</span>
+        </button>
+        <button type="button" class="tg-menu-item" id="tgMenuCopyBtn">
+          <span class="tg-menu-icon">📋</span>
+          <span>Копировать текст</span>
+        </button>
+        <button type="button" class="tg-menu-item hidden" id="tgMenuEditBtn">
+          <span class="tg-menu-icon">✏️</span>
+          <span>Изменить</span>
+        </button>
+        <button type="button" class="tg-menu-item danger hidden" id="tgMenuDeleteBtn">
+          <span class="tg-menu-icon">🗑️</span>
+          <span>Удалить</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: PHOTO & VIEW-ONCE LIGHTBOX -->
   <div id="photoViewerModal" class="modal-backdrop hidden">
     <div class="modal-card photo-viewer-card">
+      <div id="photoViewerTimerWrap" class="photo-viewer-timer-wrap hidden">
+        <div id="photoViewerTimerBar" class="photo-viewer-timer-bar"></div>
+      </div>
       <button class="modal-close" data-close="photoViewerModal">✕</button>
-      <div id="photoViewerBadge" class="photo-viewer-badge hidden">💣 Одноразовое фото — исчезнет после закрытия</div>
+      <div id="photoViewerBadge" class="photo-viewer-badge hidden">🔥 Одноразовое фото — исчезнет после закрытия</div>
       <img id="photoViewerImg" class="photo-viewer-img" src="" alt="Фото" />
       <div id="photoViewerCaption" class="photo-viewer-caption"></div>
     </div>

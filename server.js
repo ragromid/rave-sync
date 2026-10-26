@@ -150,9 +150,10 @@ function broadcastPublicRooms() {
 
 function getUserPresence(userId) {
   const sockets = userSockets.get(userId);
-  const online = !!(sockets && sockets.size > 0);
+  const hasSocket = !!(sockets && sockets.size > 0);
+  const online = hasSocket || db.isUserRecentlyActive(userId, 45000);
   let currentRoom = null;
-  if (online) {
+  if (hasSocket) {
     for (const sid of sockets) {
       const meta = socketMeta.get(sid);
       if (meta && meta.roomCode && rooms.has(meta.roomCode)) {
@@ -166,6 +167,23 @@ function getUserPresence(userId) {
         };
         break;
       }
+    }
+  }
+  if (!currentRoom) {
+    for (const r of rooms.values()) {
+      for (const p of r.participants.values()) {
+        if (p.id === userId) {
+          currentRoom = {
+            code: r.code,
+            name: r.name,
+            isPublic: r.isPublic,
+            mediaTitle: r.media?.title || r.name,
+            poster: r.media?.poster || ''
+          };
+          break;
+        }
+      }
+      if (currentRoom) break;
     }
   }
   return { online, currentRoom };
@@ -226,6 +244,7 @@ function authMiddleware(req, res, next) {
   if (!user) {
     return res.status(401).json({ error: 'Пользователь не найден' });
   }
+  db.touchUserOnline(user.id);
   req.user = user;
   req.token = token;
   next();
@@ -418,16 +437,16 @@ app.post('/api/dms/:friendId', authMiddleware, (req, res) => {
 app.post('/api/dms/:friendId/react', authMiddleware, (req, res) => {
   try {
     const { messageId, emoji } = req.body || {};
-    const result = db.toggleDmReaction(req.user.id, req.params.friendId, messageId, emoji);
+    const msg = db.toggleDmReaction(req.user.id, req.params.friendId, messageId, emoji);
     for (const uid of [req.user.id, req.params.friendId]) {
       const sids = userSockets.get(uid);
       if (sids) {
         for (const sid of sids) {
-          io.to(sid).emit('dm:reaction_updated', result);
+          io.to(sid).emit('dm:updated', msg);
         }
       }
     }
-    res.json(result);
+    res.json({ message: msg });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
@@ -441,11 +460,41 @@ app.post('/api/dms/:friendId/view-once', authMiddleware, (req, res) => {
       const sids = userSockets.get(uid);
       if (sids) {
         for (const sid of sids) {
-          io.to(sid).emit('dm:view_once_opened', {
-            messageId: result.messageId,
-            fromId: result.fromId,
-            toId: result.toId
-          });
+          if (result.message) io.to(sid).emit('dm:updated', result.message);
+        }
+      }
+    }
+    res.json(result);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.put('/api/dms/:friendId/:messageId', authMiddleware, (req, res) => {
+  try {
+    const msg = db.editDirectMessage(req.user.id, req.params.friendId, req.params.messageId, req.body?.text);
+    for (const uid of [req.user.id, req.params.friendId]) {
+      const sids = userSockets.get(uid);
+      if (sids) {
+        for (const sid of sids) {
+          io.to(sid).emit('dm:updated', msg);
+        }
+      }
+    }
+    res.json({ message: msg });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.delete('/api/dms/:friendId/:messageId', authMiddleware, (req, res) => {
+  try {
+    const result = db.deleteDirectMessage(req.user.id, req.params.friendId, req.params.messageId);
+    for (const uid of [req.user.id, req.params.friendId]) {
+      const sids = userSockets.get(uid);
+      if (sids) {
+        for (const sid of sids) {
+          io.to(sid).emit('dm:deleted', result);
         }
       }
     }
@@ -1120,6 +1169,47 @@ app.post('/api/rooms/:code/chat/view-once', authMiddleware, (req, res) => {
   }
 });
 
+app.put('/api/rooms/:code/chat/:messageId', authMiddleware, (req, res) => {
+  try {
+    hydrateRoomsFromDb();
+    const code = String(req.params.code || '').trim().toUpperCase();
+    const room = rooms.get(code);
+    if (!room) return res.status(404).json({ error: 'Комната не найдена' });
+    const msg = (room.messages || []).find(m => m.id === req.params.messageId && !m.system);
+    if (!msg) return res.status(404).json({ error: 'Сообщение не найдено' });
+    if (msg.user?.id !== req.user.id) return res.status(403).json({ error: 'Можно редактировать только свои сообщения' });
+    const clean = String(req.body?.text || '').trim().slice(0, 800);
+    if (!clean && !msg.hasPhoto) return res.status(400).json({ error: 'Текст не может быть пустым' });
+    msg.text = clean;
+    msg.editedAt = Date.now();
+    persistRoomsToDb();
+    io.to(code).emit('chat:updated', msg);
+    res.json({ message: msg });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.delete('/api/rooms/:code/chat/:messageId', authMiddleware, (req, res) => {
+  try {
+    hydrateRoomsFromDb();
+    const code = String(req.params.code || '').trim().toUpperCase();
+    const room = rooms.get(code);
+    if (!room) return res.status(404).json({ error: 'Комната не найдена' });
+    const idx = (room.messages || []).findIndex(m => m.id === req.params.messageId && !m.system);
+    if (idx === -1) return res.status(404).json({ error: 'Сообщение не найдено' });
+    if (room.messages[idx].user?.id !== req.user.id && room.hostId !== req.user.id) {
+      return res.status(403).json({ error: 'Нет прав для удаления' });
+    }
+    const removed = room.messages.splice(idx, 1)[0];
+    persistRoomsToDb();
+    io.to(code).emit('chat:deleted', { id: removed.id });
+    res.json({ id: removed.id, deleted: true });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // ================= SOCKET.IO REAL-TIME ENGINE =================
 
 io.on('connection', (socket) => {
@@ -1412,6 +1502,34 @@ io.on('connection', (socket) => {
     } catch {}
   });
 
+  socket.on('chat:edit', ({ messageId, text }) => {
+    const meta = socketMeta.get(socket.id);
+    if (!meta || !meta.roomCode || !currentUser) return;
+    const room = rooms.get(meta.roomCode);
+    if (!room) return;
+    const msg = (room.messages || []).find(m => m.id === messageId && !m.system);
+    if (!msg || msg.user?.id !== currentUser.id) return;
+    const clean = String(text || '').trim().slice(0, 800);
+    if (!clean && !msg.hasPhoto) return;
+    msg.text = clean;
+    msg.editedAt = Date.now();
+    persistRoomsToDb();
+    io.to(room.code).emit('chat:updated', msg);
+  });
+
+  socket.on('chat:delete', ({ messageId }) => {
+    const meta = socketMeta.get(socket.id);
+    if (!meta || !meta.roomCode || !currentUser) return;
+    const room = rooms.get(meta.roomCode);
+    if (!room) return;
+    const idx = (room.messages || []).findIndex(m => m.id === messageId && !m.system);
+    if (idx === -1) return;
+    if (room.messages[idx].user?.id !== currentUser.id && room.hostId !== currentUser.id) return;
+    const removed = room.messages.splice(idx, 1)[0];
+    persistRoomsToDb();
+    io.to(room.code).emit('chat:deleted', { id: removed.id });
+  });
+
   // Floating emoji reactions over the video player
   socket.on('room:reaction', ({ emoji }) => {
     const meta = socketMeta.get(socket.id);
@@ -1494,6 +1612,36 @@ io.on('connection', (socket) => {
         if (sids) {
           for (const sid of sids) {
             io.to(sid).emit('dm:updated', safeMsg);
+          }
+        }
+      }
+    } catch {}
+  });
+
+  socket.on('dm:edit', ({ friendId, messageId, text }) => {
+    if (!currentUser || !friendId || !messageId) return;
+    try {
+      const msg = db.editDirectMessage(currentUser.id, friendId, messageId, text);
+      for (const uid of [currentUser.id, friendId]) {
+        const sids = userSockets.get(uid);
+        if (sids) {
+          for (const sid of sids) {
+            io.to(sid).emit('dm:updated', msg);
+          }
+        }
+      }
+    } catch {}
+  });
+
+  socket.on('dm:delete', ({ friendId, messageId }) => {
+    if (!currentUser || !friendId || !messageId) return;
+    try {
+      const result = db.deleteDirectMessage(currentUser.id, friendId, messageId);
+      for (const uid of [currentUser.id, friendId]) {
+        const sids = userSockets.get(uid);
+        if (sids) {
+          for (const sid of sids) {
+            io.to(sid).emit('dm:deleted', result);
           }
         }
       }

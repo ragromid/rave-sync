@@ -1552,9 +1552,14 @@
     if (!targetFriendId) return;
     try {
       const data = await api(`/api/dms/${encodeURIComponent(targetFriendId)}`);
+      if (data.friend) {
+        const idx = state.friends.findIndex(x => x.id === data.friend.id);
+        if (idx >= 0) state.friends[idx] = { ...state.friends[idx], ...data.friend };
+        if (activeDmFriendId === data.friend.id) updateDmHeader(data.friend);
+      }
       syncDmMessagesFromPoll(targetFriendId, data.messages || []);
     } catch {}
-  }, 3500);
+  }, 2000);
 
   $('resyncPlayerBtn').addEventListener('click', async () => {
     if (socket.connected) {
@@ -1696,6 +1701,10 @@
     updateChatMessageDom(msg, 'room');
   });
 
+  socket.on('chat:deleted', ({ id }) => {
+    removeChatMessageDom(id);
+  });
+
   socket.on('room:reaction', ({ emoji }) => {
     spawnFloatingEmoji(emoji);
   });
@@ -1717,13 +1726,15 @@
     if (text) showToast(text);
   });
 
-  // ================= RICH CHAT ENGINE (PHOTOS, VIEW-ONCE, REPLIES & REACTIONS) =================
+  // ================= TELEGRAM-STYLE CHAT ENGINE (PHOTOS, VIEW-ONCE, REPLIES, REACTIONS, EDIT, DELETE) =================
   const composers = {
-    room: { replyTo: null, imageUrl: '', viewOnce: false, barId: 'chatComposerBar', inputId: 'chatInput' },
-    dm: { replyTo: null, imageUrl: '', viewOnce: false, barId: 'dmComposerBar', inputId: 'dmInput' },
-    roomDm: { replyTo: null, imageUrl: '', viewOnce: false, barId: 'roomDmComposerBar', inputId: 'roomDmInput' }
+    room: { replyTo: null, editingMsg: null, imageUrl: '', viewOnce: false, barId: 'chatComposerBar', inputId: 'chatInput' },
+    dm: { replyTo: null, editingMsg: null, imageUrl: '', viewOnce: false, barId: 'dmComposerBar', inputId: 'dmInput' },
+    roomDm: { replyTo: null, editingMsg: null, imageUrl: '', viewOnce: false, barId: 'roomDmComposerBar', inputId: 'roomDmInput' }
   };
   let activePhotoTarget = 'room';
+  let activeTgMenuCtx = null; // { msg, el, contextType, composerTarget, friendId }
+  let viewOnceTimerId = null;
 
   function resizeChatImageFile(file) {
     return new Promise((resolve, reject) => {
@@ -1763,7 +1774,7 @@
     const bar = $(c.barId);
     if (!bar) return;
 
-    if (!c.replyTo && !c.imageUrl) {
+    if (!c.replyTo && !c.editingMsg && !c.imageUrl) {
       bar.classList.add('hidden');
       bar.innerHTML = '';
       return;
@@ -1771,12 +1782,22 @@
 
     bar.classList.remove('hidden');
     let html = '';
-    if (c.replyTo) {
+    if (c.editingMsg) {
+      html += `
+        <div class="composer-item">
+          <div class="composer-item-left">
+            <span>✏️</span>
+            <div class="composer-text"><strong>Редактирование</strong>: ${esc(c.editingMsg.text || '')}</div>
+          </div>
+          <button type="button" class="composer-cancel-btn" data-clear-edit="${esc(target)}">✕</button>
+        </div>
+      `;
+    } else if (c.replyTo) {
       html += `
         <div class="composer-item">
           <div class="composer-item-left">
             <span>↩️</span>
-            <div class="composer-text">Ответ <strong>${esc(c.replyTo.senderName)}</strong>: ${esc(c.replyTo.text || '📷 Фото')}</div>
+            <div class="composer-text"><strong>${esc(c.replyTo.senderName)}</strong>: ${esc(c.replyTo.text || '📷 Фотография')}</div>
           </div>
           <button type="button" class="composer-cancel-btn" data-clear-reply="${esc(target)}">✕</button>
         </div>
@@ -1787,11 +1808,11 @@
         <div class="composer-item">
           <div class="composer-item-left">
             <img class="composer-thumb" src="${esc(c.imageUrl)}" alt="" />
-            <div class="composer-text">${c.viewOnce ? '💣 <strong>Одноразовое фото</strong> (исчезнет после просмотра)' : '📷 <strong>Фотография</strong>'}</div>
+            <div class="composer-text">${c.viewOnce ? '🔥 <strong>Одноразовое фото</strong> (исчезнет после просмотра)' : '📷 <strong>Фотография</strong>'}</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <button type="button" class="composer-viewonce-btn ${c.viewOnce ? 'active' : ''}" data-toggle-viewonce="${esc(target)}" title="Сделать фото одноразовым">
-              💣 1 раз
+            <button type="button" class="composer-viewonce-btn ${c.viewOnce ? 'active' : ''}" data-toggle-viewonce="${esc(target)}" title="Одноразовое фото (как в Telegram)">
+              ${c.viewOnce ? '🔥 1 просмотр' : '1️⃣ 1 раз'}
             </button>
             <button type="button" class="composer-cancel-btn" data-clear-photo="${esc(target)}">✕</button>
           </div>
@@ -1803,6 +1824,14 @@
     bar.querySelectorAll('[data-clear-reply]').forEach(btn => {
       btn.onclick = () => {
         c.replyTo = null;
+        renderComposerBar(target);
+      };
+    });
+    bar.querySelectorAll('[data-clear-edit]').forEach(btn => {
+      btn.onclick = () => {
+        c.editingMsg = null;
+        const inp = $(c.inputId);
+        if (inp) inp.value = '';
         renderComposerBar(target);
       };
     });
@@ -1824,15 +1853,29 @@
   function setComposerReply(target, msg) {
     const c = composers[target];
     if (!c) return;
-    const senderName = msg.user?.displayName || msg.sender?.displayName || 'Друг';
+    c.editingMsg = null;
+    const senderName = msg.user?.displayName || msg.sender?.displayName || 'Собеседник';
     c.replyTo = {
       id: msg.id,
       senderName,
-      text: msg.text || (msg.viewOnce ? '💣 Одноразовое фото' : (msg.hasPhoto || msg.imageUrl ? '📷 Фото' : '')),
-      hasPhoto: !!(msg.hasPhoto || msg.imageUrl)
+      text: msg.text || (msg.viewOnce ? '🔥 Одноразовое фото' : (msg.hasPhoto || msg.hasImage || msg.imageUrl ? '📷 Фотография' : '')),
+      hasPhoto: !!(msg.hasPhoto || msg.hasImage || msg.imageUrl)
     };
     renderComposerBar(target);
     $(c.inputId)?.focus();
+  }
+
+  function setComposerEdit(target, msg, friendId = null) {
+    const c = composers[target];
+    if (!c) return;
+    c.replyTo = null;
+    c.editingMsg = { id: msg.id, text: msg.text || '', friendId };
+    renderComposerBar(target);
+    const inp = $(c.inputId);
+    if (inp) {
+      inp.value = msg.text || '';
+      inp.focus();
+    }
   }
 
   document.querySelectorAll('.attach-photo-btn').forEach(btn => {
@@ -1861,15 +1904,41 @@
 
   function openPhotoLightbox(imageUrl, caption = '', isViewOnce = false) {
     if (!imageUrl) return;
+    clearTimeout(viewOnceTimerId);
     $('photoViewerImg').src = imageUrl;
     $('photoViewerCaption').textContent = caption || '';
     $('photoViewerBadge').classList.toggle('hidden', !isViewOnce);
+    const timerWrap = $('photoViewerTimerWrap');
+    const timerBar = $('photoViewerTimerBar');
+    if (isViewOnce && timerWrap && timerBar) {
+      timerWrap.classList.remove('hidden');
+      timerBar.style.transition = 'none';
+      timerBar.style.transform = 'scaleX(1)';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          timerBar.style.transition = 'transform 10s linear';
+          timerBar.style.transform = 'scaleX(0)';
+        });
+      });
+      viewOnceTimerId = setTimeout(() => {
+        $('photoViewerModal').classList.add('hidden');
+        $('photoViewerImg').src = '';
+      }, 10000);
+    } else if (timerWrap) {
+      timerWrap.classList.add('hidden');
+    }
     $('photoViewerModal').classList.remove('hidden');
   }
 
   async function handleViewOnceClick(msg, contextType, friendId = null) {
+    const uid = msg.fromId || msg.user?.id || '';
+    const isSender = state.user && uid === state.user.id;
     if (msg.viewed) {
-      showToast('Это одноразовое фото уже было просмотрено и удалено');
+      showToast('💨 Фотография уже была просмотрена и удалена');
+      return;
+    }
+    if (isSender && contextType === 'dm') {
+      showToast('Вы отправили одноразовое фото — его может открыть только получатель');
       return;
     }
     try {
@@ -1931,101 +2000,301 @@
     }
   }
 
+  async function handleDeleteMessage(msg, contextType, friendId = null) {
+    if (contextType === 'room') {
+      if (!state.room) return;
+      if (socket.connected) {
+        socket.emit('chat:delete', { messageId: msg.id });
+      } else {
+        try {
+          await api(`/api/rooms/${encodeURIComponent(state.room.code)}/chat/${encodeURIComponent(msg.id)}`, { method: 'DELETE' });
+          removeChatMessageDom(msg.id);
+        } catch (e) { showToast(e.message); }
+      }
+    } else {
+      const targetFriend = friendId || (msg.fromId === state.user?.id ? msg.toId : msg.fromId) || activeDmFriendId || roomActiveDmFriendId;
+      if (!targetFriend) return;
+      if (socket.connected) {
+        socket.emit('dm:delete', { friendId: targetFriend, messageId: msg.id });
+      } else {
+        try {
+          await api(`/api/dms/${encodeURIComponent(targetFriend)}/${encodeURIComponent(msg.id)}`, { method: 'DELETE' });
+          removeChatMessageDom(msg.id);
+        } catch (e) { showToast(e.message); }
+      }
+    }
+  }
+
+  // Telegram Floating Context Menu & Reaction Popup
+  function openTelegramMsgMenu(clientX, clientY, ctx) {
+    closeTelegramMsgMenu();
+    activeTgMenuCtx = ctx;
+    const { msg, el } = ctx;
+    el.classList.add('context-active');
+
+    const uid = msg.fromId || msg.user?.id || '';
+    const isOwn = state.user && uid === state.user.id;
+    const canDelete = isOwn || (ctx.contextType === 'room' && state.room && state.room.hostId === state.user?.id);
+
+    $('tgMenuCopyBtn').classList.toggle('hidden', !msg.text);
+    $('tgMenuEditBtn').classList.toggle('hidden', !isOwn || !msg.text);
+    $('tgMenuDeleteBtn').classList.toggle('hidden', !canDelete);
+
+    // Highlight user's active reactions in the strip
+    const myReactions = new Set();
+    if (msg.reactions && state.user) {
+      for (const [em, arr] of Object.entries(msg.reactions)) {
+        if (Array.isArray(arr) && arr.includes(state.user.id)) myReactions.add(em);
+      }
+    }
+    document.querySelectorAll('#tgReactionStrip .tg-rx-btn').forEach(btn => {
+      btn.classList.toggle('active', myReactions.has(btn.dataset.tgRx));
+    });
+
+    const overlay = $('tgMsgOverlay');
+    const popup = $('tgMsgPopup');
+    overlay.classList.remove('hidden');
+
+    const popW = 248;
+    const popH = isOwn ? 225 : 150;
+    const rect = el.querySelector('.chat-bubble')?.getBoundingClientRect() || { left: clientX, top: clientY, right: clientX };
+    let left = isOwn ? (rect.right - popW) : rect.left;
+    let top = (clientY || rect.top) - 52;
+
+    left = Math.max(10, Math.min(window.innerWidth - popW - 10, left));
+    top = Math.max(12, Math.min(window.innerHeight - popH - 12, top));
+
+    popup.style.left = `${Math.round(left)}px`;
+    popup.style.top = `${Math.round(top)}px`;
+  }
+
+  function closeTelegramMsgMenu() {
+    if (activeTgMenuCtx?.el) {
+      activeTgMenuCtx.el.classList.remove('context-active');
+    }
+    activeTgMenuCtx = null;
+    $('tgMsgOverlay')?.classList.add('hidden');
+  }
+
+  $('tgMsgOverlay')?.addEventListener('click', (e) => {
+    if (e.target === $('tgMsgOverlay')) closeTelegramMsgMenu();
+  });
+
+  document.querySelectorAll('#tgReactionStrip .tg-rx-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!activeTgMenuCtx) return;
+      const { msg, contextType, friendId } = activeTgMenuCtx;
+      closeTelegramMsgMenu();
+      handleToggleMessageReaction(msg, btn.dataset.tgRx, contextType, friendId);
+    });
+  });
+
+  $('tgMenuReplyBtn')?.addEventListener('click', () => {
+    if (!activeTgMenuCtx) return;
+    const { msg, composerTarget } = activeTgMenuCtx;
+    closeTelegramMsgMenu();
+    setComposerReply(composerTarget, msg);
+  });
+
+  $('tgMenuCopyBtn')?.addEventListener('click', () => {
+    if (!activeTgMenuCtx) return;
+    const txt = activeTgMenuCtx.msg?.text || '';
+    closeTelegramMsgMenu();
+    if (txt) {
+      navigator.clipboard.writeText(txt).then(() => showToast('Скопировано в буфер обмена')).catch(() => {});
+    }
+  });
+
+  $('tgMenuEditBtn')?.addEventListener('click', () => {
+    if (!activeTgMenuCtx) return;
+    const { msg, composerTarget, friendId } = activeTgMenuCtx;
+    closeTelegramMsgMenu();
+    setComposerEdit(composerTarget, msg, friendId);
+  });
+
+  $('tgMenuDeleteBtn')?.addEventListener('click', () => {
+    if (!activeTgMenuCtx) return;
+    const { msg, contextType, friendId } = activeTgMenuCtx;
+    closeTelegramMsgMenu();
+    handleDeleteMessage(msg, contextType, friendId);
+  });
+
   function buildRichBubbleInner(msg, options = {}) {
-    const { showAuthor = false, showTime = false } = options;
+    const { showAuthor = false, isOwn = false, contextType = 'room' } = options;
     const u = msg.user || msg.sender || {};
     let html = '';
 
-    if (showAuthor) {
-      html += `<div class="chat-author" style="color:${esc(u.color || '#9175ff')}">${esc(u.displayName || 'Гость')}</div>`;
+    if (showAuthor && !isOwn) {
+      html += `<div class="chat-author" style="color:${esc(u.color || '#64d2ff')}">${esc(u.displayName || 'Гость')}</div>`;
     }
 
     if (msg.replyTo && msg.replyTo.id) {
       html += `
         <div class="msg-reply-quote" data-scroll-msg="${esc(msg.replyTo.id)}">
           <div class="msg-reply-author">${esc(msg.replyTo.senderName || 'Сообщение')}</div>
-          <div class="msg-reply-text">${esc(msg.replyTo.text || '📷 Фото')}</div>
+          <div class="msg-reply-text">${esc(msg.replyTo.text || '📷 Фотография')}</div>
         </div>
       `;
     }
 
     if (msg.viewOnce) {
       if (msg.viewed) {
-        html += `<div class="msg-view-once-btn viewed">💨 Фото просмотрено</div>`;
+        html += `
+          <div class="tg-viewonce-card viewed">
+            <div class="tg-viewonce-icon">💨</div>
+            <div class="tg-viewonce-info">
+              <div class="tg-viewonce-title">Фотография</div>
+              <div class="tg-viewonce-sub">Просмотрено</div>
+            </div>
+          </div>
+        `;
       } else {
-        const isSender = state.user && (msg.fromId === state.user.id || msg.user?.id === state.user.id);
-        html += `<button type="button" class="msg-view-once-btn" data-open-viewonce="1">💣 Одноразовое фото ${isSender ? '(Отправлено)' : '· Открыть'}</button>`;
+        html += `
+          <div class="tg-viewonce-card" data-open-viewonce="1">
+            <div class="tg-viewonce-icon">1</div>
+            <div class="tg-viewonce-info">
+              <div class="tg-viewonce-title">Фотография</div>
+              <div class="tg-viewonce-sub">${isOwn ? 'Одноразовое · Отправлено' : 'Нажмите для просмотра'}</div>
+            </div>
+          </div>
+        `;
       }
     } else if (msg.imageUrl) {
       html += `<img class="msg-photo" src="${esc(msg.imageUrl)}" alt="Фото" loading="lazy" />`;
     }
 
+    const timeStr = formatMsgTime(msg.createdAt);
+    const editedTag = msg.editedAt ? 'изм. ' : '';
+    const ticksHtml = (contextType === 'dm' && isOwn)
+      ? `<span class="chat-ticks">${msg.read ? '✓✓' : '✓'}</span>`
+      : '';
+    const metaInline = `<span class="chat-meta-inline">${esc(editedTag)}${esc(timeStr)}${ticksHtml}</span>`;
+
     if (msg.text) {
-      html += `<div class="chat-text">${esc(msg.text)}</div>`;
+      html += `<div class="chat-text-wrap"><span class="chat-text">${esc(msg.text)}</span>${metaInline}</div>`;
+    } else {
+      html += `<div class="chat-text-wrap">${metaInline}</div>`;
     }
 
-    if (showTime) {
-      html += `<div class="chat-time">${esc(formatMsgTime(msg.createdAt))}</div>`;
-    }
-
-    return html;
-  }
-
-  function buildReactionsAndActionsHtml(msg) {
+    // Active reaction pills inside the bubble (only rendered if reactions exist!)
     const reactions = msg.reactions || {};
     const rxEntries = Object.entries(reactions).filter(([, arr]) => Array.isArray(arr) && arr.length > 0);
-    let rxHtml = '';
     if (rxEntries.length > 0) {
-      rxHtml = `<div class="msg-reactions-bar">` + rxEntries.map(([emoji, users]) => {
+      html += `<div class="msg-reactions-bar">` + rxEntries.map(([emoji, users]) => {
         const mine = state.user && users.includes(state.user.id);
         return `<button type="button" class="msg-rx-pill ${mine ? 'mine' : ''}" data-rx="${esc(emoji)}"><span>${esc(emoji)}</span><span>${users.length}</span></button>`;
       }).join('') + `</div>`;
     }
 
-    const actionsHtml = `
-      <div class="msg-actions-bar">
-        <button type="button" class="msg-act-btn" data-reply-btn="1" title="Ответить">↩️</button>
-        <button type="button" class="msg-act-btn" data-rx="❤️">❤️</button>
-        <button type="button" class="msg-act-btn" data-rx="🔥">🔥</button>
-        <button type="button" class="msg-act-btn" data-rx="😂">😂</button>
-        <button type="button" class="msg-act-btn" data-rx="👍">👍</button>
-      </div>
-    `;
-
-    return rxHtml + actionsHtml;
+    return html;
   }
 
   function bindRichMessageEvents(el, msg, contextType, composerTarget, friendId = null) {
     const u = msg.user || msg.sender || {};
     const av = el.querySelector('.chat-av');
-    if (av && u.id) av.onclick = () => openUserCard(u.id);
+    if (av && u.id) av.onclick = (e) => {
+      e.stopPropagation();
+      openUserCard(u.id);
+    };
 
     const photo = el.querySelector('.msg-photo');
     if (photo && msg.imageUrl) {
-      photo.onclick = () => openPhotoLightbox(msg.imageUrl, msg.text || '', false);
+      photo.onclick = (e) => {
+        e.stopPropagation();
+        openPhotoLightbox(msg.imageUrl, msg.text || '', false);
+      };
     }
 
     const voBtn = el.querySelector('[data-open-viewonce]');
     if (voBtn) {
-      voBtn.onclick = () => handleViewOnceClick(msg, contextType, friendId);
+      voBtn.onclick = (e) => {
+        e.stopPropagation();
+        handleViewOnceClick(msg, contextType, friendId);
+      };
     }
 
     const quote = el.querySelector('[data-scroll-msg]');
     if (quote) {
-      quote.onclick = () => {
+      quote.onclick = (e) => {
+        e.stopPropagation();
         const targetEl = document.querySelector(`[data-msg-id="${CSS.escape(msg.replyTo.id)}"]`);
-        if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          targetEl.classList.add('context-active');
+          setTimeout(() => targetEl.classList.remove('context-active'), 1100);
+        }
       };
     }
 
-    const replyBtn = el.querySelector('[data-reply-btn]');
-    if (replyBtn) {
-      replyBtn.onclick = () => setComposerReply(composerTarget, msg);
+    el.querySelectorAll('[data-rx]').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        handleToggleMessageReaction(msg, btn.dataset.rx, contextType, friendId);
+      };
+    });
+
+    const ctxObj = { msg, el, contextType, composerTarget, friendId };
+    const bubble = el.querySelector('.chat-bubble');
+    const hoverTrig = el.querySelector('.tg-hover-trigger');
+
+    if (hoverTrig) {
+      hoverTrig.onclick = (e) => {
+        e.stopPropagation();
+        openTelegramMsgMenu(e.clientX, e.clientY, ctxObj);
+      };
     }
 
-    el.querySelectorAll('[data-rx]').forEach(btn => {
-      btn.onclick = () => handleToggleMessageReaction(msg, btn.dataset.rx, contextType, friendId);
-    });
+    if (bubble) {
+      // 1. Right-click on PC -> Telegram Context Menu + Reactions
+      bubble.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        openTelegramMsgMenu(e.clientX, e.clientY, ctxObj);
+      });
+
+      // 2. Double-click on PC -> Quick Reply like Telegram Desktop
+      bubble.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+        setComposerReply(composerTarget, msg);
+      });
+
+      // 3. Single click / tap on bubble (if not clicking photo, quote, or reaction pill) -> open Telegram menu
+      bubble.addEventListener('click', (e) => {
+        if (e.target.closest('.msg-photo, [data-open-viewonce], .msg-reply-quote, .msg-rx-pill')) return;
+        if (window.getSelection && String(window.getSelection()).length > 0) return;
+        openTelegramMsgMenu(e.clientX, e.clientY, ctxObj);
+      });
+
+      // 4. Mobile Touch: Swipe-left to Reply like Telegram iOS/Android
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let swipedReply = false;
+      bubble.addEventListener('touchstart', (e) => {
+        const t = e.touches[0];
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+        swipedReply = false;
+      }, { passive: true });
+
+      bubble.addEventListener('touchmove', (e) => {
+        const t = e.touches[0];
+        const dx = t.clientX - touchStartX;
+        const dy = Math.abs(t.clientY - touchStartY);
+        if (dx < -18 && dy < 30) {
+          const shift = Math.max(-56, dx);
+          el.style.transform = `translateX(${shift}px)`;
+          if (dx < -46 && !swipedReply) {
+            swipedReply = true;
+          }
+        }
+      }, { passive: true });
+
+      bubble.addEventListener('touchend', () => {
+        el.style.transform = '';
+        if (swipedReply) {
+          setComposerReply(composerTarget, msg);
+        }
+      });
+    }
   }
 
   function createRichMessageElement(msg, contextType = 'room', composerTarget = 'room', friendId = null) {
@@ -2039,17 +2308,25 @@
     }
 
     const uid = msg.fromId || msg.user?.id || '';
-    const isOwn = state.user && uid === state.user.id;
+    const isOwn = !!(state.user && uid === state.user.id);
     const u = msg.user || msg.sender || (isOwn ? state.user : {});
-    el.className = `chat-msg ${contextType === 'dm' && isOwn ? 'own' : ''}`;
+    el.className = `chat-msg ${isOwn ? 'own' : ''}`;
+    el.dataset.authorId = uid;
+    el.dataset.msgSig = JSON.stringify({
+      t: msg.text,
+      e: msg.editedAt,
+      v: msg.viewed,
+      r: msg.read,
+      rx: msg.reactions
+    });
 
     el.innerHTML = `
       <div class="chat-av" style="background:${esc(u?.color || '#7c5cff')}">${avatarInnerHtml(u)}</div>
       <div class="chat-msg-body">
         <div class="chat-bubble">
-          ${buildRichBubbleInner(msg, { showAuthor: contextType === 'room', showTime: contextType === 'dm' })}
+          ${buildRichBubbleInner(msg, { showAuthor: contextType === 'room', isOwn, contextType })}
         </div>
-        ${buildReactionsAndActionsHtml(msg)}
+        <button type="button" class="tg-hover-trigger" title="Реакции и меню">😊</button>
       </div>
     `;
 
@@ -2057,26 +2334,64 @@
     return el;
   }
 
+  // Group consecutive messages from the same sender like Telegram
+  function refreshMessageGrouping(container) {
+    if (!container) return;
+    const items = Array.from(container.querySelectorAll('.chat-msg'));
+    for (let i = 0; i < items.length; i++) {
+      const cur = items[i];
+      const prev = items[i - 1];
+      const next = items[i + 1];
+      const curAuthor = cur.dataset.authorId;
+      if (!curAuthor || cur.classList.contains('system')) continue;
+      const samePrev = prev && !prev.classList.contains('system') && prev.dataset.authorId === curAuthor;
+      const sameNext = next && !next.classList.contains('system') && next.dataset.authorId === curAuthor;
+      cur.classList.toggle('grouped-prev', !!samePrev);
+      cur.classList.toggle('grouped-next', !!sameNext);
+    }
+  }
+
   function updateChatMessageDom(msg, contextType = 'room') {
     if (!msg || !msg.id) return;
     document.querySelectorAll(`[data-msg-id="${CSS.escape(msg.id)}"]`).forEach(existing => {
-      const parentId = existing.parentElement?.id || '';
+      const parent = existing.parentElement;
+      const parentId = parent?.id || '';
       const composerTarget = parentId === 'roomDmMessages' ? 'roomDm' : (parentId === 'dmMessages' ? 'dm' : 'room');
       const friendId = composerTarget === 'roomDm' ? roomActiveDmFriendId : activeDmFriendId;
       const fresh = createRichMessageElement(msg, contextType, composerTarget, friendId);
       existing.replaceWith(fresh);
+      refreshMessageGrouping(parent);
+    });
+  }
+
+  function removeChatMessageDom(messageId) {
+    if (!messageId) return;
+    document.querySelectorAll(`[data-msg-id="${CSS.escape(messageId)}"]`).forEach(existing => {
+      const parent = existing.parentElement;
+      existing.remove();
+      refreshMessageGrouping(parent);
     });
   }
 
   function syncRoomMessagesFromPoll(messages) {
     const box = $('chatMessages');
     if (!box) return;
+    const validIds = new Set(messages.map(m => m.id));
+    box.querySelectorAll('.chat-msg[data-msg-id]').forEach(el => {
+      if (el.dataset.msgId && !validIds.has(el.dataset.msgId)) el.remove();
+    });
     messages.forEach(m => {
       const existing = box.querySelector(`[data-msg-id="${CSS.escape(m.id)}"]`);
       if (!existing) {
         appendChatMessage(m, false);
+      } else {
+        const nextSig = JSON.stringify({ t: m.text, e: m.editedAt, v: m.viewed, r: m.read, rx: m.reactions });
+        if (existing.dataset.msgSig !== nextSig) {
+          updateChatMessageDom(m, 'room');
+        }
       }
     });
+    refreshMessageGrouping(box);
   }
 
   function syncDmMessagesFromPoll(friendId, messages) {
@@ -2086,6 +2401,10 @@
       const isTarget = (boxId === 'dmMessages' && activeDmFriendId === friendId) ||
                        (boxId === 'roomDmMessages' && roomActiveDmFriendId === friendId);
       if (!isTarget) return;
+      const validIds = new Set(messages.map(m => m.id));
+      box.querySelectorAll('.chat-msg[data-msg-id]').forEach(el => {
+        if (el.dataset.msgId && !validIds.has(el.dataset.msgId)) el.remove();
+      });
       messages.forEach(m => {
         const existing = box.querySelector(`[data-msg-id="${CSS.escape(m.id)}"]`);
         if (!existing) {
@@ -2093,8 +2412,14 @@
           const compTarget = boxId === 'roomDmMessages' ? 'roomDm' : 'dm';
           box.appendChild(createRichMessageElement(m, 'dm', compTarget, friendId));
           box.scrollTop = box.scrollHeight;
+        } else {
+          const nextSig = JSON.stringify({ t: m.text, e: m.editedAt, v: m.viewed, r: m.read, rx: m.reactions });
+          if (existing.dataset.msgSig !== nextSig) {
+            updateChatMessageDom(m, 'dm');
+          }
         }
       });
+      refreshMessageGrouping(box);
     });
   }
 
@@ -2184,6 +2509,7 @@
       }
     }
     box.appendChild(el);
+    refreshMessageGrouping(box);
     box.scrollTop = box.scrollHeight;
   }
 
@@ -2193,6 +2519,28 @@
     const input = $('chatInput');
     const text = input.value.trim();
     const comp = composers.room;
+
+    // Handle Edit Mode in Room Chat
+    if (comp.editingMsg) {
+      const editId = comp.editingMsg.id;
+      input.value = '';
+      comp.editingMsg = null;
+      renderComposerBar('room');
+      if (!text) return;
+      if (socket.connected) {
+        socket.emit('chat:edit', { messageId: editId, text });
+      } else {
+        try {
+          const res = await api(`/api/rooms/${encodeURIComponent(state.room.code)}/chat/${encodeURIComponent(editId)}`, {
+            method: 'PUT',
+            body: JSON.stringify({ text })
+          });
+          if (res.message) updateChatMessageDom(res.message, 'room');
+        } catch (err) { showToast(err.message); }
+      }
+      return;
+    }
+
     if (!text && !comp.imageUrl) return;
 
     const payload = {
@@ -2468,6 +2816,7 @@
         box.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.84rem;">Сообщений пока нет. Напишите привет или отправьте фото! 👋📷</div>';
       } else {
         msgs.forEach(m => box.appendChild(createRichMessageElement(m, 'dm', 'dm', friendId)));
+        refreshMessageGrouping(box);
         box.scrollTop = box.scrollHeight;
       }
       $('dmInput')?.focus();
@@ -2485,6 +2834,28 @@
     const input = $(inputId);
     const text = input ? input.value.trim() : '';
     const comp = composers[composerKey];
+
+    // Handle Edit Mode in Direct Messages
+    if (comp && comp.editingMsg) {
+      const editId = comp.editingMsg.id;
+      if (input) input.value = '';
+      comp.editingMsg = null;
+      renderComposerBar(composerKey);
+      if (!text) return;
+      if (socket.connected) {
+        socket.emit('dm:edit', { friendId, messageId: editId, text });
+      } else {
+        try {
+          const res = await api(`/api/dms/${encodeURIComponent(friendId)}/${encodeURIComponent(editId)}`, {
+            method: 'PUT',
+            body: JSON.stringify({ text })
+          });
+          if (res.message) updateChatMessageDom(res.message, 'dm');
+        } catch (err) { showToast(err.message); }
+      }
+      return;
+    }
+
     if (!text && (!comp || !comp.imageUrl)) return;
 
     const payload = {
@@ -2579,6 +2950,7 @@
       const data = await api(`/api/dms/${encodeURIComponent(friendId)}`);
       box.innerHTML = '';
       (data.messages || []).forEach(m => box.appendChild(createRichMessageElement(m, 'dm', 'roomDm', friendId)));
+      refreshMessageGrouping(box);
       box.scrollTop = box.scrollHeight;
       $('roomDmInput')?.focus();
     } catch {}
@@ -2600,7 +2972,7 @@
     if (!state.user) return;
     const otherId = msg.fromId === state.user.id ? msg.toId : msg.fromId;
     const friend = state.friends.find(x => x.id === otherId);
-    const previewText = msg.text || (msg.viewOnce ? '💣 Одноразовое фото' : (msg.hasPhoto || msg.imageUrl ? '📷 Фото' : ''));
+    const previewText = msg.text || (msg.viewOnce ? '🔥 Одноразовое фото' : (msg.hasPhoto || msg.hasImage || msg.imageUrl ? '📷 Фотография' : ''));
     if (friend) {
       friend.lastMessage = {
         text: previewText,
@@ -2617,6 +2989,7 @@
       if (box && !box.querySelector(`[data-msg-id="${CSS.escape(msg.id)}"]`)) {
         if (box.querySelector('div[style*="text-align:center"]')) box.innerHTML = '';
         box.appendChild(createRichMessageElement(msg, 'dm', 'dm', otherId));
+        refreshMessageGrouping(box);
         box.scrollTop = box.scrollHeight;
       }
     }
@@ -2625,6 +2998,7 @@
       const rBox = $('roomDmMessages');
       if (rBox && !rBox.querySelector(`[data-msg-id="${CSS.escape(msg.id)}"]`)) {
         rBox.appendChild(createRichMessageElement(msg, 'dm', 'roomDm', otherId));
+        refreshMessageGrouping(rBox);
         rBox.scrollTop = rBox.scrollHeight;
       }
     }
@@ -2661,6 +3035,10 @@
 
   socket.on('dm:updated', (msg) => {
     updateChatMessageDom(msg, 'dm');
+  });
+
+  socket.on('dm:deleted', ({ id }) => {
+    removeChatMessageDom(id);
   });
 
   async function respondFriend(requestId, accept) {
