@@ -16,11 +16,12 @@
         "moviesWatched": 0,
         "episodesWatched": 1,
         "roomsCreated": 2,
-        "messagesSent": 14,
+        "messagesSent": 15,
         "reactionsSent": 0
       },
       "updatedAt": 1792993656702,
-      "lastSeenAt": 1793001270191
+      "lastSeenAt": 1793002737134,
+      "pushSubscriptions": []
     },
     {
       "id": "u_80ab0d1134f5",
@@ -82,39 +83,6 @@
   "bookmarks": {},
   "history": {
     "u_805b52bfc220": [
-      {
-        "movie": {
-          "id": 105248,
-          "tmdb_id": 105248,
-          "imdb_id": "tt12590266",
-          "kinopoisk_id": "2000102",
-          "type": "tv",
-          "serial": 1,
-          "title": "Cyberpunk: Edgerunners",
-          "name": "Cyberpunk: Edgerunners",
-          "original_title": "Cyberpunk: Edgerunners",
-          "original_name": "Cyberpunk: Edgerunners",
-          "original_language": "en",
-          "overview": "В мире будущего, где царит коррупция, а люди одержимы киберимплантами, одаренный, но безрассудный парень мечтает стать наемником вне закона — «бегущим по краю».",
-          "release_date": "2022-09-13",
-          "first_air_date": "2022-09-13",
-          "year": "2022",
-          "vote_average": 8.5,
-          "poster": "https://imagetmdb.com/t/p/w500/sNN1i1tflYkL32FtNXT4t9OlYZa.jpg",
-          "backdrop": "https://imagetmdb.com/t/p/w1280/4NmCfWHzytiKM3riCMcbVYBJhlB.jpg",
-          "poster_path": "/sNN1i1tflYkL32FtNXT4t9OlYZa.jpg",
-          "backdrop_path": "/4NmCfWHzytiKM3riCMcbVYBJhlB.jpg",
-          "number_of_seasons": 1,
-          "runtime": 0,
-          "genres": []
-        },
-        "balancerKey": "veoveo",
-        "balancer": "VeoVeo",
-        "season": 1,
-        "episode": 1,
-        "voiceName": "",
-        "updatedAt": 1793000736219
-      },
       {
         "movie": {
           "id": 1218925,
@@ -405,6 +373,20 @@
         "createdAt": 1793000663557,
         "read": false,
         "updatedAt": 1793000663557
+      },
+      {
+        "id": "dm_f8e512bd1b15",
+        "fromId": "u_805b52bfc220",
+        "toId": "u_80ab0d1134f5",
+        "text": "hhh",
+        "imageUrl": "",
+        "hasImage": false,
+        "viewOnce": false,
+        "viewed": false,
+        "replyTo": null,
+        "reactions": {},
+        "createdAt": 1793002736791,
+        "read": false
       }
     ]
   },
@@ -449,6 +431,22 @@
         },
         "title": "Rashid Sultanov",
         "body": "uvedomleniya"
+      },
+      {
+        "id": "ntf_c43000fa",
+        "createdAt": 1793002736797,
+        "type": "dm_message",
+        "msgId": "dm_f8e512bd1b15",
+        "fromId": "u_805b52bfc220",
+        "from": {
+          "id": "u_805b52bfc220",
+          "username": "rashid",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊",
+          "color": "#1de9b6"
+        },
+        "title": "Rashid Sultanov",
+        "body": "hhh"
       }
     ]
   },
