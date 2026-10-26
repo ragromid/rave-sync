@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040177623,
+      "lastSeenAt": 1793040187206,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -117,6 +117,13 @@
       "toId": "u_80ab0d1134f5",
       "status": "accepted",
       "createdAt": 1792993812607
+    },
+    {
+      "id": "fr_eb44ac72f4",
+      "fromId": "u_805b52bfc220",
+      "toId": "u_1333f556dd06",
+      "status": "pending",
+      "createdAt": 1793040187010
     }
   ],
   "bookmarks": {},
@@ -555,6 +562,15 @@
         },
         "title": "Rashid Sultanov",
         "body": "кончи мне в рот"
+      }
+    ],
+    "u_1333f556dd06": [
+      {
+        "id": "ntf_8622ff28",
+        "createdAt": 1793040187011,
+        "type": "friend_request",
+        "title": "Заявка в друзья",
+        "body": "🦊 Rashid Sultanov хочет добавить вас в друзья"
       }
     ]
   },
