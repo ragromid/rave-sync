@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040454372,
+      "lastSeenAt": 1793040463404,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 0,
         "episodesWatched": 0,
         "roomsCreated": 0,
-        "messagesSent": 2,
+        "messagesSent": 3,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040453559
+      "lastSeenAt": 1793040464524
     }
   ],
   "friendships": [
@@ -157,11 +157,12 @@
             "фэнтези"
           ]
         },
+        "balancerKey": "filmix",
         "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1792965688026
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "updatedAt": 1793040247007
       }
     ]
   },
@@ -183,9 +184,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "currentTime": 3354,
+        "currentTime": 425,
         "duration": 5999,
-        "updatedAt": 1793040429609
+        "updatedAt": 1793040430600
       }
     },
     "u_80ab0d1134f5": {
@@ -700,7 +701,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": false,
+      "isPublic": true,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -773,9 +774,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 11.006556542004075,
+        "currentTime": 21.02274127798635,
         "rate": 1,
-        "updatedAt": 1793040453230
+        "updatedAt": 1793040463067
       },
       "messages": [
         {
@@ -922,6 +923,25 @@
           "replyTo": null,
           "reactions": {},
           "createdAt": 1793040453388
+        },
+        {
+          "id": "m_4f643e2797",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "тоже самое",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793040464525
         }
       ],
       "viewOnceStore": {}
