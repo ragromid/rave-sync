@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040534078,
+      "lastSeenAt": 1793040539487,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040534713
+      "lastSeenAt": 1793040539391
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
-        "balancer": "Filmix",
+        "balancerKey": "kodik",
+        "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
-        "updatedAt": 1793040247007
+        "voiceName": "AnimeVost",
+        "updatedAt": 1793040516339
       }
     ]
   },
@@ -179,14 +179,14 @@
         "updatedAt": 1793001267614
       },
       "1218925": {
-        "balancerKey": "filmix",
-        "balancerName": "Filmix",
+        "balancerKey": "kodik",
+        "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "currentTime": 64,
+        "voiceName": "AnimeVost",
+        "currentTime": 54,
         "duration": 5999,
-        "updatedAt": 1793040509333
+        "updatedAt": 1793040516339
       }
     },
     "u_80ab0d1134f5": {
@@ -199,6 +199,18 @@
         "currentTime": 9751,
         "duration": 0,
         "updatedAt": 1793010496477
+      }
+    },
+    "u_1333f556dd06": {
+      "1218925": {
+        "balancerKey": "kodik",
+        "balancerName": "Kodik",
+        "season": 0,
+        "episode": 0,
+        "voiceName": "AnimeVost",
+        "currentTime": 5,
+        "duration": 6016,
+        "updatedAt": 1793040524978
       }
     }
   },
@@ -575,8 +587,7 @@
         "title": "Rashid Sultanov",
         "body": "кончи мне в рот"
       }
-    ],
-    "u_805b52bfc220": []
+    ]
   },
   "savedRooms": {
     "393HNX": {
@@ -693,7 +704,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": true,
+      "isPublic": false,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -766,9 +777,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 14.530142085343748,
+        "currentTime": 19.53808760032704,
         "rate": 1,
-        "updatedAt": 1793040533181
+        "updatedAt": 1793040538189
       },
       "messages": [
         {
@@ -1001,8 +1012,14 @@
           "viewOnce": false,
           "viewed": false,
           "replyTo": null,
-          "reactions": {},
-          "createdAt": 1793040533452
+          "reactions": {
+            "❤️": [
+              "u_805b52bfc220"
+            ]
+          },
+          "createdAt": 1793040533452,
+          "read": false,
+          "updatedAt": 1793040533452
         }
       ],
       "viewOnceStore": {}
