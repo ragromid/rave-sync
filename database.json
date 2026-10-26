@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793044861550,
+      "lastSeenAt": 1793044866067,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 1,
         "episodesWatched": 0,
         "roomsCreated": 2,
-        "messagesSent": 58,
+        "messagesSent": 59,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793044862283
+      "lastSeenAt": 1793044866192
     }
   ],
   "friendships": [
@@ -1767,32 +1767,11 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 3563.4457751190002,
+        "currentTime": 3565.948983714,
         "rate": 1,
-        "updatedAt": 1793044862283
+        "updatedAt": 1793044864796
       },
       "messages": [
-        {
-          "id": "m_60211995c6",
-          "system": false,
-          "user": {
-            "id": "u_1333f556dd06",
-            "displayName": "Sabina",
-            "avatar": "🦊",
-            "avatarUrl": "",
-            "color": "#e040fb"
-          },
-          "text": "я немного вперед перевела",
-          "imageUrl": "",
-          "hasPhoto": false,
-          "viewOnce": false,
-          "viewed": false,
-          "replyTo": null,
-          "reactions": {},
-          "createdAt": 1793041495202,
-          "read": false,
-          "updatedAt": 1793041495202
-        },
         {
           "id": "m_98f3726258",
           "system": false,
@@ -3634,6 +3613,25 @@
           "replyTo": null,
           "reactions": {},
           "createdAt": 1793044812634
+        },
+        {
+          "id": "m_26d5afbdf8",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "почему всем нужно его сердце",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793044866192
         }
       ],
       "viewOnceStore": {}
