@@ -58,7 +58,7 @@
         "moviesWatched": 0,
         "episodesWatched": 0,
         "roomsCreated": 0,
-        "messagesSent": 2,
+        "messagesSent": 3,
         "reactionsSent": 0
       },
       "createdAt": 1792993803285,
@@ -131,6 +131,14 @@
         "toId": "u_805b52bfc220",
         "text": "ya dalboeb",
         "createdAt": 1792993914983,
+        "read": false
+      },
+      {
+        "id": "dm_a3a096dc061b",
+        "fromId": "u_80ab0d1134f5",
+        "toId": "u_805b52bfc220",
+        "text": "Minet?))",
+        "createdAt": 1792993918666,
         "read": false
       }
     ]
