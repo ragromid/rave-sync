@@ -19,9 +19,18 @@
         "messagesSent": 15,
         "reactionsSent": 0
       },
-      "updatedAt": 1792993656702,
-      "lastSeenAt": 1793002738346,
-      "pushSubscriptions": []
+      "updatedAt": 1793002837494,
+      "lastSeenAt": 1793002837494,
+      "pushSubscriptions": [
+        {
+          "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
+          "keys": {
+            "p256dh": "BBr7VN8ah1F3_ALIm3Elk8c37-fy0Wm65W9e_zpwQ5BFYKpcCBfswdBYThFzGAPoY6fT_t-xxNFWJMhB0rZ6CCo",
+            "auth": "UL8Iy17oqZVhnySXjp7NeA"
+          },
+          "updatedAt": 1793002837494
+        }
+      ]
     },
     {
       "id": "u_80ab0d1134f5",
