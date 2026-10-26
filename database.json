@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1792993656702,
-      "lastSeenAt": 1793001214650
+      "lastSeenAt": 1793001223112
     },
     {
       "id": "u_80ab0d1134f5",
@@ -60,39 +60,6 @@
   "bookmarks": {},
   "history": {
     "u_805b52bfc220": [
-      {
-        "movie": {
-          "id": 105248,
-          "tmdb_id": 105248,
-          "imdb_id": "tt12590266",
-          "kinopoisk_id": "2000102",
-          "type": "tv",
-          "serial": 1,
-          "title": "Cyberpunk: Edgerunners",
-          "name": "Cyberpunk: Edgerunners",
-          "original_title": "Cyberpunk: Edgerunners",
-          "original_name": "Cyberpunk: Edgerunners",
-          "original_language": "en",
-          "overview": "В мире будущего, где царит коррупция, а люди одержимы киберимплантами, одаренный, но безрассудный парень мечтает стать наемником вне закона — «бегущим по краю».",
-          "release_date": "2022-09-13",
-          "first_air_date": "2022-09-13",
-          "year": "2022",
-          "vote_average": 8.5,
-          "poster": "https://imagetmdb.com/t/p/w500/sNN1i1tflYkL32FtNXT4t9OlYZa.jpg",
-          "backdrop": "https://imagetmdb.com/t/p/w1280/4NmCfWHzytiKM3riCMcbVYBJhlB.jpg",
-          "poster_path": "/sNN1i1tflYkL32FtNXT4t9OlYZa.jpg",
-          "backdrop_path": "/4NmCfWHzytiKM3riCMcbVYBJhlB.jpg",
-          "number_of_seasons": 1,
-          "runtime": 0,
-          "genres": []
-        },
-        "balancerKey": "veoveo",
-        "balancer": "VeoVeo",
-        "season": 1,
-        "episode": 1,
-        "voiceName": "",
-        "updatedAt": 1793000736219
-      },
       {
         "movie": {
           "id": 1218925,
@@ -137,9 +104,9 @@
         "season": 1,
         "episode": 1,
         "voiceName": "",
-        "currentTime": 22,
-        "duration": 1450,
-        "updatedAt": 1793000763487
+        "currentTime": 0,
+        "duration": 0,
+        "updatedAt": 1793000736220
       }
     }
   },
