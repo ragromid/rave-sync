@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041269749,
+      "lastSeenAt": 1793041286910,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041269743
+      "lastSeenAt": 1793041287252
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "kodik",
-        "balancer": "Kodik",
+        "balancerKey": "filmix",
+        "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "updatedAt": 1793040858095
+        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "updatedAt": 1793040416330
       }
     ],
     "u_1333f556dd06": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "AnimeVost",
-        "updatedAt": 1793041148694
+        "voiceName": "AniStar",
+        "updatedAt": 1793041170472
       }
     ]
   },
@@ -216,14 +216,14 @@
         "updatedAt": 1793001267614
       },
       "1218925": {
-        "balancerKey": "kodik",
-        "balancerName": "Kodik",
+        "balancerKey": "filmix",
+        "balancerName": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "currentTime": 131,
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "currentTime": 220,
         "duration": 5971,
-        "updatedAt": 1793040858095
+        "updatedAt": 1793041014191
       }
     },
     "u_80ab0d1134f5": {
@@ -244,10 +244,10 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "PantsuVoice",
-        "currentTime": 557,
+        "voiceName": "AnimeVost",
+        "currentTime": 24,
         "duration": 6015,
-        "updatedAt": 1793041269725
+        "updatedAt": 1793041177571
       }
     }
   },
@@ -814,9 +814,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 475.69426215368054,
+        "currentTime": 493.2219878099754,
         "rate": 1,
-        "updatedAt": 1793041269591
+        "updatedAt": 1793041286910
       },
       "messages": [
         {
