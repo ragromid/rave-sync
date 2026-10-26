@@ -793,13 +793,26 @@
     if (!(await ensureAuthenticated())) return;
     const clean = String(code || '').trim().toUpperCase();
     if (!clean) return;
-    socket.emit('room:join', { code: clean, token: state.token });
+    if (socket.connected) {
+      socket.emit('room:join', { code: clean, token: state.token });
+    } else {
+      try {
+        const res = await api(`/api/rooms/${encodeURIComponent(clean)}/join`, { method: 'POST' });
+        if (res.room) handleRoomJoined(res.room);
+      } catch (e) {
+        showToast(e.message);
+      }
+    }
   }
 
   function leaveRoom() {
+    const prevCode = state.room?.code;
     stopVoiceChat();
     destroyPlayers();
     socket.emit('room:leave');
+    if (prevCode && !socket.connected) {
+      api(`/api/rooms/${encodeURIComponent(prevCode)}/leave`, { method: 'POST' }).catch(() => {});
+    }
     state.room = null;
     const url = new URL(window.location.href);
     url.searchParams.delete('room');
@@ -871,6 +884,17 @@
     if (state.room) {
       switchView('room');
       socket.emit('room:set_media', { media });
+      if (!socket.connected) {
+        api(`/api/rooms/${encodeURIComponent(state.room.code)}/sync`, {
+          method: 'POST',
+          body: JSON.stringify({ media })
+        }).then(r => {
+          if (r.room) {
+            state.room = r.room;
+            loadMediaIntoPlayer(r.room.media, r.room.playback);
+          }
+        }).catch(() => {});
+      }
     } else {
       const res = await api('/api/rooms', {
         method: 'POST',
@@ -1081,6 +1105,13 @@
 
       if (broadcastToRoom && state.room) {
         socket.emit('room:set_media', { media: newMedia });
+        if (!socket.connected) {
+          api(`/api/rooms/${encodeURIComponent(state.room.code)}/sync`, {
+            method: 'POST',
+            body: JSON.stringify({ media: newMedia })
+          }).catch(() => {});
+          loadMediaIntoPlayer(newMedia, { playing: true, currentTime: 0 });
+        }
       } else {
         loadMediaIntoPlayer(newMedia, { playing: true, currentTime: 0 });
       }
@@ -1420,12 +1451,21 @@
     if (action === 'timeupdate' && now - state.lastSyncAt < 3000) return;
     state.lastSyncAt = now;
 
-    socket.emit('player:sync', {
+    const payload = {
       action,
       playing: !mainVideo.paused,
       currentTime: mainVideo.currentTime || 0,
       rate: mainVideo.playbackRate || 1
-    });
+    };
+
+    if (socket.connected) {
+      socket.emit('player:sync', payload);
+    } else {
+      api(`/api/rooms/${encodeURIComponent(state.room.code)}/sync`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      }).catch(() => {});
+    }
 
     // Save playback timecode on the server
     if (state.user && state.room?.media?.movie?.id && mainVideo.currentTime > 5) {
@@ -1459,9 +1499,39 @@
     if (!mainVideo.muted) $('unmuteSyncBtn').classList.add('hidden');
   });
 
-  // Periodic 2.5s Heartbeat for tight multi-device sync + watch time stats
-  setInterval(() => {
-    if (!state.room || !state.room.media || state.room.media.streamType === 'youtube') return;
+  // Periodic 2.5s Heartbeat for tight multi-device sync + watch time stats + Serverless HTTP Room Poll
+  setInterval(async () => {
+    if (!state.room) return;
+
+    // If running on Vercel Serverless (where WebSockets are disabled), poll room state via HTTP
+    if (!socket.connected) {
+      try {
+        const isHost = state.user && state.room.hostId === state.user.id;
+        const body = isHost && state.room.media && state.room.media.streamType !== 'youtube' && !mainVideo.paused
+          ? { action: 'heartbeat', playing: true, currentTime: mainVideo.currentTime || 0, rate: mainVideo.playbackRate || 1 }
+          : {};
+        const res = await api(`/api/rooms/${encodeURIComponent(state.room.code)}/sync`, {
+          method: 'POST',
+          body: JSON.stringify(body)
+        });
+        if (res.room) {
+          const prevMediaUrl = state.room.media?.streamUrl || state.room.media?.youtubeId || '';
+          const nextMediaUrl = res.room.media?.streamUrl || res.room.media?.youtubeId || '';
+          state.room = res.room;
+          renderRoomHeader(res.room);
+          renderRoomParticipants(res.room.participants || []);
+          syncRoomMessagesFromPoll(res.room.messages || []);
+          if (nextMediaUrl && nextMediaUrl !== prevMediaUrl) {
+            loadMediaIntoPlayer(res.room.media, res.room.playback);
+          } else if (!isHost && res.room.playback) {
+            applyRemoteSync(res.room.playback, true);
+          }
+        }
+      } catch {}
+      return;
+    }
+
+    if (!state.room.media || state.room.media.streamType === 'youtube') return;
     if (mainVideo.paused || state.suppressSyncEmit) return;
     if (Date.now() < state.justLoadedMediaUntil && (mainVideo.currentTime || 0) < 2) return;
     socket.emit('player:heartbeat', {
@@ -1472,8 +1542,26 @@
     });
   }, 2500);
 
-  $('resyncPlayerBtn').addEventListener('click', () => {
-    socket.emit('player:request_sync');
+  // Serverless HTTP DM poll when in Friends / Room DMs on Vercel
+  setInterval(async () => {
+    if (socket.connected || !state.user) return;
+    const targetFriendId = state.currentView === 'friends' ? activeDmFriendId : (state.currentView === 'room' ? roomActiveDmFriendId : null);
+    if (!targetFriendId) return;
+    try {
+      const data = await api(`/api/dms/${encodeURIComponent(targetFriendId)}`);
+      syncDmMessagesFromPoll(targetFriendId, data.messages || []);
+    } catch {}
+  }, 3500);
+
+  $('resyncPlayerBtn').addEventListener('click', async () => {
+    if (socket.connected) {
+      socket.emit('player:request_sync');
+    } else if (state.room) {
+      try {
+        const res = await api(`/api/rooms/${encodeURIComponent(state.room.code)}`);
+        if (res.room?.playback) applyRemoteSync({ ...res.room.playback, action: 'resync' }, false);
+      } catch {}
+    }
     showToast('Синхронизировано с комнатой');
   });
 
@@ -1524,7 +1612,7 @@
     syncBadgeTimer = setTimeout(() => el.classList.add('hidden'), 2000);
   }
 
-  // ================= SOCKET.IO ROOM EVENTS =================
+  // ================= SOCKET.IO & ROOM EVENTS =================
   socket.on('rooms:public_list', (list) => {
     renderPublicRooms(list || []);
   });
@@ -1533,7 +1621,7 @@
     showToast(error || 'Ошибка комнаты');
   });
 
-  socket.on('room:joined', async (room) => {
+  async function handleRoomJoined(room) {
     state.room = room;
     switchView('room');
     setMobileRoomTab('chat');
@@ -1550,11 +1638,9 @@
     if (room.media) {
       if (room.media.type === 'z01' && room.media.movie) {
         if (room.media.streamUrl) {
-          // Stream is already resolved in the room! Play it immediately and load Z01 panel in background
           loadMediaIntoPlayer(room.media, room.playback);
           loadZ01ForMovieInRoom(room.media.movie, false);
         } else {
-          // Newly created room: resolve first working Z01 balancer & stream automatically
           await loadZ01ForMovieInRoom(room.media.movie, true);
         }
       } else {
@@ -1565,7 +1651,9 @@
       $('z01Panel').classList.add('hidden');
       setPlayerOverlay(true, false, 'Выберите фильм из каталога или вставьте ссылку');
     }
-  });
+  }
+
+  socket.on('room:joined', handleRoomJoined);
 
   socket.on('room:state', (room) => {
     state.room = room;
@@ -1601,6 +1689,10 @@
     appendChatMessage(msg, true);
   });
 
+  socket.on('chat:updated', (msg) => {
+    updateChatMessageDom(msg, 'room');
+  });
+
   socket.on('room:reaction', ({ emoji }) => {
     spawnFloatingEmoji(emoji);
   });
@@ -1622,6 +1714,387 @@
     if (text) showToast(text);
   });
 
+  // ================= RICH CHAT ENGINE (PHOTOS, VIEW-ONCE, REPLIES & REACTIONS) =================
+  const composers = {
+    room: { replyTo: null, imageUrl: '', viewOnce: false, barId: 'chatComposerBar', inputId: 'chatInput' },
+    dm: { replyTo: null, imageUrl: '', viewOnce: false, barId: 'dmComposerBar', inputId: 'dmInput' },
+    roomDm: { replyTo: null, imageUrl: '', viewOnce: false, barId: 'roomDmComposerBar', inputId: 'roomDmInput' }
+  };
+  let activePhotoTarget = 'room';
+
+  function resizeChatImageFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Не удалось прочитать фото'));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('Некорректный формат изображения'));
+        img.onload = () => {
+          const maxDim = 1080;
+          let { width, height } = img;
+          if (width > maxDim || height > maxDim) {
+            if (width >= height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.8));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderComposerBar(target) {
+    const c = composers[target];
+    if (!c) return;
+    const bar = $(c.barId);
+    if (!bar) return;
+
+    if (!c.replyTo && !c.imageUrl) {
+      bar.classList.add('hidden');
+      bar.innerHTML = '';
+      return;
+    }
+
+    bar.classList.remove('hidden');
+    let html = '';
+    if (c.replyTo) {
+      html += `
+        <div class="composer-item">
+          <div class="composer-item-left">
+            <span>↩️</span>
+            <div class="composer-text">Ответ <strong>${esc(c.replyTo.senderName)}</strong>: ${esc(c.replyTo.text || '📷 Фото')}</div>
+          </div>
+          <button type="button" class="composer-cancel-btn" data-clear-reply="${esc(target)}">✕</button>
+        </div>
+      `;
+    }
+    if (c.imageUrl) {
+      html += `
+        <div class="composer-item">
+          <div class="composer-item-left">
+            <img class="composer-thumb" src="${esc(c.imageUrl)}" alt="" />
+            <div class="composer-text">${c.viewOnce ? '💣 <strong>Одноразовое фото</strong> (исчезнет после просмотра)' : '📷 <strong>Фотография</strong>'}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button type="button" class="composer-viewonce-btn ${c.viewOnce ? 'active' : ''}" data-toggle-viewonce="${esc(target)}" title="Сделать фото одноразовым">
+              💣 1 раз
+            </button>
+            <button type="button" class="composer-cancel-btn" data-clear-photo="${esc(target)}">✕</button>
+          </div>
+        </div>
+      `;
+    }
+    bar.innerHTML = html;
+
+    bar.querySelectorAll('[data-clear-reply]').forEach(btn => {
+      btn.onclick = () => {
+        c.replyTo = null;
+        renderComposerBar(target);
+      };
+    });
+    bar.querySelectorAll('[data-clear-photo]').forEach(btn => {
+      btn.onclick = () => {
+        c.imageUrl = '';
+        c.viewOnce = false;
+        renderComposerBar(target);
+      };
+    });
+    bar.querySelectorAll('[data-toggle-viewonce]').forEach(btn => {
+      btn.onclick = () => {
+        c.viewOnce = !c.viewOnce;
+        renderComposerBar(target);
+      };
+    });
+  }
+
+  function setComposerReply(target, msg) {
+    const c = composers[target];
+    if (!c) return;
+    const senderName = msg.user?.displayName || msg.sender?.displayName || 'Друг';
+    c.replyTo = {
+      id: msg.id,
+      senderName,
+      text: msg.text || (msg.viewOnce ? '💣 Одноразовое фото' : (msg.hasPhoto || msg.imageUrl ? '📷 Фото' : '')),
+      hasPhoto: !!(msg.hasPhoto || msg.imageUrl)
+    };
+    renderComposerBar(target);
+    $(c.inputId)?.focus();
+  }
+
+  document.querySelectorAll('.attach-photo-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activePhotoTarget = btn.dataset.chatTarget || 'room';
+      $('chatPhotoInput').value = '';
+      $('chatPhotoInput').click();
+    });
+  });
+
+  $('chatPhotoInput')?.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const dataUrl = await resizeChatImageFile(file);
+      const c = composers[activePhotoTarget];
+      if (c) {
+        c.imageUrl = dataUrl;
+        renderComposerBar(activePhotoTarget);
+        $(c.inputId)?.focus();
+      }
+    } catch (err) {
+      showToast(err.message);
+    }
+  });
+
+  function openPhotoLightbox(imageUrl, caption = '', isViewOnce = false) {
+    if (!imageUrl) return;
+    $('photoViewerImg').src = imageUrl;
+    $('photoViewerCaption').textContent = caption || '';
+    $('photoViewerBadge').classList.toggle('hidden', !isViewOnce);
+    $('photoViewerModal').classList.remove('hidden');
+  }
+
+  async function handleViewOnceClick(msg, contextType, friendId = null) {
+    if (msg.viewed) {
+      showToast('Это одноразовое фото уже было просмотрено и удалено');
+      return;
+    }
+    try {
+      if (contextType === 'room') {
+        if (!state.room) return;
+        const res = await api(`/api/rooms/${encodeURIComponent(state.room.code)}/chat/view-once`, {
+          method: 'POST',
+          body: JSON.stringify({ messageId: msg.id })
+        });
+        if (res.imageUrl) {
+          openPhotoLightbox(res.imageUrl, msg.text || '', true);
+        }
+        if (res.message) updateChatMessageDom(res.message, 'room');
+      } else {
+        const targetFriend = friendId || activeDmFriendId || roomActiveDmFriendId;
+        if (!targetFriend) return;
+        const res = await api(`/api/dms/${encodeURIComponent(targetFriend)}/view-once`, {
+          method: 'POST',
+          body: JSON.stringify({ messageId: msg.id })
+        });
+        if (res.imageUrl) {
+          openPhotoLightbox(res.imageUrl, msg.text || '', true);
+        }
+        if (res.message) updateChatMessageDom(res.message, 'dm');
+      }
+    } catch (e) {
+      showToast(e.message);
+    }
+  }
+
+  async function handleToggleMessageReaction(msg, emoji, contextType, friendId = null) {
+    if (contextType === 'room') {
+      if (!state.room) return;
+      if (socket.connected) {
+        socket.emit('chat:react', { messageId: msg.id, emoji });
+      } else {
+        try {
+          const res = await api(`/api/rooms/${encodeURIComponent(state.room.code)}/chat/react`, {
+            method: 'POST',
+            body: JSON.stringify({ messageId: msg.id, emoji })
+          });
+          if (res.message) updateChatMessageDom(res.message, 'room');
+        } catch {}
+      }
+    } else {
+      const targetFriend = friendId || (msg.fromId === state.user?.id ? msg.toId : msg.fromId) || activeDmFriendId || roomActiveDmFriendId;
+      if (!targetFriend) return;
+      if (socket.connected) {
+        socket.emit('dm:react', { friendId: targetFriend, messageId: msg.id, emoji });
+      } else {
+        try {
+          const res = await api(`/api/dms/${encodeURIComponent(targetFriend)}/react`, {
+            method: 'POST',
+            body: JSON.stringify({ messageId: msg.id, emoji })
+          });
+          if (res.message) updateChatMessageDom(res.message, 'dm');
+        } catch {}
+      }
+    }
+  }
+
+  function buildRichBubbleInner(msg, options = {}) {
+    const { showAuthor = false, showTime = false } = options;
+    const u = msg.user || msg.sender || {};
+    let html = '';
+
+    if (showAuthor) {
+      html += `<div class="chat-author" style="color:${esc(u.color || '#9175ff')}">${esc(u.displayName || 'Гость')}</div>`;
+    }
+
+    if (msg.replyTo && msg.replyTo.id) {
+      html += `
+        <div class="msg-reply-quote" data-scroll-msg="${esc(msg.replyTo.id)}">
+          <div class="msg-reply-author">${esc(msg.replyTo.senderName || 'Сообщение')}</div>
+          <div class="msg-reply-text">${esc(msg.replyTo.text || '📷 Фото')}</div>
+        </div>
+      `;
+    }
+
+    if (msg.viewOnce) {
+      if (msg.viewed) {
+        html += `<div class="msg-view-once-btn viewed">💨 Фото просмотрено</div>`;
+      } else {
+        const isSender = state.user && (msg.fromId === state.user.id || msg.user?.id === state.user.id);
+        html += `<button type="button" class="msg-view-once-btn" data-open-viewonce="1">💣 Одноразовое фото ${isSender ? '(Отправлено)' : '· Открыть'}</button>`;
+      }
+    } else if (msg.imageUrl) {
+      html += `<img class="msg-photo" src="${esc(msg.imageUrl)}" alt="Фото" loading="lazy" />`;
+    }
+
+    if (msg.text) {
+      html += `<div class="chat-text">${esc(msg.text)}</div>`;
+    }
+
+    if (showTime) {
+      html += `<div class="chat-time">${esc(formatMsgTime(msg.createdAt))}</div>`;
+    }
+
+    return html;
+  }
+
+  function buildReactionsAndActionsHtml(msg) {
+    const reactions = msg.reactions || {};
+    const rxEntries = Object.entries(reactions).filter(([, arr]) => Array.isArray(arr) && arr.length > 0);
+    let rxHtml = '';
+    if (rxEntries.length > 0) {
+      rxHtml = `<div class="msg-reactions-bar">` + rxEntries.map(([emoji, users]) => {
+        const mine = state.user && users.includes(state.user.id);
+        return `<button type="button" class="msg-rx-pill ${mine ? 'mine' : ''}" data-rx="${esc(emoji)}"><span>${esc(emoji)}</span><span>${users.length}</span></button>`;
+      }).join('') + `</div>`;
+    }
+
+    const actionsHtml = `
+      <div class="msg-actions-bar">
+        <button type="button" class="msg-act-btn" data-reply-btn="1" title="Ответить">↩️</button>
+        <button type="button" class="msg-act-btn" data-rx="❤️">❤️</button>
+        <button type="button" class="msg-act-btn" data-rx="🔥">🔥</button>
+        <button type="button" class="msg-act-btn" data-rx="😂">😂</button>
+        <button type="button" class="msg-act-btn" data-rx="👍">👍</button>
+      </div>
+    `;
+
+    return rxHtml + actionsHtml;
+  }
+
+  function bindRichMessageEvents(el, msg, contextType, composerTarget, friendId = null) {
+    const u = msg.user || msg.sender || {};
+    const av = el.querySelector('.chat-av');
+    if (av && u.id) av.onclick = () => openUserCard(u.id);
+
+    const photo = el.querySelector('.msg-photo');
+    if (photo && msg.imageUrl) {
+      photo.onclick = () => openPhotoLightbox(msg.imageUrl, msg.text || '', false);
+    }
+
+    const voBtn = el.querySelector('[data-open-viewonce]');
+    if (voBtn) {
+      voBtn.onclick = () => handleViewOnceClick(msg, contextType, friendId);
+    }
+
+    const quote = el.querySelector('[data-scroll-msg]');
+    if (quote) {
+      quote.onclick = () => {
+        const targetEl = document.querySelector(`[data-msg-id="${CSS.escape(msg.replyTo.id)}"]`);
+        if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      };
+    }
+
+    const replyBtn = el.querySelector('[data-reply-btn]');
+    if (replyBtn) {
+      replyBtn.onclick = () => setComposerReply(composerTarget, msg);
+    }
+
+    el.querySelectorAll('[data-rx]').forEach(btn => {
+      btn.onclick = () => handleToggleMessageReaction(msg, btn.dataset.rx, contextType, friendId);
+    });
+  }
+
+  function createRichMessageElement(msg, contextType = 'room', composerTarget = 'room', friendId = null) {
+    const el = document.createElement('div');
+    el.dataset.msgId = msg.id || '';
+
+    if (msg.system) {
+      el.className = 'chat-msg system';
+      el.textContent = msg.text;
+      return el;
+    }
+
+    const uid = msg.fromId || msg.user?.id || '';
+    const isOwn = state.user && uid === state.user.id;
+    const u = msg.user || msg.sender || (isOwn ? state.user : {});
+    el.className = `chat-msg ${contextType === 'dm' && isOwn ? 'own' : ''}`;
+
+    el.innerHTML = `
+      <div class="chat-av" style="background:${esc(u?.color || '#7c5cff')}">${avatarInnerHtml(u)}</div>
+      <div class="chat-msg-body">
+        <div class="chat-bubble">
+          ${buildRichBubbleInner(msg, { showAuthor: contextType === 'room', showTime: contextType === 'dm' })}
+        </div>
+        ${buildReactionsAndActionsHtml(msg)}
+      </div>
+    `;
+
+    bindRichMessageEvents(el, msg, contextType, composerTarget, friendId);
+    return el;
+  }
+
+  function updateChatMessageDom(msg, contextType = 'room') {
+    if (!msg || !msg.id) return;
+    document.querySelectorAll(`[data-msg-id="${CSS.escape(msg.id)}"]`).forEach(existing => {
+      const parentId = existing.parentElement?.id || '';
+      const composerTarget = parentId === 'roomDmMessages' ? 'roomDm' : (parentId === 'dmMessages' ? 'dm' : 'room');
+      const friendId = composerTarget === 'roomDm' ? roomActiveDmFriendId : activeDmFriendId;
+      const fresh = createRichMessageElement(msg, contextType, composerTarget, friendId);
+      existing.replaceWith(fresh);
+    });
+  }
+
+  function syncRoomMessagesFromPoll(messages) {
+    const box = $('chatMessages');
+    if (!box) return;
+    messages.forEach(m => {
+      const existing = box.querySelector(`[data-msg-id="${CSS.escape(m.id)}"]`);
+      if (!existing) {
+        appendChatMessage(m, false);
+      }
+    });
+  }
+
+  function syncDmMessagesFromPoll(friendId, messages) {
+    ['dmMessages', 'roomDmMessages'].forEach(boxId => {
+      const box = $(boxId);
+      if (!box) return;
+      const isTarget = (boxId === 'dmMessages' && activeDmFriendId === friendId) ||
+                       (boxId === 'roomDmMessages' && roomActiveDmFriendId === friendId);
+      if (!isTarget) return;
+      messages.forEach(m => {
+        const existing = box.querySelector(`[data-msg-id="${CSS.escape(m.id)}"]`);
+        if (!existing) {
+          if (box.querySelector('div[style*="text-align:center"]')) box.innerHTML = '';
+          const compTarget = boxId === 'roomDmMessages' ? 'roomDm' : 'dm';
+          box.appendChild(createRichMessageElement(m, 'dm', compTarget, friendId));
+          box.scrollTop = box.scrollHeight;
+        }
+      });
+    });
+  }
+
   // ================= ROOM UI: HEADER, CHAT, REACTIONS, PARTICIPANTS =================
   function renderRoomHeader(room) {
     $('roomTitleText').textContent = room.name;
@@ -1635,6 +2108,12 @@
     if (!state.room) return;
     const nextPublic = !state.room.isPublic;
     socket.emit('room:settings', { isPublic: nextPublic });
+    if (!socket.connected) {
+      api(`/api/rooms/${encodeURIComponent(state.room.code)}/sync`, {
+        method: 'POST',
+        body: JSON.stringify({ settings: { isPublic: nextPublic } })
+      }).catch(() => {});
+    }
     showToast(nextPublic ? 'Комната теперь публичная' : 'Комната теперь приватная (только по коду/ссылке)');
   });
 
@@ -1675,7 +2154,8 @@
     if (!overlay) return;
     const pill = document.createElement('div');
     pill.className = 'vchat-pill';
-    pill.innerHTML = `<strong>${esc(msg.user.displayName)}:</strong> <span>${esc(msg.text)}</span>`;
+    const preview = msg.text || (msg.viewOnce ? '💣 Одноразовое фото' : '📷 Фото');
+    pill.innerHTML = `<strong>${esc(msg.user.displayName)}:</strong> <span>${esc(preview)}</span>`;
     overlay.appendChild(pill);
     while (overlay.children.length > 3) {
       overlay.firstElementChild.remove();
@@ -1687,32 +2167,16 @@
 
   function appendChatMessage(msg, isLive = false) {
     const box = $('chatMessages');
-    const el = document.createElement('div');
-    if (msg.system) {
-      el.className = 'chat-msg system';
-      el.textContent = msg.text;
-    } else {
-      el.className = 'chat-msg';
-      el.innerHTML = `
-        <div class="chat-av" style="background:${esc(msg.user?.color || '#7c5cff')}" data-uid="${esc(msg.user?.id || '')}">${avatarInnerHtml(msg.user)}</div>
-        <div class="chat-bubble">
-          <div class="chat-author" style="color:${esc(msg.user?.color || '#9175ff')}">${esc(msg.user?.displayName || 'Гость')}</div>
-          <div class="chat-text">${esc(msg.text)}</div>
-        </div>
-      `;
-      const avEl = el.querySelector('.chat-av');
-      if (avEl && msg.user?.id) {
-        avEl.addEventListener('click', () => openUserCard(msg.user.id));
-      }
-      if (isLive) {
-        spawnVideoChatPill(msg);
-        if (state.mobileRoomTab !== 'chat') {
-          state.unreadChatCount++;
-          const badge = $('chatUnreadBadge');
-          if (badge) {
-            badge.textContent = state.unreadChatCount;
-            badge.classList.remove('hidden');
-          }
+    if (msg.id && box.querySelector(`[data-msg-id="${CSS.escape(msg.id)}"]`)) return;
+    const el = createRichMessageElement(msg, 'room', 'room', null);
+    if (!msg.system && isLive) {
+      spawnVideoChatPill(msg);
+      if (state.mobileRoomTab !== 'chat') {
+        state.unreadChatCount++;
+        const badge = $('chatUnreadBadge');
+        if (badge) {
+          badge.textContent = state.unreadChatCount;
+          badge.classList.remove('hidden');
         }
       }
     }
@@ -1720,13 +2184,40 @@
     box.scrollTop = box.scrollHeight;
   }
 
-  $('chatForm').addEventListener('submit', (e) => {
+  $('chatForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (!state.room) return;
     const input = $('chatInput');
     const text = input.value.trim();
-    if (!text) return;
-    socket.emit('chat:send', { text });
+    const comp = composers.room;
+    if (!text && !comp.imageUrl) return;
+
+    const payload = {
+      text,
+      imageUrl: comp.imageUrl || '',
+      viewOnce: !!comp.viewOnce,
+      replyTo: comp.replyTo || null
+    };
+
     input.value = '';
+    comp.imageUrl = '';
+    comp.viewOnce = false;
+    comp.replyTo = null;
+    renderComposerBar('room');
+
+    if (socket.connected) {
+      socket.emit('chat:send', payload);
+    } else {
+      try {
+        const res = await api(`/api/rooms/${encodeURIComponent(state.room.code)}/chat`, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        if (res.message) appendChatMessage(res.message, false);
+      } catch (err) {
+        showToast(err.message);
+      }
+    }
   });
 
   // Mobile Room Quick Switcher (💬 Комната | 💌 Друзья | 🎞️ Озвучка | 👥 Зрители)
@@ -1776,6 +2267,7 @@
   document.querySelectorAll('.emoji-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       socket.emit('room:reaction', { emoji: btn.dataset.emoji });
+      if (!socket.connected) spawnFloatingEmoji(btn.dataset.emoji);
     });
   });
 
@@ -1947,23 +2439,6 @@
     }
   }
 
-  function createDmBubbleEl(msg) {
-    const isOwn = state.user && msg.fromId === state.user.id;
-    const el = document.createElement('div');
-    el.className = `chat-msg ${isOwn ? 'own' : ''}`;
-    const u = msg.sender || (isOwn ? state.user : {});
-    el.innerHTML = `
-      <div class="chat-av" style="background:${esc(u?.color || '#7c5cff')}">${avatarInnerHtml(u)}</div>
-      <div class="chat-bubble">
-        <div class="chat-text">${esc(msg.text)}</div>
-        <div class="chat-time">${esc(formatMsgTime(msg.createdAt))}</div>
-      </div>
-    `;
-    const av = el.querySelector('.chat-av');
-    if (av && u?.id) av.onclick = () => openUserCard(u.id);
-    return el;
-  }
-
   async function openFriendChat(friendId) {
     activeDmFriendId = friendId;
     $('friendsLayout')?.classList.add('chat-open');
@@ -1987,9 +2462,9 @@
       box.innerHTML = '';
       const msgs = data.messages || [];
       if (msgs.length === 0) {
-        box.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.84rem;">Сообщений пока нет. Напишите привет! 👋</div>';
+        box.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.84rem;">Сообщений пока нет. Напишите привет или отправьте фото! 👋📷</div>';
       } else {
-        msgs.forEach(m => box.appendChild(createDmBubbleEl(m)));
+        msgs.forEach(m => box.appendChild(createRichMessageElement(m, 'dm', 'dm', friendId)));
         box.scrollTop = box.scrollHeight;
       }
       $('dmInput')?.focus();
@@ -2002,14 +2477,47 @@
     $('friendsLayout')?.classList.remove('chat-open');
   });
 
+  async function submitDirectMessageForm(friendId, inputId, composerKey) {
+    if (!friendId) return;
+    const input = $(inputId);
+    const text = input ? input.value.trim() : '';
+    const comp = composers[composerKey];
+    if (!text && (!comp || !comp.imageUrl)) return;
+
+    const payload = {
+      toId: friendId,
+      text,
+      imageUrl: comp?.imageUrl || '',
+      viewOnce: !!comp?.viewOnce,
+      replyTo: comp?.replyTo || null
+    };
+
+    if (input) input.value = '';
+    if (comp) {
+      comp.imageUrl = '';
+      comp.viewOnce = false;
+      comp.replyTo = null;
+      renderComposerBar(composerKey);
+    }
+
+    if (socket.connected) {
+      socket.emit('dm:send', payload);
+    } else {
+      try {
+        const res = await api(`/api/dms/${encodeURIComponent(friendId)}`, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        if (res.message) handleIncomingOrOutgoingDm(res.message);
+      } catch (err) {
+        showToast(err.message);
+      }
+    }
+  }
+
   $('dmForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (!activeDmFriendId) return;
-    const input = $('dmInput');
-    const text = input.value.trim();
-    if (!text) return;
-    socket.emit('dm:send', { toId: activeDmFriendId, text });
-    input.value = '';
+    submitDirectMessageForm(activeDmFriendId, 'dmInput', 'dm');
   });
 
   // Friends Private Chat inside Watch Party Room (#rtab-dms)
@@ -2067,7 +2575,7 @@
     try {
       const data = await api(`/api/dms/${encodeURIComponent(friendId)}`);
       box.innerHTML = '';
-      (data.messages || []).forEach(m => box.appendChild(createDmBubbleEl(m)));
+      (data.messages || []).forEach(m => box.appendChild(createRichMessageElement(m, 'dm', 'roomDm', friendId)));
       box.scrollTop = box.scrollHeight;
       $('roomDmInput')?.focus();
     } catch {}
@@ -2082,22 +2590,17 @@
 
   $('roomDmForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (!roomActiveDmFriendId) return;
-    const input = $('roomDmInput');
-    const text = input.value.trim();
-    if (!text) return;
-    socket.emit('dm:send', { toId: roomActiveDmFriendId, text });
-    input.value = '';
+    submitDirectMessageForm(roomActiveDmFriendId, 'roomDmInput', 'roomDm');
   });
 
-  // Real-time incoming/outgoing Direct Message handler
-  socket.on('dm:message', (msg) => {
+  function handleIncomingOrOutgoingDm(msg) {
     if (!state.user) return;
     const otherId = msg.fromId === state.user.id ? msg.toId : msg.fromId;
     const friend = state.friends.find(x => x.id === otherId);
+    const previewText = msg.text || (msg.viewOnce ? '💣 Одноразовое фото' : (msg.hasPhoto || msg.imageUrl ? '📷 Фото' : ''));
     if (friend) {
       friend.lastMessage = {
-        text: msg.text,
+        text: previewText,
         fromId: msg.fromId,
         createdAt: msg.createdAt
       };
@@ -2108,17 +2611,17 @@
 
     if (activeDmFriendId === otherId) {
       const box = $('dmMessages');
-      if (box) {
+      if (box && !box.querySelector(`[data-msg-id="${CSS.escape(msg.id)}"]`)) {
         if (box.querySelector('div[style*="text-align:center"]')) box.innerHTML = '';
-        box.appendChild(createDmBubbleEl(msg));
+        box.appendChild(createRichMessageElement(msg, 'dm', 'dm', otherId));
         box.scrollTop = box.scrollHeight;
       }
     }
 
     if (roomActiveDmFriendId === otherId) {
       const rBox = $('roomDmMessages');
-      if (rBox) {
-        rBox.appendChild(createDmBubbleEl(msg));
+      if (rBox && !rBox.querySelector(`[data-msg-id="${CSS.escape(msg.id)}"]`)) {
+        rBox.appendChild(createRichMessageElement(msg, 'dm', 'roomDm', otherId));
         rBox.scrollTop = rBox.scrollHeight;
       }
     }
@@ -2129,7 +2632,7 @@
       } else {
         if (friend) friend.unreadCount = (friend.unreadCount || 0) + 1;
         showToast(
-          `💌 ${msg.sender?.displayName || 'Друг'}: ${msg.text}`,
+          `💌 ${msg.sender?.displayName || 'Друг'}: ${previewText}`,
           'Ответить',
           () => {
             if (state.currentView === 'room') {
@@ -2148,6 +2651,13 @@
     updateDmBadges();
     renderFriendsView();
     renderRoomDmFriendsList();
+  }
+
+  // Real-time incoming/outgoing Direct Message handler
+  socket.on('dm:message', handleIncomingOrOutgoingDm);
+
+  socket.on('dm:updated', (msg) => {
+    updateChatMessageDom(msg, 'dm');
   });
 
   async function respondFriend(requestId, accept) {

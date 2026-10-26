@@ -2,7 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
+const os = require('os');
+const DATA_DIR = process.env.VERCEL
+  ? path.join(os.tmpdir(), 'ravelampa-data')
+  : path.join(__dirname, '..', 'data');
 const DB_FILE = path.join(DATA_DIR, 'database.json');
 const JWT_SECRET = process.env.JWT_SECRET || 'rave-lampa-z01-secret-key-2026';
 
@@ -41,11 +44,14 @@ const DEFAULT_DB = {
   history: {},     // userId -> [ { movie, balancer, balancerKey, season, episode, voiceName, currentTime, duration, updatedAt } ]
   progress: {},    // userId -> { [movieId]: { balancerKey, balancerName, season, episode, voiceName, currentTime, duration, updatedAt } }
   dms: {},         // pairKey ("u1:u2") -> [ { id, fromId, toId, text, createdAt, read } ]
-  deletedUsers: {} // userId -> deletedAt timestamp (so deleted users are not re-added during merge)
+  deletedUsers: {}, // userId -> deletedAt timestamp (so deleted users are not re-added during merge)
+  savedRooms: {}   // roomCode -> serialized room state for serverless/Vercel persistence
 };
 
 let db = loadLocalDb();
 let cloudInitialized = false;
+let lastCloudLoadAt = 0;
+let cloudInitPromise = null;
 let cloudFileSha = null;
 let cloudSyncTimer = null;
 let cloudSyncInFlight = false;
@@ -128,9 +134,24 @@ function mergeDb(base, incoming) {
     history: { ...(base?.history || {}), ...(incoming.history && typeof incoming.history === 'object' ? incoming.history : {}) },
     progress: { ...(base?.progress || {}), ...(incoming.progress && typeof incoming.progress === 'object' ? incoming.progress : {}) },
     dms: { ...(base?.dms || {}), ...(incoming.dms && typeof incoming.dms === 'object' ? incoming.dms : {}) },
-    deletedUsers
+    deletedUsers,
+    savedRooms: { ...(base?.savedRooms || {}), ...(incoming.savedRooms && typeof incoming.savedRooms === 'object' ? incoming.savedRooms : {}) }
   };
   return out;
+}
+
+async function ensureCloudLoaded() {
+  if (!cloudInitialized) {
+    if (!cloudInitPromise) {
+      cloudInitPromise = initCloudDb().finally(() => { cloudInitPromise = null; });
+    }
+    await cloudInitPromise;
+    return;
+  }
+  // On Vercel Serverless, refresh from cloud if more than 3.5s elapsed since last pull
+  if (process.env.VERCEL && Date.now() - lastCloudLoadAt > 3500 && !cloudSyncInFlight) {
+    await initCloudDb();
+  }
 }
 
 // Initialize & pull persistent DB from cloud branch on server startup
@@ -185,19 +206,23 @@ async function initCloudDb() {
       const remoteDb = JSON.parse(contentStr);
       // Merge remote DB with any local changes
       db = mergeDb(remoteDb, db);
-      fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
+      try { fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8'); } catch {}
       cloudInitialized = true;
+      lastCloudLoadAt = Date.now();
       console.log(`[CloudDB] Loaded persistent database from GitHub (${db.users.length} users)`);
     } else if (fileRes.status === 404) {
       cloudInitialized = true;
+      lastCloudLoadAt = Date.now();
       await pushToCloudDb();
       console.log(`[CloudDB] Initialized new database.json on GitHub (${GH_BRANCH})`);
     } else {
       cloudInitialized = true;
+      lastCloudLoadAt = Date.now();
       console.error('[CloudDB] Unexpected status from GitHub:', fileRes.status);
     }
   } catch (e) {
     cloudInitialized = true;
+    lastCloudLoadAt = Date.now();
     console.error('[CloudDB] Startup sync warning:', e.message);
   }
 }
@@ -560,11 +585,21 @@ function getFriendsData(userId) {
           const msgs = db.dms[pairKey] || [];
           const unreadCount = msgs.filter(m => m.toId === userId && !m.read).length;
           const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+          let lastPreview = '';
+          if (lastMsg) {
+            if (lastMsg.viewOnce) {
+              lastPreview = lastMsg.viewed ? '💨 Фото просмотрено' : '💣 Одноразовое фото';
+            } else if (lastMsg.imageUrl) {
+              lastPreview = lastMsg.text ? `📷 ${lastMsg.text}` : '📷 Фотография';
+            } else {
+              lastPreview = lastMsg.text || '';
+            }
+          }
           friends.push({
             ...u,
             unreadCount,
             lastMessage: lastMsg ? {
-              text: lastMsg.text,
+              text: lastPreview,
               fromId: lastMsg.fromId,
               createdAt: lastMsg.createdAt
             } : null
@@ -595,9 +630,12 @@ function getDirectMessages(userId, friendId) {
       changed = true;
     }
   }
-  if (changed) saveDb();
+  if (changed) saveDb(false);
   return msgs.map(m => ({
     ...m,
+    // For view-once photos, do not expose raw imageUrl in history list until explicitly opened!
+    imageUrl: m.viewOnce ? '' : (m.imageUrl || ''),
+    hasImage: !!(m.imageUrl || m.hasImage),
     sender: getUserById(m.fromId)
   }));
 }
@@ -613,12 +651,16 @@ function markDirectMessagesRead(userId, friendId) {
       changed = true;
     }
   }
-  if (changed) saveDb();
+  if (changed) saveDb(false);
 }
 
-function sendDirectMessage(fromId, toId, text) {
-  const cleanText = String(text || '').trim().slice(0, 600);
-  if (!cleanText) throw new Error('Пустое сообщение');
+function sendDirectMessage(fromId, toId, payload) {
+  const opts = typeof payload === 'string' ? { text: payload } : (payload || {});
+  const cleanText = String(opts.text || '').trim().slice(0, 600);
+  const cleanImage = String(opts.imageUrl || '').trim();
+  if (!cleanText && !cleanImage) throw new Error('Пустое сообщение');
+  if (cleanImage.length > 900000) throw new Error('Слишком большой размер фото');
+
   const sender = getUserById(fromId);
   const recipient = getUserById(toId);
   if (!sender || !recipient) throw new Error('Пользователь не найден');
@@ -627,11 +669,28 @@ function sendDirectMessage(fromId, toId, text) {
   const pairKey = getDmPairKey(fromId, toId);
   if (!db.dms[pairKey]) db.dms[pairKey] = [];
 
+  let replyTo = null;
+  if (opts.replyTo && opts.replyTo.id) {
+    replyTo = {
+      id: String(opts.replyTo.id),
+      authorName: String(opts.replyTo.authorName || '').slice(0, 40),
+      text: String(opts.replyTo.text || '').slice(0, 140),
+      hasImage: !!opts.replyTo.hasImage
+    };
+  }
+
+  const isViewOnce = !!(cleanImage && opts.viewOnce);
   const msg = {
     id: 'dm_' + crypto.randomBytes(6).toString('hex'),
     fromId,
     toId,
     text: cleanText,
+    imageUrl: cleanImage,
+    hasImage: !!cleanImage,
+    viewOnce: isViewOnce,
+    viewed: false,
+    replyTo,
+    reactions: {},
     createdAt: Date.now(),
     read: false
   };
@@ -640,12 +699,63 @@ function sendDirectMessage(fromId, toId, text) {
     db.dms[pairKey] = db.dms[pairKey].slice(-150);
   }
   incrementUserStat(fromId, 'messagesSent', 1);
-  saveDb();
+  saveDb(true);
 
   return {
     ...msg,
+    imageUrl: isViewOnce ? '' : msg.imageUrl,
     sender,
     recipient
+  };
+}
+
+function toggleDmReaction(userId, friendId, messageId, emoji) {
+  if (!db.dms) db.dms = {};
+  const pairKey = getDmPairKey(userId, friendId);
+  const msgs = db.dms[pairKey] || [];
+  const msg = msgs.find(m => m.id === messageId);
+  if (!msg) throw new Error('Сообщение не найдено');
+
+  const cleanEmoji = String(emoji || '❤️').slice(0, 8);
+  if (!msg.reactions || typeof msg.reactions !== 'object') msg.reactions = {};
+  if (!Array.isArray(msg.reactions[cleanEmoji])) msg.reactions[cleanEmoji] = [];
+
+  const idx = msg.reactions[cleanEmoji].indexOf(userId);
+  if (idx >= 0) {
+    msg.reactions[cleanEmoji].splice(idx, 1);
+    if (msg.reactions[cleanEmoji].length === 0) delete msg.reactions[cleanEmoji];
+  } else {
+    msg.reactions[cleanEmoji].push(userId);
+  }
+  saveDb(true);
+  return {
+    messageId: msg.id,
+    fromId: msg.fromId,
+    toId: msg.toId,
+    reactions: msg.reactions
+  };
+}
+
+function consumeDmViewOnce(userId, friendId, messageId) {
+  if (!db.dms) db.dms = {};
+  const pairKey = getDmPairKey(userId, friendId);
+  const msgs = db.dms[pairKey] || [];
+  const msg = msgs.find(m => m.id === messageId);
+  if (!msg) throw new Error('Сообщение не найдено');
+  if (!msg.viewOnce) throw new Error('Это обычное фото');
+  if (msg.viewed || !msg.imageUrl) {
+    throw new Error('Одноразовое фото уже было просмотрено и удалено');
+  }
+  const dataUrl = msg.imageUrl;
+  msg.viewed = true;
+  msg.imageUrl = ''; // Permanently wipe photo after 1 view
+  saveDb(true);
+  return {
+    messageId: msg.id,
+    fromId: msg.fromId,
+    toId: msg.toId,
+    imageUrl: dataUrl,
+    viewed: true
   };
 }
 
@@ -798,8 +908,20 @@ function adminImpersonateUser(userId) {
   return { user: publicUser(u), token: signToken(u) };
 }
 
+function saveRoomsSnapshot(roomsObj, immediate = false) {
+  db.savedRooms = roomsObj || {};
+  saveDb(immediate);
+}
+
+function getSavedRoomsSnapshot() {
+  return db.savedRooms || {};
+}
+
 module.exports = {
   initCloudDb,
+  ensureCloudLoaded,
+  saveRoomsSnapshot,
+  getSavedRoomsSnapshot,
   registerUser,
   loginUser,
   verifyToken,
@@ -813,6 +935,8 @@ module.exports = {
   getFriendsData,
   getDirectMessages,
   sendDirectMessage,
+  toggleDmReaction,
+  consumeDmViewOnce,
   markDirectMessagesRead,
   toggleBookmark,
   getBookmarks,

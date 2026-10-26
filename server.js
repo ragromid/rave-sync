@@ -13,7 +13,7 @@ const io = new Server(server, {
   cors: { origin: '*' }
 });
 
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '5mb' }));
 
 // Защита от индексации поисковиками и DMCA-ботами
 app.use((req, res, next) => {
@@ -23,13 +23,71 @@ app.use((req, res, next) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Active rooms in memory
+// Active rooms in memory (also persisted to DB for Vercel Serverless compatibility)
 // roomCode -> roomObject
 const rooms = new Map();
 // userId -> Set of socketIds
 const userSockets = new Map();
 // socketId -> { userId, roomCode }
 const socketMeta = new Map();
+// HTTP presence map for serverless / polling clients: userId -> { lastSeen, roomCode }
+const httpPresence = new Map();
+
+function persistRoomsToDb(immediate = false) {
+  const out = {};
+  for (const [code, r] of rooms.entries()) {
+    out[code] = {
+      code: r.code,
+      name: r.name,
+      isPublic: r.isPublic,
+      hostId: r.hostId,
+      hostOnlyControl: !!r.hostOnlyControl,
+      createdAt: r.createdAt,
+      participants: Array.from(r.participants.values()),
+      media: r.media,
+      playback: r.playback,
+      messages: (r.messages || []).slice(-80),
+      viewOnceStore: r.viewOnceStore || {}
+    };
+  }
+  db.saveRoomsSnapshot(out, immediate);
+}
+
+function hydrateRoomsFromDb() {
+  const saved = db.getSavedRoomsSnapshot();
+  for (const [code, sr] of Object.entries(saved)) {
+    if (!rooms.has(code) && sr && sr.code) {
+      const pMap = new Map();
+      if (Array.isArray(sr.participants)) {
+        sr.participants.forEach(p => {
+          if (p && (p.socketId || p.id)) pMap.set(p.socketId || `http_${p.id}`, p);
+        });
+      }
+      rooms.set(code, {
+        code: sr.code,
+        name: sr.name || 'Комната',
+        isPublic: sr.isPublic !== false,
+        hostId: sr.hostId,
+        hostOnlyControl: !!sr.hostOnlyControl,
+        createdAt: sr.createdAt || Date.now(),
+        participants: pMap,
+        media: sr.media || null,
+        playback: sr.playback || { playing: false, currentTime: 0, rate: 1, updatedAt: Date.now() },
+        messages: Array.isArray(sr.messages) ? sr.messages : [],
+        viewOnceStore: sr.viewOnceStore || {}
+      });
+    }
+  }
+}
+
+// Middleware to ensure Cloud DB is loaded before API requests (crucial on Vercel Serverless cold starts)
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api/') || req.path === '/admin') {
+    await db.ensureCloudLoaded();
+    hydrateRoomsFromDb();
+  }
+  next();
+});
 
 function generateRoomCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -70,7 +128,10 @@ function serializeRoom(room, brief = false) {
   if (brief) return base;
   return {
     ...base,
-    messages: room.messages.slice(-80)
+    messages: (room.messages || []).slice(-80).map(m => ({
+      ...m,
+      imageUrl: m.viewOnce ? '' : (m.imageUrl || '')
+    }))
   };
 }
 
@@ -336,8 +397,7 @@ app.get('/api/dms/:friendId', authMiddleware, (req, res) => {
 
 app.post('/api/dms/:friendId', authMiddleware, (req, res) => {
   try {
-    const { text } = req.body || {};
-    const msg = db.sendDirectMessage(req.user.id, req.params.friendId, text);
+    const msg = db.sendDirectMessage(req.user.id, req.params.friendId, req.body || {});
     // Emit to all sockets of recipient and sender
     for (const uid of [req.user.id, req.params.friendId]) {
       const sids = userSockets.get(uid);
@@ -348,6 +408,46 @@ app.post('/api/dms/:friendId', authMiddleware, (req, res) => {
       }
     }
     res.json({ message: msg });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post('/api/dms/:friendId/react', authMiddleware, (req, res) => {
+  try {
+    const { messageId, emoji } = req.body || {};
+    const result = db.toggleDmReaction(req.user.id, req.params.friendId, messageId, emoji);
+    for (const uid of [req.user.id, req.params.friendId]) {
+      const sids = userSockets.get(uid);
+      if (sids) {
+        for (const sid of sids) {
+          io.to(sid).emit('dm:reaction_updated', result);
+        }
+      }
+    }
+    res.json(result);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post('/api/dms/:friendId/view-once', authMiddleware, (req, res) => {
+  try {
+    const { messageId } = req.body || {};
+    const result = db.consumeDmViewOnce(req.user.id, req.params.friendId, messageId);
+    for (const uid of [req.user.id, req.params.friendId]) {
+      const sids = userSockets.get(uid);
+      if (sids) {
+        for (const sid of sids) {
+          io.to(sid).emit('dm:view_once_opened', {
+            messageId: result.messageId,
+            fromId: result.fromId,
+            toId: result.toId
+          });
+        }
+      }
+    }
+    res.json(result);
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
@@ -716,9 +816,104 @@ app.get('/api/stream-proxy', async (req, res) => {
   }
 });
 
-// ================= ROOMS REST API =================
+// ================= ROOMS REST API & SERVERLESS SYNC =================
+
+function createRoomChatMessage(room, user, payload = {}) {
+  const raw = typeof payload === 'string' ? { text: payload } : (payload || {});
+  const text = String(raw.text || '').trim().slice(0, 800);
+  const imageUrl = String(raw.imageUrl || '').trim();
+  const viewOnce = !!raw.viewOnce && !!imageUrl;
+
+  if (!text && !imageUrl) {
+    throw new Error('Сообщение не может быть пустым');
+  }
+  if (imageUrl && imageUrl.length > 2500000) {
+    throw new Error('Фото слишком большое');
+  }
+
+  let replyTo = null;
+  if (raw.replyTo && raw.replyTo.id) {
+    replyTo = {
+      id: String(raw.replyTo.id),
+      senderName: String(raw.replyTo.senderName || 'Участник').slice(0, 40),
+      text: String(raw.replyTo.text || (raw.replyTo.hasPhoto ? '📷 Фото' : '')).slice(0, 120),
+      hasPhoto: !!raw.replyTo.hasPhoto
+    };
+  }
+
+  const msgId = 'm_' + crypto.randomBytes(5).toString('hex');
+  if (!room.viewOnceStore) room.viewOnceStore = {};
+  if (viewOnce) {
+    room.viewOnceStore[msgId] = imageUrl;
+  }
+
+  const msg = {
+    id: msgId,
+    system: false,
+    user: {
+      id: user.id,
+      displayName: user.displayName,
+      avatar: user.avatar,
+      avatarUrl: user.avatarUrl || '',
+      color: user.color
+    },
+    text,
+    imageUrl: viewOnce ? '' : imageUrl,
+    hasPhoto: !!imageUrl,
+    viewOnce,
+    viewed: false,
+    replyTo,
+    reactions: {},
+    createdAt: Date.now()
+  };
+
+  db.incrementUserStat(user.id, 'messagesSent', 1);
+  room.messages.push(msg);
+  if (room.messages.length > 100) room.messages.shift();
+  persistRoomsToDb();
+  return msg;
+}
+
+function toggleRoomChatReaction(room, userId, messageId, emoji) {
+  const msg = (room.messages || []).find(m => m.id === messageId && !m.system);
+  if (!msg) throw new Error('Сообщение не найдено');
+  const cleanEmoji = String(emoji || '❤️').trim().slice(0, 8);
+  if (!msg.reactions) msg.reactions = {};
+  if (!Array.isArray(msg.reactions[cleanEmoji])) msg.reactions[cleanEmoji] = [];
+  const idx = msg.reactions[cleanEmoji].indexOf(userId);
+  if (idx >= 0) {
+    msg.reactions[cleanEmoji].splice(idx, 1);
+    if (msg.reactions[cleanEmoji].length === 0) delete msg.reactions[cleanEmoji];
+  } else {
+    msg.reactions[cleanEmoji].push(userId);
+  }
+  persistRoomsToDb();
+  return msg;
+}
+
+function consumeRoomChatViewOnce(room, userId, messageId) {
+  const msg = (room.messages || []).find(m => m.id === messageId && !m.system);
+  if (!msg) throw new Error('Сообщение не найдено');
+  if (!msg.viewOnce) throw new Error('Это обычное фото');
+  if (!room.viewOnceStore) room.viewOnceStore = {};
+  const rawImage = room.viewOnceStore[messageId] || msg.imageUrl || '';
+  if (msg.viewed || !rawImage) {
+    throw new Error('Фото уже было просмотрено и удалено');
+  }
+  // Anyone in the room other than sender consumes the one-time photo (or sender can preview if they tap, let's consume when a recipient opens it; if sender opens before recipient, allow preview without destroying, or consume for everyone else)
+  if (msg.user && msg.user.id !== userId) {
+    msg.viewed = true;
+    msg.viewedBy = userId;
+    msg.viewedAt = Date.now();
+    msg.imageUrl = '';
+    delete room.viewOnceStore[messageId];
+    persistRoomsToDb();
+  }
+  return { imageUrl: rawImage, message: msg };
+}
 
 app.get('/api/rooms', (req, res) => {
+  hydrateRoomsFromDb();
   const list = [];
   for (const r of rooms.values()) {
     if (r.isPublic && r.participants.size > 0) {
@@ -730,6 +925,7 @@ app.get('/api/rooms', (req, res) => {
 });
 
 app.get('/api/rooms/:code', (req, res) => {
+  hydrateRoomsFromDb();
   const code = String(req.params.code || '').trim().toUpperCase();
   const room = rooms.get(code);
   if (!room) return res.status(404).json({ error: 'Комната не найдена' });
@@ -737,6 +933,7 @@ app.get('/api/rooms/:code', (req, res) => {
 });
 
 app.post('/api/rooms', authMiddleware, (req, res) => {
+  hydrateRoomsFromDb();
   const { name, isPublic = true, hostOnlyControl = false, media = null } = req.body || {};
   const code = generateRoomCode();
   const room = {
@@ -754,11 +951,171 @@ app.post('/api/rooms', authMiddleware, (req, res) => {
       rate: 1,
       updatedAt: Date.now()
     },
-    messages: []
+    messages: [],
+    viewOnceStore: {}
   };
+  // Pre-populate creator as participant so room stays alive on serverless Vercel
+  room.participants.set('http_' + req.user.id, {
+    socketId: 'http_' + req.user.id,
+    id: req.user.id,
+    username: req.user.username,
+    displayName: req.user.displayName,
+    avatar: req.user.avatar,
+    avatarUrl: req.user.avatarUrl || '',
+    bio: req.user.bio || '',
+    color: req.user.color,
+    inVoice: false,
+    muted: false
+  });
   rooms.set(code, room);
+  persistRoomsToDb();
   db.incrementUserStat(req.user.id, 'roomsCreated', 1);
   res.json({ room: serializeRoom(room, false) });
+});
+
+// HTTP Room Join / Poll / Sync (enables full Watch Party on Vercel Serverless)
+app.post('/api/rooms/:code/join', authMiddleware, (req, res) => {
+  hydrateRoomsFromDb();
+  const code = String(req.params.code || '').trim().toUpperCase();
+  const room = rooms.get(code);
+  if (!room) return res.status(404).json({ error: 'Комната не найдена или уже закрыта' });
+
+  const existingEntry = Array.from(room.participants.entries()).find(([, p]) => p.id === req.user.id);
+  const key = existingEntry ? existingEntry[0] : ('http_' + req.user.id);
+  room.participants.set(key, {
+    socketId: key,
+    id: req.user.id,
+    username: req.user.username,
+    displayName: req.user.displayName,
+    avatar: req.user.avatar,
+    avatarUrl: req.user.avatarUrl || '',
+    bio: req.user.bio || '',
+    color: req.user.color,
+    inVoice: existingEntry ? existingEntry[1].inVoice : false,
+    muted: existingEntry ? existingEntry[1].muted : false
+  });
+  persistRoomsToDb();
+  io.to(code).emit('room:participants', Array.from(room.participants.values()));
+  res.json({ room: serializeRoom(room, false) });
+});
+
+app.post('/api/rooms/:code/leave', authMiddleware, (req, res) => {
+  hydrateRoomsFromDb();
+  const code = String(req.params.code || '').trim().toUpperCase();
+  const room = rooms.get(code);
+  if (room) {
+    for (const [k, p] of room.participants.entries()) {
+      if (p.id === req.user.id && String(k).startsWith('http_')) {
+        room.participants.delete(k);
+      }
+    }
+    persistRoomsToDb();
+  }
+  res.json({ ok: true });
+});
+
+app.post('/api/rooms/:code/sync', authMiddleware, (req, res) => {
+  hydrateRoomsFromDb();
+  const code = String(req.params.code || '').trim().toUpperCase();
+  const room = rooms.get(code);
+  if (!room) return res.status(404).json({ error: 'Комната не найдена' });
+
+  const { action, currentTime, playing, rate, media, settings } = req.body || {};
+
+  // Ensure user is listed in participants
+  const hasUser = Array.from(room.participants.values()).some(p => p.id === req.user.id);
+  if (!hasUser) {
+    room.participants.set('http_' + req.user.id, {
+      socketId: 'http_' + req.user.id,
+      id: req.user.id,
+      username: req.user.username,
+      displayName: req.user.displayName,
+      avatar: req.user.avatar,
+      avatarUrl: req.user.avatarUrl || '',
+      bio: req.user.bio || '',
+      color: req.user.color,
+      inVoice: false,
+      muted: false
+    });
+  }
+
+  const canControl = !room.hostOnlyControl || room.hostId === req.user.id;
+  if (canControl) {
+    if (media) {
+      room.media = media;
+      room.playback = { playing: true, currentTime: 0, rate: 1, updatedAt: Date.now() };
+      io.to(code).emit('room:media_changed', {
+        media: room.media,
+        playback: { ...room.playback, serverTime: Date.now() }
+      });
+    } else if (action === 'play' || action === 'pause' || action === 'seek' || action === 'heartbeat') {
+      const effectiveNow = getEffectiveTime(room.playback);
+      room.playback = {
+        playing: typeof playing === 'boolean' ? playing : room.playback.playing,
+        currentTime: typeof currentTime === 'number' && !isNaN(currentTime) ? Math.max(0, currentTime) : effectiveNow,
+        rate: typeof rate === 'number' ? rate : (room.playback.rate || 1),
+        updatedAt: Date.now()
+      };
+      if (action !== 'heartbeat') {
+        io.to(code).emit('player:sync', {
+          ...room.playback,
+          action,
+          serverTime: Date.now(),
+          actor: { id: req.user.id, displayName: req.user.displayName, avatar: req.user.avatar }
+        });
+      }
+    }
+    if (settings && room.hostId === req.user.id) {
+      if (typeof settings.isPublic === 'boolean') room.isPublic = settings.isPublic;
+      if (typeof settings.hostOnlyControl === 'boolean') room.hostOnlyControl = settings.hostOnlyControl;
+      if (typeof settings.name === 'string' && settings.name.trim()) room.name = settings.name.trim().slice(0, 60);
+    }
+    persistRoomsToDb();
+  }
+
+  res.json({ room: serializeRoom(room, false) });
+});
+
+app.post('/api/rooms/:code/chat', authMiddleware, (req, res) => {
+  try {
+    hydrateRoomsFromDb();
+    const code = String(req.params.code || '').trim().toUpperCase();
+    const room = rooms.get(code);
+    if (!room) return res.status(404).json({ error: 'Комната не найдена' });
+    const msg = createRoomChatMessage(room, req.user, req.body || {});
+    io.to(code).emit('chat:message', msg);
+    res.json({ message: msg });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post('/api/rooms/:code/chat/react', authMiddleware, (req, res) => {
+  try {
+    hydrateRoomsFromDb();
+    const code = String(req.params.code || '').trim().toUpperCase();
+    const room = rooms.get(code);
+    if (!room) return res.status(404).json({ error: 'Комната не найдена' });
+    const msg = toggleRoomChatReaction(room, req.user.id, req.body?.messageId, req.body?.emoji);
+    io.to(code).emit('chat:updated', msg);
+    res.json({ message: msg });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post('/api/rooms/:code/chat/view-once', authMiddleware, (req, res) => {
+  try {
+    hydrateRoomsFromDb();
+    const code = String(req.params.code || '').trim().toUpperCase();
+    const room = rooms.get(code);
+    if (!room) return res.status(404).json({ error: 'Комната не найдена' });
+    const result = consumeRoomChatViewOnce(room, req.user.id, req.body?.messageId);
+    io.to(code).emit('chat:updated', result.message);
+    res.json(result);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
 });
 
 // ================= SOCKET.IO REAL-TIME ENGINE =================
@@ -803,6 +1160,7 @@ io.on('connection', (socket) => {
         const r = rooms.get(code);
         if (r && r.participants.size === 0) {
           rooms.delete(code);
+          persistRoomsToDb();
           broadcastPublicRooms();
         }
       }, 120000);
@@ -816,6 +1174,7 @@ io.on('connection', (socket) => {
       io.to(code).emit('room:state', serializeRoom(room, false));
     }
 
+    persistRoomsToDb();
     broadcastPublicRooms();
     if (currentUser) notifyFriendsPresence(currentUser.id);
   }
@@ -829,10 +1188,12 @@ io.on('connection', (socket) => {
     };
     room.messages.push(msg);
     if (room.messages.length > 100) room.messages.shift();
+    persistRoomsToDb();
     io.to(room.code).emit('chat:message', msg);
   }
 
   socket.on('room:join', ({ code, token }) => {
+    hydrateRoomsFromDb();
     if (!currentUser && token) {
       const payload = db.verifyToken(token);
       if (payload && payload.id) currentUser = db.getUserById(payload.id);
@@ -848,6 +1209,9 @@ io.on('connection', (socket) => {
     }
 
     leaveCurrentRoom();
+
+    // Remove stale http_ placeholder for this user if upgrading to Socket.io
+    room.participants.delete('http_' + currentUser.id);
 
     socket.join(cleanCode);
     socketMeta.set(socket.id, { userId: currentUser.id, roomCode: cleanCode });
@@ -865,6 +1229,7 @@ io.on('connection', (socket) => {
       muted: false
     });
 
+    persistRoomsToDb();
     socket.emit('room:joined', serializeRoom(room, false));
     io.to(cleanCode).emit('room:participants', Array.from(room.participants.values()));
     addSystemMessage(room, `${currentUser.avatar} ${currentUser.displayName} в комнате`);
@@ -912,6 +1277,7 @@ io.on('connection', (socket) => {
       rate: typeof rate === 'number' ? rate : (room.playback.rate || 1),
       updatedAt: Date.now()
     };
+    persistRoomsToDb();
 
     socket.to(room.code).emit('player:sync', {
       ...room.playback,
@@ -983,6 +1349,7 @@ io.on('connection', (socket) => {
       rate: 1,
       updatedAt: Date.now()
     };
+    persistRoomsToDb();
 
     const epTag = media?.season && media?.episode ? ` (S${media.season}E${media.episode})` : '';
     const voiceTag = media?.voiceName ? ` · ${media.voiceName}` : '';
@@ -1011,37 +1378,36 @@ io.on('connection', (socket) => {
     if (typeof hostOnlyControl === 'boolean') room.hostOnlyControl = hostOnlyControl;
     if (typeof name === 'string' && name.trim()) room.name = name.trim().slice(0, 60);
 
+    persistRoomsToDb();
     io.to(room.code).emit('room:state', serializeRoom(room, false));
     broadcastPublicRooms();
   });
 
-  // Chat messages
-  socket.on('chat:send', ({ text }) => {
+  // Chat messages (text, photos, view-once photos, replies)
+  socket.on('chat:send', (payload) => {
     const meta = socketMeta.get(socket.id);
     if (!meta || !meta.roomCode || !currentUser) return;
     const room = rooms.get(meta.roomCode);
     if (!room) return;
 
-    const clean = String(text || '').trim().slice(0, 500);
-    if (!clean) return;
+    try {
+      const msg = createRoomChatMessage(room, currentUser, payload);
+      io.to(room.code).emit('chat:message', msg);
+    } catch (e) {
+      socket.emit('toast', { type: 'error', text: e.message });
+    }
+  });
 
-    const msg = {
-      id: 'm_' + crypto.randomBytes(4).toString('hex'),
-      system: false,
-      user: {
-        id: currentUser.id,
-        displayName: currentUser.displayName,
-        avatar: currentUser.avatar,
-        avatarUrl: currentUser.avatarUrl || '',
-        color: currentUser.color
-      },
-      text: clean,
-      createdAt: Date.now()
-    };
-    db.incrementUserStat(currentUser.id, 'messagesSent', 1);
-    room.messages.push(msg);
-    if (room.messages.length > 100) room.messages.shift();
-    io.to(room.code).emit('chat:message', msg);
+  // Toggle emoji reaction on a specific room chat message
+  socket.on('chat:react', ({ messageId, emoji }) => {
+    const meta = socketMeta.get(socket.id);
+    if (!meta || !meta.roomCode || !currentUser) return;
+    const room = rooms.get(meta.roomCode);
+    if (!room) return;
+    try {
+      const msg = toggleRoomChatReaction(room, currentUser.id, messageId, emoji);
+      io.to(room.code).emit('chat:updated', msg);
+    } catch {}
   });
 
   // Floating emoji reactions over the video player
@@ -1093,22 +1459,43 @@ io.on('connection', (socket) => {
     socket.emit('toast', { type: 'success', text: 'Приглашение отправлено!' });
   });
 
-  // Direct Messages (Friends Private Chat)
-  socket.on('dm:send', ({ toId, text }) => {
+  // Direct Messages (Friends Private Chat: text, photo, viewOnce, reply)
+  socket.on('dm:send', (payload = {}) => {
+    const { toId } = payload;
     if (!currentUser || !toId) return;
     try {
-      const msg = db.sendDirectMessage(currentUser.id, toId, text);
+      const msg = db.sendDirectMessage(currentUser.id, toId, payload);
+      const safeForSockets = {
+        ...msg,
+        imageUrl: msg.viewOnce ? '' : msg.imageUrl
+      };
       for (const uid of [currentUser.id, toId]) {
         const sids = userSockets.get(uid);
         if (sids) {
           for (const sid of sids) {
-            io.to(sid).emit('dm:message', msg);
+            io.to(sid).emit('dm:message', safeForSockets);
           }
         }
       }
     } catch (e) {
       socket.emit('toast', { type: 'error', text: e.message });
     }
+  });
+
+  socket.on('dm:react', ({ friendId, messageId, emoji }) => {
+    if (!currentUser || !friendId || !messageId) return;
+    try {
+      const msg = db.toggleDmReaction(currentUser.id, friendId, messageId, emoji);
+      const safeMsg = { ...msg, imageUrl: msg.viewOnce ? '' : msg.imageUrl };
+      for (const uid of [currentUser.id, friendId]) {
+        const sids = userSockets.get(uid);
+        if (sids) {
+          for (const sid of sids) {
+            io.to(sid).emit('dm:updated', safeMsg);
+          }
+        }
+      }
+    } catch {}
   });
 
   socket.on('dm:read', ({ friendId }) => {
@@ -1158,9 +1545,9 @@ io.on('connection', (socket) => {
   });
 });
 
-// Healthcheck endpoint for Render.com
+// Healthcheck endpoint for Render.com & Vercel
 app.get('/healthz', (req, res) => {
-  res.status(200).json({ status: 'ok', uptime: process.uptime() });
+  res.status(200).json({ status: 'ok', uptime: process.uptime(), vercel: !!process.env.VERCEL });
 });
 
 // SPA fallback
@@ -1168,18 +1555,23 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Keep-alive on Render while there are active rooms so the instance doesn't sleep mid-movie
-setInterval(() => {
-  let activeUsers = 0;
-  for (const r of rooms.values()) activeUsers += r.participants.size;
-  if (activeUsers > 0 && process.env.RENDER_EXTERNAL_URL) {
-    fetch(`${process.env.RENDER_EXTERNAL_URL}/healthz`).catch(() => {});
-  }
-}, 10 * 60 * 1000);
+if (!process.env.VERCEL) {
+  // Keep-alive on Render while there are active rooms so the instance doesn't sleep mid-movie
+  setInterval(() => {
+    let activeUsers = 0;
+    for (const r of rooms.values()) activeUsers += r.participants.size;
+    if (activeUsers > 0 && process.env.RENDER_EXTERNAL_URL) {
+      fetch(`${process.env.RENDER_EXTERNAL_URL}/healthz`).catch(() => {});
+    }
+  }, 10 * 60 * 1000);
 
-const PORT = process.env.PORT || 3000;
-db.initCloudDb().finally(() => {
-  server.listen(PORT, () => {
-    console.log(`Rave x Lampa (Z01) server running at http://localhost:${PORT}`);
+  const PORT = process.env.PORT || 3000;
+  db.initCloudDb().finally(() => {
+    hydrateRoomsFromDb();
+    server.listen(PORT, () => {
+      console.log(`Rave x Lampa (Z01) server running at http://localhost:${PORT}`);
+    });
   });
-});
+}
+
+module.exports = app;
