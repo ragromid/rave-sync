@@ -16,11 +16,11 @@
         "moviesWatched": 0,
         "episodesWatched": 1,
         "roomsCreated": 2,
-        "messagesSent": 16,
+        "messagesSent": 17,
         "reactionsSent": 0
       },
       "updatedAt": 1793010505797,
-      "lastSeenAt": 1793025671289,
+      "lastSeenAt": 1793025683445,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -36,7 +36,7 @@
             "p256dh": "BGBSyGpzc3yvwpqpodI-0WSI--smntccRP6Qe0F5rIlOeKPvsKDsSmWLMV6WeAhtKYrTmLh2WCGKBCEO1ceAGbA",
             "auth": "LsQqD48zlHcMsQb22mz5Mg"
           },
-          "updatedAt": 1793025671289
+          "updatedAt": 1793010505797
         }
       ]
     },
@@ -71,7 +71,7 @@
             "p256dh": "BHbYcKKobMNL7JMDbQmePksQd45rHVPOPMQueD-eSL4dhuZmPWiDRL0Cyr1Olqzsx_JEEPBzPsZFwDtYOdVznGA",
             "auth": "AdDiynCGUaGFtqlVq4-D6A"
           },
-          "updatedAt": 1793025180932
+          "updatedAt": 1793010289985
         },
         {
           "endpoint": "https://web.push.apple.com/QMGL0t5u0KwcBg0hh6kFw3U0jq0KiuWEe6VP0DwhDwZ7DKg-lRFYT058AGWd8QFAs1UooVYHGFS1Ynvi5x8D87k3rr_ufODBimmI-NqtuTnEY0-vGX5s3bLzxwo8qx_XvpHW9x9uuyxngJWLI29WSWoiLeX0AsQ5uyiFttzdg7A",
@@ -514,6 +514,20 @@
         "createdAt": 1793010554299,
         "read": true,
         "updatedAt": 1793010554299
+      },
+      {
+        "id": "dm_aa8cafffca5d",
+        "fromId": "u_805b52bfc220",
+        "toId": "u_80ab0d1134f5",
+        "text": "кончи мне в рот",
+        "imageUrl": "",
+        "hasImage": false,
+        "viewOnce": false,
+        "viewed": false,
+        "replyTo": null,
+        "reactions": {},
+        "createdAt": 1793025683256,
+        "read": false
       }
     ]
   },
@@ -524,7 +538,26 @@
     "ntf_c0b9c501": 1792999871201,
     "ntf_b80933e5": 1792999871201
   },
-  "notifications": {},
+  "notifications": {
+    "u_80ab0d1134f5": [
+      {
+        "id": "ntf_0ccd6ba4",
+        "createdAt": 1793025683259,
+        "type": "dm_message",
+        "msgId": "dm_aa8cafffca5d",
+        "fromId": "u_805b52bfc220",
+        "from": {
+          "id": "u_805b52bfc220",
+          "username": "rashid",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊",
+          "color": "#1de9b6"
+        },
+        "title": "Rashid Sultanov",
+        "body": "кончи мне в рот"
+      }
+    ]
+  },
   "savedRooms": {
     "393HNX": {
       "code": "393HNX",
