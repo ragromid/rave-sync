@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793047207961,
+      "lastSeenAt": 1793047216958,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 1,
         "episodesWatched": 0,
         "roomsCreated": 2,
-        "messagesSent": 78,
+        "messagesSent": 79,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793047207582
+      "lastSeenAt": 1793047218105
     }
   ],
   "friendships": [
@@ -1767,36 +1767,11 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 5575.247060899001,
+        "currentTime": 5585.2632139023335,
         "rate": 1,
-        "updatedAt": 1793047206188
+        "updatedAt": 1793047216058
       },
       "messages": [
-        {
-          "id": "m_fc1fb9b5bc",
-          "system": false,
-          "user": {
-            "id": "u_1333f556dd06",
-            "displayName": "Sabina",
-            "avatar": "🦊",
-            "avatarUrl": "",
-            "color": "#e040fb"
-          },
-          "text": "Рашидик",
-          "imageUrl": "",
-          "hasPhoto": false,
-          "viewOnce": false,
-          "viewed": false,
-          "replyTo": null,
-          "reactions": {
-            "❤️": [
-              "u_805b52bfc220"
-            ]
-          },
-          "createdAt": 1793042974866,
-          "read": false,
-          "updatedAt": 1793042974866
-        },
         {
           "id": "m_b5f9438468",
           "system": false,
@@ -3585,6 +3560,25 @@
           "replyTo": null,
           "reactions": {},
           "createdAt": 1793047206781
+        },
+        {
+          "id": "m_9f9d471d7d",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": ":(",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793047217966
         }
       ],
       "viewOnceStore": {}
