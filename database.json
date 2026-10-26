@@ -16,11 +16,11 @@
         "moviesWatched": 0,
         "episodesWatched": 0,
         "roomsCreated": 1,
-        "messagesSent": 9,
+        "messagesSent": 10,
         "reactionsSent": 0
       },
       "updatedAt": 1792993656702,
-      "lastSeenAt": 1792999842082
+      "lastSeenAt": 1792999860233
     },
     {
       "id": "u_80ab0d1134f5",
@@ -260,6 +260,21 @@
         "replyTo": null,
         "reactions": {},
         "createdAt": 1792999842083,
+        "read": false,
+        "updatedAt": 1792999842083
+      },
+      {
+        "id": "dm_3a8d04adb95d",
+        "fromId": "u_805b52bfc220",
+        "toId": "u_80ab0d1134f5",
+        "text": "gandon",
+        "imageUrl": "",
+        "hasImage": false,
+        "viewOnce": false,
+        "viewed": false,
+        "replyTo": null,
+        "reactions": {},
+        "createdAt": 1792999860233,
         "read": false
       }
     ]
