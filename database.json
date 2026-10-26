@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041602196,
+      "lastSeenAt": 1793041614908,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041602479
+      "lastSeenAt": 1793041615346
     }
   ],
   "friendships": [
@@ -244,10 +244,10 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "currentTime": 286,
-        "duration": 6015,
-        "updatedAt": 1793041602479
+        "voiceName": "PantsuVoice",
+        "currentTime": 7,
+        "duration": 5971,
+        "updatedAt": 1793041615346
       }
     }
   },
@@ -1766,10 +1766,10 @@
         "subtitles": []
       },
       "playback": {
-        "playing": true,
-        "currentTime": 431.0589882643334,
+        "playing": false,
+        "currentTime": 7.098297550000014,
         "rate": 1,
-        "updatedAt": 1793041602072
+        "updatedAt": 1793041615292
       },
       "messages": [
         {
