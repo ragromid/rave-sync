@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040996864,
+      "lastSeenAt": 1793041009367,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040996972
+      "lastSeenAt": 1793041009497
     }
   ],
   "friendships": [
@@ -161,8 +161,8 @@
         "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
-        "updatedAt": 1793040247007
+        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "updatedAt": 1793040416330
       }
     ]
   },
@@ -179,14 +179,14 @@
         "updatedAt": 1793001267614
       },
       "1218925": {
-        "balancerKey": "filmix",
-        "balancerName": "Filmix",
+        "balancerKey": "kodik",
+        "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
-        "currentTime": 203,
+        "voiceName": "Flarrow Films",
+        "currentTime": 131,
         "duration": 5971,
-        "updatedAt": 1793040996864
+        "updatedAt": 1793040788609
       }
     },
     "u_80ab0d1134f5": {
@@ -207,10 +207,10 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "currentTime": 158,
-        "duration": 5971,
-        "updatedAt": 1793040872994
+        "voiceName": "AnimeVost",
+        "currentTime": 5,
+        "duration": 6016,
+        "updatedAt": 1793040524978
       }
     }
   },
@@ -704,7 +704,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": true,
+      "isPublic": false,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -777,9 +777,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 203.98280717048053,
+        "currentTime": 216.05689485601343,
         "rate": 1,
-        "updatedAt": 1793040996803
+        "updatedAt": 1793041008968
       },
       "messages": [
         {
@@ -1555,7 +1555,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040962639
+          "createdAt": 1793040962639,
+          "read": false,
+          "updatedAt": 1793040962639
         },
         {
           "id": "m_0c3cb6add0",
@@ -1574,7 +1576,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040987876
+          "createdAt": 1793040987876,
+          "read": false,
+          "updatedAt": 1793040987876
         },
         {
           "id": "m_3f098f9ec9",
