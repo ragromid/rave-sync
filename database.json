@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793045745942,
+      "lastSeenAt": 1793045773024,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 1,
         "episodesWatched": 0,
         "roomsCreated": 2,
-        "messagesSent": 62,
+        "messagesSent": 63,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793045746218
+      "lastSeenAt": 1793045772958
     }
   ],
   "friendships": [
@@ -221,9 +221,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Flarrow Films",
-        "currentTime": 3375,
+        "currentTime": 4195,
         "duration": 5971,
-        "updatedAt": 1793044676912
+        "updatedAt": 1793045506853
       }
     },
     "u_80ab0d1134f5": {
@@ -1767,32 +1767,11 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 4416.5580081826665,
+        "currentTime": 4426.574214366333,
         "rate": 1,
-        "updatedAt": 1793045746218
+        "updatedAt": 1793045756393
       },
       "messages": [
-        {
-          "id": "m_02a2454407",
-          "system": false,
-          "user": {
-            "id": "u_1333f556dd06",
-            "displayName": "Sabina",
-            "avatar": "🦊",
-            "avatarUrl": "",
-            "color": "#e040fb"
-          },
-          "text": "блин",
-          "imageUrl": "",
-          "hasPhoto": false,
-          "viewOnce": false,
-          "viewed": false,
-          "replyTo": null,
-          "reactions": {},
-          "createdAt": 1793041923928,
-          "read": false,
-          "updatedAt": 1793041923928
-        },
         {
           "id": "m_fb2b3a22e1",
           "system": false,
@@ -3620,6 +3599,25 @@
           "createdAt": 1793045520602,
           "read": false,
           "updatedAt": 1793045520602
+        },
+        {
+          "id": "m_bca4b008f0",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "как они орут(",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793045772959
         }
       ],
       "viewOnceStore": {}
