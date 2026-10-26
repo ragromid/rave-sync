@@ -58,7 +58,7 @@
         "moviesWatched": 0,
         "episodesWatched": 0,
         "roomsCreated": 0,
-        "messagesSent": 5,
+        "messagesSent": 6,
         "reactionsSent": 0
       },
       "createdAt": 1792993803285,
@@ -155,6 +155,14 @@
         "toId": "u_805b52bfc220",
         "text": "begite",
         "createdAt": 1792993929771,
+        "read": false
+      },
+      {
+        "id": "dm_28dbc2f27d8a",
+        "fromId": "u_80ab0d1134f5",
+        "toId": "u_805b52bfc220",
+        "text": "☺️☺️🍌🍌🍌🍌",
+        "createdAt": 1792993932154,
         "read": false
       }
     ]
