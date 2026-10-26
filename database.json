@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793046398631
+      "lastSeenAt": 1793046399925
     }
   ],
   "friendships": [
@@ -1767,9 +1767,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 4779.820797337001,
+        "currentTime": 4782.325348017666,
         "rate": 1,
-        "updatedAt": 1793046397255
+        "updatedAt": 1793046399741
       },
       "messages": [
         {
