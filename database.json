@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040431828,
+      "lastSeenAt": 1793040436326,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040432413
+      "lastSeenAt": 1793040436211
     }
   ],
   "friendships": [
@@ -157,11 +157,12 @@
             "фэнтези"
           ]
         },
+        "balancerKey": "filmix",
         "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1792965688026
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "updatedAt": 1793040247007
       }
     ]
   },
@@ -183,9 +184,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "currentTime": 3354,
+        "currentTime": 425,
         "duration": 5999,
-        "updatedAt": 1793040429609
+        "updatedAt": 1793040430600
       }
     },
     "u_80ab0d1134f5": {
