@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041614908,
+      "lastSeenAt": 1793041617217,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041615346
+      "lastSeenAt": 1793041617171
     }
   ],
   "friendships": [
@@ -247,7 +247,7 @@
         "voiceName": "PantsuVoice",
         "currentTime": 7,
         "duration": 5971,
-        "updatedAt": 1793041615346
+        "updatedAt": 1793041616060
       }
     }
   },
@@ -1766,10 +1766,10 @@
         "subtitles": []
       },
       "playback": {
-        "playing": false,
-        "currentTime": 7.098297550000014,
+        "playing": true,
+        "currentTime": 8.778937177333216,
         "rate": 1,
-        "updatedAt": 1793041615292
+        "updatedAt": 1793041617104
       },
       "messages": [
         {
