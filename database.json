@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793047347922,
+      "lastSeenAt": 1793047352373,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 1,
         "episodesWatched": 0,
         "roomsCreated": 2,
-        "messagesSent": 81,
+        "messagesSent": 82,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793047347630
+      "lastSeenAt": 1793047353467
     }
   ],
   "friendships": [
@@ -1767,9 +1767,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 5714.179962841333,
+        "currentTime": 5719.194672871333,
         "rate": 1,
-        "updatedAt": 1793047346268
+        "updatedAt": 1793047351296
       },
       "messages": [
         {
@@ -3537,7 +3537,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793047338263
+          "createdAt": 1793047338263,
+          "read": false,
+          "updatedAt": 1793047338263
         },
         {
           "id": "m_20372f5eb6",
@@ -3556,7 +3558,28 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793047347922
+          "createdAt": 1793047347922,
+          "read": false,
+          "updatedAt": 1793047347922
+        },
+        {
+          "id": "m_0c30decdb6",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "и вот ее уже убили)",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793047353212
         }
       ],
       "viewOnceStore": {}
