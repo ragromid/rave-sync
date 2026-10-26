@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041911025,
+      "lastSeenAt": 1793041918555,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041912014
+      "lastSeenAt": 1793041919480
     }
   ],
   "friendships": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "updatedAt": 1793041602479
+        "voiceName": "PantsuVoice",
+        "updatedAt": 1793041326035
       }
     ]
   },
@@ -220,10 +220,10 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "currentTime": 467,
-        "duration": 5971,
-        "updatedAt": 1793041722447
+        "voiceName": "PantsuVoice",
+        "currentTime": 659,
+        "duration": 6015,
+        "updatedAt": 1793041915009
       }
     },
     "u_80ab0d1134f5": {
@@ -245,9 +245,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "PantsuVoice",
-        "currentTime": 8,
-        "duration": 5971,
-        "updatedAt": 1793041617384
+        "currentTime": 308,
+        "duration": 6015,
+        "updatedAt": 1793041478692
       }
     }
   },
@@ -1756,20 +1756,20 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
+        "voiceName": "PantsuVoice",
         "quality": "720p",
-        "rawUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/43f4d0b6a600d5f952b0bc7e47063837:2026102702/720.mp4:hls:manifest.m3u8",
-        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2Fb1c4c826-01f0-4162-a8e7-357892019fc4%2F43f4d0b6a600d5f952b0bc7e47063837%3A2026102702%2F720.mp4%3Ahls%3Amanifest.m3u8",
-        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/43f4d0b6a600d5f952b0bc7e47063837:2026102702/720.mp4:hls:manifest.m3u8",
-        "streamUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/43f4d0b6a600d5f952b0bc7e47063837:2026102702/720.mp4:hls:manifest.m3u8",
+        "rawUrl": "https://cloud2.solodcdn.com/useruploads/5ebd128c-134e-405d-a6f6-49577b175aa2/4aeeae0f975a83cebe375365b54a4418:2026102702/720.mp4:hls:manifest.m3u8",
+        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2F5ebd128c-134e-405d-a6f6-49577b175aa2%2F4aeeae0f975a83cebe375365b54a4418%3A2026102702%2F720.mp4%3Ahls%3Amanifest.m3u8",
+        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/5ebd128c-134e-405d-a6f6-49577b175aa2/4aeeae0f975a83cebe375365b54a4418:2026102702/720.mp4:hls:manifest.m3u8",
+        "streamUrl": "https://cloud2.solodcdn.com/useruploads/5ebd128c-134e-405d-a6f6-49577b175aa2/4aeeae0f975a83cebe375365b54a4418:2026102702/720.mp4:hls:manifest.m3u8",
         "streamType": "hls",
         "subtitles": []
       },
       "playback": {
         "playing": true,
-        "currentTime": 656.4039167000001,
+        "currentTime": 661.8208814083334,
         "rate": 1,
-        "updatedAt": 1793041910261
+        "updatedAt": 1793041917581
       },
       "messages": [
         {
@@ -2125,7 +2125,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793041792371
+          "createdAt": 1793041792371,
+          "read": false,
+          "updatedAt": 1793041792371
         },
         {
           "id": "m_2a1ed3f439",
@@ -2148,7 +2150,9 @@
               "u_805b52bfc220"
             ]
           },
-          "createdAt": 1793041825337
+          "createdAt": 1793041825337,
+          "read": false,
+          "updatedAt": 1793041825337
         },
         {
           "id": "m_ec690de7ae",
@@ -2167,7 +2171,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793041910697
+          "createdAt": 1793041910697,
+          "read": false,
+          "updatedAt": 1793041910697
         }
       ],
       "viewOnceStore": {}
