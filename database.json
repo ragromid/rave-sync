@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040309298,
+      "lastSeenAt": 1793040317819,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 0,
         "episodesWatched": 0,
         "roomsCreated": 0,
-        "messagesSent": 0,
+        "messagesSent": 1,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040309309
+      "lastSeenAt": 1793040318421
     }
   ],
   "friendships": [
@@ -176,6 +176,16 @@
         "currentTime": 522,
         "duration": 1450,
         "updatedAt": 1793001267614
+      },
+      "1218925": {
+        "balancerKey": "filmix",
+        "balancerName": "Filmix",
+        "season": 0,
+        "episode": 0,
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "currentTime": 8,
+        "duration": 5971,
+        "updatedAt": 1793040308837
       }
     },
     "u_80ab0d1134f5": {
@@ -754,9 +764,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 8.458333333333334,
+        "currentTime": 17.097297985678303,
         "rate": 1,
-        "updatedAt": 1793040309298
+        "updatedAt": 1793040317819
       },
       "messages": [
         {
@@ -776,7 +786,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040291766
+          "createdAt": 1793040291766,
+          "read": false,
+          "updatedAt": 1793040291766
         },
         {
           "id": "m_1a45e52a52",
@@ -795,7 +807,28 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040297344
+          "createdAt": 1793040297344,
+          "read": false,
+          "updatedAt": 1793040297344
+        },
+        {
+          "id": "m_e377b6a4c0",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "Нет",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793040318421
         }
       ],
       "viewOnceStore": {}
