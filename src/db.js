@@ -88,6 +88,14 @@ function mergeUserRecord(a, b) {
     mergedStats[k] = Math.max(Number(statsA[k]) || 0, Number(statsB[k]) || 0);
   }
 
+  // Merge Web Push subscriptions by endpoint (up to 6 active devices per user)
+  const subMap = new Map();
+  for (const s of [...(Array.isArray(older.pushSubscriptions) ? older.pushSubscriptions : []), ...(Array.isArray(newer.pushSubscriptions) ? newer.pushSubscriptions : [])]) {
+    if (s && s.endpoint && s.keys?.p256dh && s.keys?.auth) {
+      subMap.set(s.endpoint, s);
+    }
+  }
+
   return {
     ...older,
     ...newer,
@@ -95,6 +103,7 @@ function mergeUserRecord(a, b) {
     avatarUrl: newer.avatarUrl !== undefined ? newer.avatarUrl : (older.avatarUrl || ''),
     bio: newer.bio !== undefined ? newer.bio : (older.bio || ''),
     isAdmin: newer.isAdmin !== undefined ? newer.isAdmin : !!older.isAdmin,
+    pushSubscriptions: Array.from(subMap.values()).slice(-6),
     stats: mergedStats,
     lastSeenAt: Math.max(a.lastSeenAt || 0, b.lastSeenAt || 0),
     updatedAt: Math.max(aTime, bTime)
@@ -460,11 +469,26 @@ function saveDb(immediateCloud = true) {
     console.error('Error saving local DB:', e.message);
   }
 
-  if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
+  if (immediateCloud === 'localOnly') return;
+  if (immediateCloud === 'lazy') {
+    if (!cloudSyncTimer) {
+      cloudSyncTimer = setTimeout(() => {
+        cloudSyncTimer = null;
+        pushToCloudDb();
+      }, 45000);
+    }
+    return;
+  }
+
+  if (cloudSyncTimer) {
+    clearTimeout(cloudSyncTimer);
+    cloudSyncTimer = null;
+  }
   if (immediateCloud) {
     pushToCloudDb();
   } else {
     cloudSyncTimer = setTimeout(() => {
+      cloudSyncTimer = null;
       pushToCloudDb();
     }, 600);
   }
@@ -1046,7 +1070,11 @@ function addWatchHistory(userId, entry) {
 function updatePlaybackProgress(userId, { movieId, balancerKey, balancerName, season, episode, voiceName, currentTime, duration, watchedDeltaSec }) {
   if (!userId || !movieId) return null;
   if (typeof watchedDeltaSec === 'number' && watchedDeltaSec > 0 && watchedDeltaSec <= 120) {
-    incrementUserStat(userId, 'watchSeconds', Math.round(watchedDeltaSec));
+    const u = db.users.find(x => x.id === userId);
+    if (u) {
+      if (!u.stats) u.stats = { ...DEFAULT_STATS };
+      u.stats.watchSeconds = (Number(u.stats.watchSeconds) || 0) + Math.round(watchedDeltaSec);
+    }
   }
   if (!db.progress[userId]) db.progress[userId] = {};
   const key = String(movieId);
@@ -1061,7 +1089,8 @@ function updatePlaybackProgress(userId, { movieId, balancerKey, balancerName, se
     duration: typeof duration === 'number' ? duration : (prev.duration || 0),
     updatedAt: Date.now()
   };
-  saveDb();
+  // Do NOT hammer GitHub API every 5 seconds while watching a movie — sync lazily!
+  saveDb('lazy');
   return db.progress[userId][key];
 }
 
@@ -1150,13 +1179,23 @@ function pushUserNotification(toUserId, notif) {
   if (!toUserId || !notif) return;
   if (!db.notifications) db.notifications = {};
   if (!Array.isArray(db.notifications[toUserId])) db.notifications[toUserId] = [];
+  const cleanNotif = { ...notif };
+  if (cleanNotif.from && typeof cleanNotif.from === 'object') {
+    cleanNotif.from = {
+      id: cleanNotif.from.id,
+      username: cleanNotif.from.username,
+      displayName: cleanNotif.from.displayName,
+      avatar: cleanNotif.from.avatar,
+      color: cleanNotif.from.color
+    };
+  }
   db.notifications[toUserId].push({
     id: 'ntf_' + crypto.randomBytes(4).toString('hex'),
     createdAt: Date.now(),
-    ...notif
+    ...cleanNotif
   });
-  if (db.notifications[toUserId].length > 25) {
-    db.notifications[toUserId] = db.notifications[toUserId].slice(-25);
+  if (db.notifications[toUserId].length > 20) {
+    db.notifications[toUserId] = db.notifications[toUserId].slice(-20);
   }
   saveDb(true);
 }
@@ -1173,6 +1212,49 @@ function popUserNotifications(userId) {
   return recent;
 }
 
+function saveUserPushSubscription(userId, sub) {
+  if (!userId || !sub || !sub.endpoint || !sub.keys?.p256dh || !sub.keys?.auth) return false;
+  const u = db.users.find(x => x.id === userId);
+  if (!u) return false;
+  if (!Array.isArray(u.pushSubscriptions)) u.pushSubscriptions = [];
+  const existingIdx = u.pushSubscriptions.findIndex(s => s && s.endpoint === sub.endpoint);
+  const cleanSub = {
+    endpoint: String(sub.endpoint),
+    keys: {
+      p256dh: String(sub.keys.p256dh),
+      auth: String(sub.keys.auth)
+    },
+    updatedAt: Date.now()
+  };
+  if (existingIdx >= 0) {
+    u.pushSubscriptions[existingIdx] = cleanSub;
+    return true;
+  }
+  u.pushSubscriptions.push(cleanSub);
+  if (u.pushSubscriptions.length > 6) {
+    u.pushSubscriptions = u.pushSubscriptions.slice(-6);
+  }
+  u.updatedAt = Date.now();
+  saveDb(true);
+  return true;
+}
+
+function removeUserPushSubscription(userId, endpoint) {
+  const u = db.users.find(x => x.id === userId);
+  if (!u || !Array.isArray(u.pushSubscriptions)) return;
+  const before = u.pushSubscriptions.length;
+  u.pushSubscriptions = u.pushSubscriptions.filter(s => s && s.endpoint !== endpoint);
+  if (u.pushSubscriptions.length !== before) {
+    u.updatedAt = Date.now();
+    saveDb(false);
+  }
+}
+
+function getUserPushSubscriptions(userId) {
+  const u = db.users.find(x => x.id === userId);
+  return Array.isArray(u?.pushSubscriptions) ? u.pushSubscriptions : [];
+}
+
 module.exports = {
   initCloudDb,
   ensureCloudLoaded,
@@ -1181,6 +1263,9 @@ module.exports = {
   getSavedRoomsSnapshot,
   pushUserNotification,
   popUserNotifications,
+  saveUserPushSubscription,
+  removeUserPushSubscription,
+  getUserPushSubscriptions,
   registerUser,
   loginUser,
   verifyToken,

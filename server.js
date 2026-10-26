@@ -6,6 +6,19 @@ const { Server } = require('socket.io');
 
 const db = require('./src/db');
 const z01 = require('./src/z01');
+const webPush = require('./src/push');
+
+async function sendPushToUser(userId, payload) {
+  if (!userId || !payload) return;
+  const subs = db.getUserPushSubscriptions(userId);
+  if (!subs || subs.length === 0) return;
+  await Promise.all(subs.map(async (sub) => {
+    const res = await webPush.sendWebPush(sub, payload);
+    if (res.status === 404 || res.status === 410) {
+      db.removeUserPushSubscription(userId, sub.endpoint);
+    }
+  }));
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -33,7 +46,7 @@ const socketMeta = new Map();
 // HTTP presence map for serverless / polling clients: userId -> { lastSeen, roomCode }
 const httpPresence = new Map();
 
-function persistRoomsToDb(immediate = false) {
+function persistRoomsToDb(immediate = true) {
   const out = {};
   for (const [code, r] of rooms.entries()) {
     out[code] = {
@@ -43,7 +56,16 @@ function persistRoomsToDb(immediate = false) {
       hostId: r.hostId,
       hostOnlyControl: !!r.hostOnlyControl,
       createdAt: r.createdAt,
-      participants: Array.from(r.participants.values()),
+      participants: Array.from(r.participants.values()).map(p => ({
+        socketId: p.socketId,
+        id: p.id,
+        username: p.username,
+        displayName: p.displayName,
+        avatar: p.avatar,
+        color: p.color,
+        inVoice: !!p.inVoice,
+        muted: !!p.muted
+      })),
       media: r.media,
       playback: r.playback,
       messages: (r.messages || []).slice(-80),
@@ -56,7 +78,8 @@ function persistRoomsToDb(immediate = false) {
 function hydrateRoomsFromDb() {
   const saved = db.getSavedRoomsSnapshot();
   for (const [code, sr] of Object.entries(saved)) {
-    if (!rooms.has(code) && sr && sr.code) {
+    if (!sr || !sr.code) continue;
+    if (!rooms.has(code)) {
       const pMap = new Map();
       if (Array.isArray(sr.participants)) {
         sr.participants.forEach(p => {
@@ -76,6 +99,32 @@ function hydrateRoomsFromDb() {
         messages: Array.isArray(sr.messages) ? sr.messages : [],
         viewOnceStore: sr.viewOnceStore || {}
       });
+    } else {
+      // Merge newer messages and playback state from Cloud DB into warm in-memory room
+      const existing = rooms.get(code);
+      if (Array.isArray(sr.messages) && sr.messages.length > 0) {
+        const msgMap = new Map();
+        for (const m of (existing.messages || [])) {
+          if (m && m.id) msgMap.set(m.id, m);
+        }
+        for (const m of sr.messages) {
+          if (m && m.id) msgMap.set(m.id, m);
+        }
+        existing.messages = Array.from(msgMap.values())
+          .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
+          .slice(-80);
+      }
+      if (sr.playback && (sr.playback.updatedAt || 0) > (existing.playback?.updatedAt || 0)) {
+        existing.playback = sr.playback;
+        if (sr.media) existing.media = sr.media;
+      }
+      if (Array.isArray(sr.participants)) {
+        for (const p of sr.participants) {
+          if (p && p.id && !Array.from(existing.participants.values()).some(ep => ep.id === p.id)) {
+            existing.participants.set(p.socketId || `http_${p.id}`, p);
+          }
+        }
+      }
     }
   }
 }
@@ -335,6 +384,19 @@ app.get('/api/users/:id', authMiddleware, (req, res) => {
   res.json({ user: u, presence: getUserPresence(u.id) });
 });
 
+// ================= WEB PUSH (VAPID) ROUTES =================
+
+app.get('/api/push/vapid-public-key', (req, res) => {
+  res.json({ publicKey: webPush.vapidPublicKey });
+});
+
+app.post('/api/push/subscribe', authMiddleware, async (req, res) => {
+  const { subscription } = req.body || {};
+  const ok = db.saveUserPushSubscription(req.user.id, subscription);
+  if (ok && process.env.VERCEL) await db.flushCloudDb();
+  res.json({ ok });
+});
+
 // ================= FRIENDS & INVITES ROUTES =================
 
 app.get('/api/friends', authMiddleware, (req, res) => {
@@ -371,7 +433,15 @@ app.post('/api/friends/request', authMiddleware, async (req, res) => {
         body: `${req.user.avatar} ${req.user.displayName} хочет добавить вас в друзья`
       });
     }
-    if (process.env.VERCEL) await db.flushCloudDb();
+    await Promise.all([
+      sendPushToUser(result.friend.id, {
+        title: 'Новая заявка в друзья 👋',
+        body: `${req.user.avatar} ${req.user.displayName} (@${req.user.username}) хочет добавить вас в друзья`,
+        tag: 'freq-' + (result.request?.id || Date.now()),
+        data: { view: 'friends' }
+      }),
+      process.env.VERCEL ? db.flushCloudDb() : Promise.resolve()
+    ]);
     res.json(result);
   } catch (e) {
     res.status(400).json({ error: e.message });
@@ -400,7 +470,15 @@ app.post('/api/friends/respond', authMiddleware, async (req, res) => {
         body: `${req.user.avatar} ${req.user.displayName} принял(а) вашу заявку в друзья`
       });
     }
-    if (process.env.VERCEL) await db.flushCloudDb();
+    await Promise.all([
+      accept ? sendPushToUser(rel.fromId, {
+        title: 'Новый друг! 🎉',
+        body: `${req.user.avatar} ${req.user.displayName} принял(а) вашу заявку в друзья`,
+        tag: 'facc-' + Date.now(),
+        data: { view: 'friends' }
+      }) : Promise.resolve(),
+      process.env.VERCEL ? db.flushCloudDb() : Promise.resolve()
+    ]);
     res.json({ ok: true });
   } catch (e) {
     res.status(400).json({ error: e.message });
@@ -444,9 +522,9 @@ app.post('/api/dms/:friendId', authMiddleware, async (req, res) => {
         }
       }
     }
+    const preview = msg.text || (msg.viewOnce ? '💣 Одноразовое фото' : (msg.hasImage ? '📷 Фотография' : 'Новое сообщение'));
     const targetSockets = userSockets.get(req.params.friendId);
     if (!targetSockets || targetSockets.size === 0) {
-      const preview = msg.text || (msg.viewOnce ? '💣 Одноразовое фото' : (msg.hasImage ? '📷 Фотография' : 'Новое сообщение'));
       db.pushUserNotification(req.params.friendId, {
         type: 'dm_message',
         msgId: msg.id,
@@ -456,7 +534,28 @@ app.post('/api/dms/:friendId', authMiddleware, async (req, res) => {
         body: preview
       });
     }
-    if (process.env.VERCEL) await db.flushCloudDb();
+    // Fire real-time Web Push (<200ms) + Cloud DB flush in parallel
+    await Promise.all([
+      sendPushToUser(req.params.friendId, {
+        type: 'dm_message',
+        title: msg.sender?.displayName || req.user.displayName,
+        body: preview,
+        tag: 'dm-msg-' + msg.id,
+        data: { friendId: req.user.id },
+        msg: {
+          ...msg,
+          imageUrl: '', // keep push payload under 4KB limit
+          sender: {
+            id: req.user.id,
+            username: req.user.username,
+            displayName: req.user.displayName,
+            avatar: req.user.avatar,
+            color: req.user.color
+          }
+        }
+      }),
+      process.env.VERCEL ? db.flushCloudDb() : Promise.resolve()
+    ]);
     res.json({ message: msg });
   } catch (e) {
     res.status(400).json({ error: e.message });
@@ -1124,6 +1223,9 @@ app.post('/api/rooms/:code/sync', authMiddleware, (req, res) => {
   }
 
   const canControl = !room.hostOnlyControl || room.hostId === req.user.id;
+  let stateChangedImmediate = false;
+  let stateChangedLazy = false;
+
   if (canControl) {
     if (media) {
       room.media = media;
@@ -1132,6 +1234,7 @@ app.post('/api/rooms/:code/sync', authMiddleware, (req, res) => {
         media: room.media,
         playback: { ...room.playback, serverTime: Date.now() }
       });
+      stateChangedImmediate = true;
     } else if (action === 'play' || action === 'pause' || action === 'seek' || action === 'heartbeat') {
       const effectiveNow = getEffectiveTime(room.playback);
       room.playback = {
@@ -1147,14 +1250,22 @@ app.post('/api/rooms/:code/sync', authMiddleware, (req, res) => {
           serverTime: Date.now(),
           actor: { id: req.user.id, displayName: req.user.displayName, avatar: req.user.avatar }
         });
+        stateChangedImmediate = true;
+      } else {
+        stateChangedLazy = true;
       }
     }
     if (settings && room.hostId === req.user.id) {
       if (typeof settings.isPublic === 'boolean') room.isPublic = settings.isPublic;
       if (typeof settings.hostOnlyControl === 'boolean') room.hostOnlyControl = settings.hostOnlyControl;
       if (typeof settings.name === 'string' && settings.name.trim()) room.name = settings.name.trim().slice(0, 60);
+      stateChangedImmediate = true;
     }
-    persistRoomsToDb();
+    if (stateChangedImmediate) {
+      persistRoomsToDb(true);
+    } else if (stateChangedLazy) {
+      persistRoomsToDb('lazy');
+    }
   }
 
   res.json({ room: serializeRoom(room, false) });
@@ -1168,7 +1279,23 @@ app.post('/api/rooms/:code/chat', authMiddleware, async (req, res) => {
     if (!room) return res.status(404).json({ error: 'Комната не найдена' });
     const msg = createRoomChatMessage(room, req.user, req.body || {});
     io.to(code).emit('chat:message', msg);
-    if (process.env.VERCEL) await db.flushCloudDb();
+
+    const preview = msg.text || (msg.viewOnce ? '💣 Одноразовое фото' : '📷 Фотография');
+    const otherUserIds = new Set();
+    for (const p of room.participants.values()) {
+      if (p && p.id && p.id !== req.user.id) otherUserIds.add(p.id);
+    }
+    await Promise.all([
+      ...Array.from(otherUserIds).map(uid => sendPushToUser(uid, {
+        type: 'room_chat',
+        title: `${req.user.displayName} (в комнате)`,
+        body: preview,
+        tag: 'roomchat-' + msg.id,
+        data: { roomCode: code },
+        msg: { ...msg, imageUrl: '' }
+      })),
+      process.env.VERCEL ? db.flushCloudDb() : Promise.resolve()
+    ]);
     res.json({ message: msg });
   } catch (e) {
     res.status(400).json({ error: e.message });
@@ -1285,7 +1412,17 @@ app.post('/api/rooms/:code/invite', authMiddleware, async (req, res) => {
         invitePayload
       });
     }
-    if (process.env.VERCEL) await db.flushCloudDb();
+    await Promise.all([
+      sendPushToUser(friendId, {
+        type: 'room_invite',
+        title: `${req.user.displayName} зовёт в комнату! 🍿`,
+        body: `Смотреть вместе: «${invitePayload.room.mediaTitle}»`,
+        tag: 'invite-' + room.code,
+        data: { roomCode: room.code },
+        invitePayload
+      }),
+      process.env.VERCEL ? db.flushCloudDb() : Promise.resolve()
+    ]);
     res.json({ ok: true });
   } catch (e) {
     res.status(400).json({ error: e.message });

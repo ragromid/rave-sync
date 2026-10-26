@@ -168,14 +168,49 @@
     }
   });
 
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+  async function ensureWebPushSubscribed() {
+    try {
+      if (!state.user || !swRegistration || !swRegistration.pushManager) return;
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      let sub = await swRegistration.pushManager.getSubscription();
+      if (!sub) {
+        const keyRes = await api('/api/push/vapid-public-key');
+        if (!keyRes?.publicKey) return;
+        sub = await swRegistration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(keyRes.publicKey)
+        });
+      }
+      if (sub) {
+        await api('/api/push/subscribe', {
+          method: 'POST',
+          body: JSON.stringify({ subscription: sub.toJSON ? sub.toJSON() : sub })
+        });
+      }
+    } catch {}
+  }
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').then(reg => {
       swRegistration = reg;
+      ensureWebPushSubscribed();
     }).catch(() => {});
 
     navigator.serviceWorker.addEventListener('message', (event) => {
       const msg = event.data;
-      if (msg && msg.type === 'RAVELAMPA_NOTIFICATION_CLICK') {
+      if (!msg) return;
+      if (msg.type === 'RAVELAMPA_NOTIFICATION_CLICK') {
         const d = msg.data || {};
         if (d.roomCode) {
           joinRoomByCode(d.roomCode);
@@ -189,6 +224,49 @@
           }
         } else if (d.view) {
           switchView(d.view);
+        }
+      } else if (msg.type === 'RAVELAMPA_PUSH_EVENT' && msg.payload) {
+        const p = msg.payload;
+        if (p.type === 'dm_message' && p.msg) {
+          const dm = p.msg;
+          if (dm.id && !notifiedDmIds.has(dm.id)) {
+            notifiedDmIds.add(dm.id);
+            playNotificationSound('message');
+            flashTabTitle(p.title || 'Новое сообщение');
+            showTelegramTopCard({
+              title: p.title || 'Друг',
+              body: p.body || 'Новое сообщение',
+              user: dm.sender,
+              onClick: () => {
+                if (state.currentView === 'room') {
+                  setMobileRoomTab('dms');
+                  openRoomDmChat(dm.fromId);
+                } else {
+                  switchView('friends');
+                  openFriendChat(dm.fromId);
+                }
+              }
+            });
+          }
+          handleIncomingOrOutgoingDm(dm);
+          if (activeDmFriendId === dm.fromId || roomActiveDmFriendId === dm.fromId) {
+            pollActiveDmChat();
+          }
+        } else if (p.type === 'room_chat' && p.msg) {
+          appendChatMessage(p.msg, true);
+        } else if (p.title) {
+          playNotificationSound('invite');
+          flashTabTitle(p.title);
+          showTelegramTopCard({
+            title: p.title,
+            body: p.body || '',
+            user: p.invitePayload?.from || null,
+            onClick: () => {
+              if (p.data?.roomCode) joinRoomByCode(p.data.roomCode);
+              else switchView('friends');
+            }
+          });
+          loadFriends();
         }
       }
     });
@@ -301,6 +379,7 @@
       const perm = await requestPermissionCompat();
       updateNotificationBellUi();
       if (perm === 'granted') {
+        ensureWebPushSubscribed();
         triggerAppNotification({
           title: 'Уведомления включены! 🔔',
           body: 'Теперь вы будете получать сообщения от друзей и приглашения в комнаты как в Telegram.',
@@ -476,6 +555,7 @@
     }
     updateHeaderUser();
     updateNotificationBellUi();
+    ensureWebPushSubscribed();
     if (state.token) {
       socket.emit('auth:identify', { token: state.token });
     }
@@ -3109,10 +3189,25 @@
     }
   }
 
-  // Fast background poll every 1.5s for new notifications, DMs, friend requests & online status
-  setInterval(() => {
-    if (state.user) loadFriends();
-  }, 1500);
+  // Fast background poll every 1.5s (plus unthrottled Web Worker ticker when tab is in background)
+  function runBackgroundSyncTick() {
+    if (!state.user) return;
+    loadFriends();
+    pollActiveDmChat();
+  }
+  setInterval(runBackgroundSyncTick, 1500);
+
+  try {
+    const workerBlob = new Blob([
+      'setInterval(function(){ postMessage("tick"); }, 2000);'
+    ], { type: 'application/javascript' });
+    const bgWorker = new Worker(URL.createObjectURL(workerBlob));
+    bgWorker.onmessage = () => {
+      if (document.hidden && state.user) {
+        runBackgroundSyncTick();
+      }
+    };
+  } catch {}
 
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden && state.user) {
