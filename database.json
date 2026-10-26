@@ -16,11 +16,11 @@
         "moviesWatched": 0,
         "episodesWatched": 0,
         "roomsCreated": 1,
-        "messagesSent": 6,
+        "messagesSent": 7,
         "reactionsSent": 0
       },
       "updatedAt": 1792993656702,
-      "lastSeenAt": 1792999297380
+      "lastSeenAt": 1792999309092
     },
     {
       "id": "u_80ab0d1134f5",
@@ -228,6 +228,20 @@
         "replyTo": null,
         "reactions": {},
         "createdAt": 1792999297380,
+        "read": false
+      },
+      {
+        "id": "dm_95ec74e3e2de",
+        "fromId": "u_805b52bfc220",
+        "toId": "u_80ab0d1134f5",
+        "text": "ya tvoi rot ebal",
+        "imageUrl": "",
+        "hasImage": false,
+        "viewOnce": false,
+        "viewed": false,
+        "replyTo": null,
+        "reactions": {},
+        "createdAt": 1792999309092,
         "read": false
       }
     ]
