@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041922160,
+      "lastSeenAt": 1793041925220,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 1,
         "episodesWatched": 0,
         "roomsCreated": 2,
-        "messagesSent": 25,
+        "messagesSent": 26,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041919480
+      "lastSeenAt": 1793041925083
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
-        "balancer": "Filmix",
+        "balancerKey": "kodik",
+        "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1793040416330
+        "voiceName": "Flarrow Films",
+        "updatedAt": 1793040858095
       }
     ],
     "u_1333f556dd06": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "PantsuVoice",
-        "updatedAt": 1793041326035
+        "voiceName": "AnimeVost",
+        "updatedAt": 1793041148694
       }
     ]
   },
@@ -221,9 +221,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Flarrow Films",
-        "currentTime": 661,
+        "currentTime": 662,
         "duration": 5971,
-        "updatedAt": 1793041922111
+        "updatedAt": 1793041922151
       }
     },
     "u_80ab0d1134f5": {
@@ -244,10 +244,10 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "PantsuVoice",
-        "currentTime": 308,
-        "duration": 6015,
-        "updatedAt": 1793041478692
+        "voiceName": "Flarrow Films",
+        "currentTime": 662,
+        "duration": 5971,
+        "updatedAt": 1793041922642
       }
     }
   },
@@ -1756,20 +1756,20 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "PantsuVoice",
+        "voiceName": "Flarrow Films",
         "quality": "720p",
-        "rawUrl": "https://cloud2.solodcdn.com/useruploads/5ebd128c-134e-405d-a6f6-49577b175aa2/4aeeae0f975a83cebe375365b54a4418:2026102702/720.mp4:hls:manifest.m3u8",
-        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2F5ebd128c-134e-405d-a6f6-49577b175aa2%2F4aeeae0f975a83cebe375365b54a4418%3A2026102702%2F720.mp4%3Ahls%3Amanifest.m3u8",
-        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/5ebd128c-134e-405d-a6f6-49577b175aa2/4aeeae0f975a83cebe375365b54a4418:2026102702/720.mp4:hls:manifest.m3u8",
-        "streamUrl": "https://cloud2.solodcdn.com/useruploads/5ebd128c-134e-405d-a6f6-49577b175aa2/4aeeae0f975a83cebe375365b54a4418:2026102702/720.mp4:hls:manifest.m3u8",
+        "rawUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/43f4d0b6a600d5f952b0bc7e47063837:2026102702/720.mp4:hls:manifest.m3u8",
+        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2Fb1c4c826-01f0-4162-a8e7-357892019fc4%2F43f4d0b6a600d5f952b0bc7e47063837%3A2026102702%2F720.mp4%3Ahls%3Amanifest.m3u8",
+        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/43f4d0b6a600d5f952b0bc7e47063837:2026102702/720.mp4:hls:manifest.m3u8",
+        "streamUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/43f4d0b6a600d5f952b0bc7e47063837:2026102702/720.mp4:hls:manifest.m3u8",
         "streamType": "hls",
         "subtitles": []
       },
       "playback": {
         "playing": true,
-        "currentTime": 662.0378814083335,
+        "currentTime": 662.1955066323333,
         "rate": 1,
-        "updatedAt": 1793041922160
+        "updatedAt": 1793041925083
       },
       "messages": [
         {
@@ -2174,6 +2174,25 @@
           "createdAt": 1793041910697,
           "read": false,
           "updatedAt": 1793041910697
+        },
+        {
+          "id": "m_02a2454407",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "блин",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793041923928
         }
       ],
       "viewOnceStore": {}
