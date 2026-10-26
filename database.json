@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041314724,
+      "lastSeenAt": 1793041326300,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041314875
+      "lastSeenAt": 1793041326644
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "kodik",
-        "balancer": "Kodik",
+        "balancerKey": "filmix",
+        "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "updatedAt": 1793040858095
+        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "updatedAt": 1793040416330
       }
     ],
     "u_1333f556dd06": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "AnimeVost",
-        "updatedAt": 1793041148694
+        "voiceName": "PantsuVoice",
+        "updatedAt": 1793041326035
       }
     ]
   },
@@ -221,9 +221,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
-        "currentTime": 520,
+        "currentTime": 220,
         "duration": 5971,
-        "updatedAt": 1793041314385
+        "updatedAt": 1793041014191
       }
     },
     "u_80ab0d1134f5": {
@@ -245,9 +245,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "PantsuVoice",
-        "currentTime": 557,
+        "currentTime": 24,
         "duration": 6015,
-        "updatedAt": 1793041269725
+        "updatedAt": 1793041326035
       }
     }
   },
@@ -813,10 +813,10 @@
         "subtitles": []
       },
       "playback": {
-        "playing": true,
-        "currentTime": 493.2219878099754,
+        "playing": false,
+        "currentTime": 520.4616871466538,
         "rate": 1,
-        "updatedAt": 1793041286910
+        "updatedAt": 1793041314203
       },
       "messages": [
         {
