@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793047052481,
+      "lastSeenAt": 1793047056314,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 1,
         "episodesWatched": 0,
         "roomsCreated": 2,
-        "messagesSent": 75,
+        "messagesSent": 76,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793047051181
+      "lastSeenAt": 1793047056507
     }
   ],
   "friendships": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Force Media",
-        "updatedAt": 1793046112108
+        "voiceName": "Flarrow Films",
+        "updatedAt": 1793046115878
       }
     ]
   },
@@ -221,9 +221,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Force Media",
-        "currentTime": 5104,
+        "currentTime": 4981,
         "duration": 5999,
-        "updatedAt": 1793046731555
+        "updatedAt": 1793046599739
       }
     },
     "u_80ab0d1134f5": {
@@ -244,10 +244,10 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Force Media",
-        "currentTime": 4509,
-        "duration": 5999,
-        "updatedAt": 1793046123929
+        "voiceName": "Flarrow Films",
+        "currentTime": 4603,
+        "duration": 5971,
+        "updatedAt": 1793046115878
       }
     }
   },
@@ -1767,36 +1767,11 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 5421.555631026667,
+        "currentTime": 5426.563998296667,
         "rate": 1,
-        "updatedAt": 1793047050970
+        "updatedAt": 1793047056231
       },
       "messages": [
-        {
-          "id": "m_47df09ac54",
-          "system": false,
-          "user": {
-            "id": "u_1333f556dd06",
-            "displayName": "Sabina",
-            "avatar": "🦊",
-            "avatarUrl": "",
-            "color": "#e040fb"
-          },
-          "text": "теперь понятно почему такой наивный пубертат",
-          "imageUrl": "",
-          "hasPhoto": false,
-          "viewOnce": false,
-          "viewed": false,
-          "replyTo": null,
-          "reactions": {
-            "❤️": [
-              "u_805b52bfc220"
-            ]
-          },
-          "createdAt": 1793042748509,
-          "read": false,
-          "updatedAt": 1793042748509
-        },
         {
           "id": "m_f65651b4bf",
           "system": false,
@@ -3582,7 +3557,9 @@
               "u_1333f556dd06"
             ]
           },
-          "createdAt": 1793046944431
+          "createdAt": 1793046944431,
+          "read": false,
+          "updatedAt": 1793046944431
         },
         {
           "id": "m_42aa040c02",
@@ -3601,7 +3578,28 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793047039412
+          "createdAt": 1793047039412,
+          "read": false,
+          "updatedAt": 1793047039412
+        },
+        {
+          "id": "m_4f1cb28a11",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "щасс погодь",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793047056507
         }
       ],
       "viewOnceStore": {}
