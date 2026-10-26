@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793046931118,
+      "lastSeenAt": 1793046936106,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793046930844
+      "lastSeenAt": 1793046936870
     }
   ],
   "friendships": [
@@ -1767,9 +1767,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 5302.393132592667,
+        "currentTime": 5307.400799817,
         "rate": 1,
-        "updatedAt": 1793046930593
+        "updatedAt": 1793046935612
       },
       "messages": [
         {
@@ -3569,7 +3569,11 @@
           "viewOnce": false,
           "viewed": false,
           "replyTo": null,
-          "reactions": {},
+          "reactions": {
+            "❤️": [
+              "u_1333f556dd06"
+            ]
+          },
           "createdAt": 1793046894944,
           "read": false,
           "updatedAt": 1793046894944
