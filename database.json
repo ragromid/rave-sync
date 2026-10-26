@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041009367,
+      "lastSeenAt": 1793041089098,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
-        "balancer": "Filmix",
+        "balancerKey": "kodik",
+        "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1793040416330
+        "voiceName": "Flarrow Films",
+        "updatedAt": 1793040858095
       }
     ]
   },
@@ -186,7 +186,7 @@
         "voiceName": "Flarrow Films",
         "currentTime": 131,
         "duration": 5971,
-        "updatedAt": 1793040788609
+        "updatedAt": 1793040858095
       }
     },
     "u_80ab0d1134f5": {
@@ -777,9 +777,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 216.05689485601343,
+        "currentTime": 295.39919641331164,
         "rate": 1,
-        "updatedAt": 1793041008968
+        "updatedAt": 1793041089098
       },
       "messages": [
         {
