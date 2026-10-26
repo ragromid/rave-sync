@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040923826,
+      "lastSeenAt": 1793040931389,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040907749
+      "lastSeenAt": 1793040930293
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "kodik",
-        "balancer": "Kodik",
+        "balancerKey": "filmix",
+        "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "updatedAt": 1793040858095
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "updatedAt": 1793040247007
       }
     ]
   },
@@ -184,9 +184,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Flarrow Films",
-        "currentTime": 131,
+        "currentTime": 158,
         "duration": 5971,
-        "updatedAt": 1793040858095
+        "updatedAt": 1793040871462
       }
     },
     "u_80ab0d1134f5": {
@@ -207,10 +207,10 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "AnimeVost",
-        "currentTime": 5,
-        "duration": 6016,
-        "updatedAt": 1793040524978
+        "voiceName": "Flarrow Films",
+        "currentTime": 158,
+        "duration": 5971,
+        "updatedAt": 1793040872994
       }
     }
   },
@@ -704,7 +704,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": false,
+      "isPublic": true,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -779,7 +779,7 @@
         "playing": true,
         "currentTime": 0,
         "rate": 1,
-        "updatedAt": 1793040923473
+        "updatedAt": 1793040931325
       },
       "messages": [
         {
@@ -1471,7 +1471,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040876050
+          "createdAt": 1793040876050,
+          "read": false,
+          "updatedAt": 1793040876050
         },
         {
           "id": "m_f57c25430b",
@@ -1490,7 +1492,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040899800
+          "createdAt": 1793040899800,
+          "read": false,
+          "updatedAt": 1793040899800
         },
         {
           "id": "m_431734378b",
@@ -1509,7 +1513,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040903973
+          "createdAt": 1793040903973,
+          "read": false,
+          "updatedAt": 1793040903973
         }
       ],
       "viewOnceStore": {}
