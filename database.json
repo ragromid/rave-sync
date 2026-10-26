@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041664818,
+      "lastSeenAt": 1793041670373,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041664684
+      "lastSeenAt": 1793041670193
     }
   ],
   "friendships": [
@@ -161,8 +161,8 @@
         "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1793040416330
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "updatedAt": 1793040247007
       }
     ],
     "u_1333f556dd06": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "updatedAt": 1793041602479
+        "voiceName": "PantsuVoice",
+        "updatedAt": 1793041249790
       }
     ]
   },
@@ -220,10 +220,10 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
+        "voiceName": "PantsuVoice",
         "currentTime": 391,
-        "duration": 5971,
-        "updatedAt": 1793041644143
+        "duration": 6015,
+        "updatedAt": 1793041642364
       }
     },
     "u_80ab0d1134f5": {
@@ -245,9 +245,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "PantsuVoice",
-        "currentTime": 8,
+        "currentTime": 370,
         "duration": 5971,
-        "updatedAt": 1793041617384
+        "updatedAt": 1793041618801
       }
     }
   },
@@ -741,7 +741,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": false,
+      "isPublic": true,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -2095,8 +2095,14 @@
           "viewOnce": false,
           "viewed": false,
           "replyTo": null,
-          "reactions": {},
-          "createdAt": 1793041649830
+          "reactions": {
+            "❤️": [
+              "u_805b52bfc220"
+            ]
+          },
+          "createdAt": 1793041649830,
+          "read": false,
+          "updatedAt": 1793041649830
         }
       ],
       "viewOnceStore": {}
