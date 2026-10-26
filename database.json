@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041089098,
+      "lastSeenAt": 1793041104121,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041009497
+      "lastSeenAt": 1793041101236
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "kodik",
-        "balancer": "Kodik",
+        "balancerKey": "filmix",
+        "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "updatedAt": 1793040858095
+        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "updatedAt": 1793040416330
       }
     ]
   },
@@ -179,14 +179,14 @@
         "updatedAt": 1793001267614
       },
       "1218925": {
-        "balancerKey": "kodik",
-        "balancerName": "Kodik",
+        "balancerKey": "filmix",
+        "balancerName": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "currentTime": 131,
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "currentTime": 220,
         "duration": 5971,
-        "updatedAt": 1793040858095
+        "updatedAt": 1793041014191
       }
     },
     "u_80ab0d1134f5": {
@@ -777,9 +777,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 295.39919641331164,
+        "currentTime": 310.4242076486842,
         "rate": 1,
-        "updatedAt": 1793041089098
+        "updatedAt": 1793041104102
       },
       "messages": [
         {
@@ -1597,7 +1597,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040995666
+          "createdAt": 1793040995666,
+          "read": false,
+          "updatedAt": 1793040995666
         }
       ],
       "viewOnceStore": {}
