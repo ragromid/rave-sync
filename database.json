@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793046013658,
+      "lastSeenAt": 1793046022706,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793046013404
+      "lastSeenAt": 1793046022617
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
-        "balancer": "Filmix",
+        "balancerKey": "kodik",
+        "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1793040416330
+        "voiceName": "Flarrow Films",
+        "updatedAt": 1793040858095
       }
     ],
     "u_1333f556dd06": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "PantsuVoice",
-        "updatedAt": 1793041326035
+        "voiceName": "AnimeVost",
+        "updatedAt": 1793041148694
       }
     ]
   },
@@ -221,9 +221,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Flarrow Films",
-        "currentTime": 4642,
+        "currentTime": 3883,
         "duration": 5971,
-        "updatedAt": 1793045979724
+        "updatedAt": 1793045186061
       }
     },
     "u_80ab0d1134f5": {
@@ -245,9 +245,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Flarrow Films",
-        "currentTime": 4603,
+        "currentTime": 662,
         "duration": 5971,
-        "updatedAt": 1793045934467
+        "updatedAt": 1793041922642
       }
     }
   },
@@ -1767,9 +1767,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 4674.651198064,
+        "currentTime": 4684.6665058223325,
         "rate": 1,
-        "updatedAt": 1793046011801
+        "updatedAt": 1793046021666
       },
       "messages": [
         {
@@ -3618,7 +3618,11 @@
           "viewOnce": false,
           "viewed": false,
           "replyTo": null,
-          "reactions": {},
+          "reactions": {
+            "❤️": [
+              "u_805b52bfc220"
+            ]
+          },
           "createdAt": 1793046012001
         }
       ],
