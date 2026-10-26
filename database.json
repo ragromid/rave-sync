@@ -58,7 +58,7 @@
         "moviesWatched": 0,
         "episodesWatched": 0,
         "roomsCreated": 0,
-        "messagesSent": 0,
+        "messagesSent": 1,
         "reactionsSent": 0
       },
       "createdAt": 1792993803285,
@@ -115,6 +115,17 @@
     ]
   },
   "progress": {},
-  "dms": {},
+  "dms": {
+    "u_805b52bfc220:u_80ab0d1134f5": [
+      {
+        "id": "dm_69e459ecf9ce",
+        "fromId": "u_80ab0d1134f5",
+        "toId": "u_805b52bfc220",
+        "text": "Money?))",
+        "createdAt": 1792993905515,
+        "read": false
+      }
+    ]
+  },
   "deletedUsers": {}
 }
