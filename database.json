@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040362917,
+      "lastSeenAt": 1793040365411,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040363250
+      "lastSeenAt": 1793040364747
     }
   ],
   "friendships": [
@@ -183,9 +183,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
-        "currentTime": 4544,
+        "currentTime": 692,
         "duration": 5971,
-        "updatedAt": 1793040362222
+        "updatedAt": 1793040360589
       }
     },
     "u_80ab0d1134f5": {
@@ -764,9 +764,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 4544.666744952007,
+        "currentTime": 543.7128872589994,
         "rate": 1,
-        "updatedAt": 1793040362917
+        "updatedAt": 1793040365411
       },
       "messages": [
         {
