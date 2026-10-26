@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040516339,
+      "lastSeenAt": 1793040520646,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040516656
+      "lastSeenAt": 1793040519667
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "kodik",
-        "balancer": "Kodik",
+        "balancerKey": "filmix",
+        "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "AnimeVost",
-        "updatedAt": 1793040516339
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "updatedAt": 1793040247007
       }
     ]
   },
@@ -179,14 +179,14 @@
         "updatedAt": 1793001267614
       },
       "1218925": {
-        "balancerKey": "kodik",
-        "balancerName": "Kodik",
+        "balancerKey": "filmix",
+        "balancerName": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "AnimeVost",
-        "currentTime": 54,
+        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "currentTime": 64,
         "duration": 5999,
-        "updatedAt": 1793040516339
+        "updatedAt": 1793040509333
       }
     },
     "u_80ab0d1134f5": {
@@ -701,7 +701,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": false,
+      "isPublic": true,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -759,24 +759,24 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
-        "balancerName": "Filmix",
+        "balancerKey": "kodik",
+        "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "voiceName": "AnimeVost",
         "quality": "720p",
-        "rawUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1212/Chainsaw.Man.The.Movie.Reze.Arc.2025.D.ru.ForceMedia.WEBDL.1080pp_720.mp4",
-        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fnl105.cdnsqu.com%2Fs%2FFHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg%2FUHD_1212%2FChainsaw.Man.The.Movie.Reze.Arc.2025.D.ru.ForceMedia.WEBDL.1080pp_720.mp4",
-        "recommendedUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1212/Chainsaw.Man.The.Movie.Reze.Arc.2025.D.ru.ForceMedia.WEBDL.1080pp_720.mp4",
-        "streamUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1212/Chainsaw.Man.The.Movie.Reze.Arc.2025.D.ru.ForceMedia.WEBDL.1080pp_720.mp4",
-        "streamType": "mp4",
+        "rawUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/a27024d1d30fa21b50cfbd211cb18255:2026102622/720.mp4:hls:manifest.m3u8",
+        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2Fab71b0b2-d64f-41b7-b388-335074b36330%2Fa27024d1d30fa21b50cfbd211cb18255%3A2026102622%2F720.mp4%3Ahls%3Amanifest.m3u8",
+        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/a27024d1d30fa21b50cfbd211cb18255:2026102622/720.mp4:hls:manifest.m3u8",
+        "streamUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/a27024d1d30fa21b50cfbd211cb18255:2026102622/720.mp4:hls:manifest.m3u8",
+        "streamType": "hls",
         "subtitles": []
       },
       "playback": {
-        "playing": false,
-        "currentTime": 64.90849094065558,
+        "playing": true,
+        "currentTime": 2.977971838984279,
         "rate": 1,
-        "updatedAt": 1793040509164
+        "updatedAt": 1793040520646
       },
       "messages": [
         {
@@ -989,7 +989,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040505772
+          "createdAt": 1793040505772,
+          "read": false,
+          "updatedAt": 1793040505772
         }
       ],
       "viewOnceStore": {}
