@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041176323,
+      "lastSeenAt": 1793041181816,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041176344
+      "lastSeenAt": 1793041181209
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
-        "balancer": "Filmix",
+        "balancerKey": "kodik",
+        "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1793040416330
+        "voiceName": "Flarrow Films",
+        "updatedAt": 1793040858095
       }
     ],
     "u_1333f556dd06": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "AniStar",
-        "updatedAt": 1793041170472
+        "voiceName": "AnimeVost",
+        "updatedAt": 1793041148694
       }
     ]
   },
@@ -216,14 +216,14 @@
         "updatedAt": 1793001267614
       },
       "1218925": {
-        "balancerKey": "filmix",
-        "balancerName": "Filmix",
+        "balancerKey": "kodik",
+        "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
-        "currentTime": 220,
+        "voiceName": "Flarrow Films",
+        "currentTime": 131,
         "duration": 5971,
-        "updatedAt": 1793041014191
+        "updatedAt": 1793040858095
       }
     },
     "u_80ab0d1134f5": {
@@ -244,10 +244,10 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "AniStar",
-        "currentTime": 329,
-        "duration": 6016,
-        "updatedAt": 1793041170472
+        "voiceName": "AnimeVost",
+        "currentTime": 661,
+        "duration": 6015,
+        "updatedAt": 1793041180278
       }
     }
   },
@@ -814,9 +814,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 380.5362790606434,
+        "currentTime": 388.052358650683,
         "rate": 1,
-        "updatedAt": 1793041174238
+        "updatedAt": 1793041181816
       },
       "messages": [
         {
@@ -1746,20 +1746,20 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "AnimeVost",
+        "voiceName": "AniStar",
         "quality": "720p",
-        "rawUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/939a4538683d454c0567d64f855d2646:2026102701/720.mp4:hls:manifest.m3u8",
-        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2Fab71b0b2-d64f-41b7-b388-335074b36330%2F939a4538683d454c0567d64f855d2646%3A2026102701%2F720.mp4%3Ahls%3Amanifest.m3u8",
-        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/939a4538683d454c0567d64f855d2646:2026102701/720.mp4:hls:manifest.m3u8",
-        "streamUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/939a4538683d454c0567d64f855d2646:2026102701/720.mp4:hls:manifest.m3u8",
+        "rawUrl": "https://cloud2.solodcdn.com/useruploads/7a2c0bf2-1a43-44cd-bbd5-3e27790ba76f/16f8bc616f24e8f8b5e2036398db7a44:2026102701/720.mp4:hls:manifest.m3u8",
+        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2F7a2c0bf2-1a43-44cd-bbd5-3e27790ba76f%2F16f8bc616f24e8f8b5e2036398db7a44%3A2026102701%2F720.mp4%3Ahls%3Amanifest.m3u8",
+        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/7a2c0bf2-1a43-44cd-bbd5-3e27790ba76f/16f8bc616f24e8f8b5e2036398db7a44:2026102701/720.mp4:hls:manifest.m3u8",
+        "streamUrl": "https://cloud2.solodcdn.com/useruploads/7a2c0bf2-1a43-44cd-bbd5-3e27790ba76f/16f8bc616f24e8f8b5e2036398db7a44:2026102701/720.mp4:hls:manifest.m3u8",
         "streamType": "hls",
         "subtitles": []
       },
       "playback": {
         "playing": true,
-        "currentTime": 3.9575409643333055,
+        "currentTime": 662.4343922946666,
         "rate": 1,
-        "updatedAt": 1793041176199
+        "updatedAt": 1793041181209
       },
       "messages": [],
       "viewOnceStore": {}
