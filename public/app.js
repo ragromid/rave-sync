@@ -213,15 +213,27 @@
     } catch {}
   }
 
+  let inAppSoundUnlocked = false;
+  try {
+    inAppSoundUnlocked = localStorage.getItem('ravelampa_notif_enabled') === '1';
+  } catch {}
+
+  function isIosSafariTab() {
+    const ua = navigator.userAgent || '';
+    const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isStandalone = window.matchMedia?.('(display-mode: standalone)')?.matches || window.navigator.standalone === true;
+    return isIOS && !isStandalone;
+  }
+
   function updateNotificationBellUi() {
     const hasNotifApi = 'Notification' in window;
-    const perm = hasNotifApi ? Notification.permission : 'denied';
+    const perm = hasNotifApi ? Notification.permission : (inAppSoundUnlocked ? 'granted' : 'default');
     const bellIcon = $('notifBellIcon');
     const bellBtn = $('notifBellBtn');
     const banner = $('notifPermissionBanner');
 
     if (bellIcon && bellBtn) {
-      if (perm === 'granted') {
+      if (perm === 'granted' || inAppSoundUnlocked) {
         bellIcon.textContent = '🔔';
         bellBtn.title = 'Уведомления включены (нажмите для проверки)';
       } else {
@@ -231,7 +243,7 @@
     }
 
     if (banner) {
-      if (hasNotifApi && perm === 'default' && state.user && !notifBannerDismissed) {
+      if (perm === 'default' && !inAppSoundUnlocked && state.user && !notifBannerDismissed) {
         banner.classList.remove('hidden');
       } else {
         banner.classList.add('hidden');
@@ -239,16 +251,47 @@
     }
   }
 
+  function requestPermissionCompat() {
+    return new Promise((resolve) => {
+      try {
+        const res = Notification.requestPermission((perm) => resolve(perm));
+        if (res && typeof res.then === 'function') {
+          res.then(resolve).catch(() => resolve(Notification.permission));
+        }
+      } catch {
+        resolve('denied');
+      }
+    });
+  }
+
   async function requestBrowserNotificationPermission() {
+    // Unlock WebAudio immediately inside user gesture (required by Safari!)
+    playNotificationSound('invite');
+    inAppSoundUnlocked = true;
+    try { localStorage.setItem('ravelampa_notif_enabled', '1'); } catch {}
+
     if (!('Notification' in window)) {
-      showToast('Ваш браузер не поддерживает системные уведомления, работают встроенные уведомления');
+      updateNotificationBellUi();
+      if (isIosSafariTab()) {
+        triggerAppNotification({
+          title: 'Звук и уведомления в Safari включены! 🔔',
+          body: 'На iPhone системные уведомления на экран блокировки работают, если нажать «Поделиться ⬆️ → На экран Домой 📲»',
+          user: state.user || { avatar: '🍏', color: '#7c5cff' }
+        });
+      } else {
+        triggerAppNotification({
+          title: 'Встроенные уведомления включены! 🔔',
+          body: 'Вы будете получать всплывающие карточки и звуковой сигнал при новых сообщениях.',
+          user: state.user || { avatar: '🔔', color: '#7c5cff' }
+        });
+      }
       return;
     }
+
     try {
-      const perm = await Notification.requestPermission();
+      const perm = await requestPermissionCompat();
       updateNotificationBellUi();
       if (perm === 'granted') {
-        playNotificationSound('invite');
         triggerAppNotification({
           title: 'Уведомления включены! 🔔',
           body: 'Теперь вы будете получать сообщения от друзей и приглашения в комнаты как в Telegram.',
@@ -256,7 +299,7 @@
           forceSystem: true
         });
       } else if (perm === 'denied') {
-        showToast('Уведомления запрещены в настройках браузера (разрешите их рядом с адресной строкой 🔒)');
+        showToast('Системные уведомления запрещены в настройках Safari, но встроенные уведомления со звуком работают!');
       }
     } catch {}
   }
@@ -267,11 +310,16 @@
     $('notifPermissionBanner')?.classList.add('hidden');
   });
   $('notifBellBtn')?.addEventListener('click', () => {
-    if (!('Notification' in window) || Notification.permission !== 'granted') {
+    const hasGrant = ('Notification' in window && Notification.permission === 'granted');
+    if (!hasGrant) {
       requestBrowserNotificationPermission();
     } else {
-      playNotificationSound('message');
-      showToast('🔔 Уведомления и звук активны!');
+      triggerAppNotification({
+        title: 'Проверка уведомлений 🔔',
+        body: 'Уведомления и звук RaveLampa работают отлично!',
+        user: state.user || { avatar: '🔔', color: '#7c5cff' },
+        forceSystem: true
+      });
     }
   });
 
