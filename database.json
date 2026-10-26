@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793043119673,
+      "lastSeenAt": 1793043205990,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 1,
         "episodesWatched": 0,
         "roomsCreated": 2,
-        "messagesSent": 44,
+        "messagesSent": 45,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793043119656
+      "lastSeenAt": 1793043206491
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
-        "balancer": "Filmix",
+        "balancerKey": "kodik",
+        "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1793040416330
+        "voiceName": "Flarrow Films",
+        "updatedAt": 1793040858095
       }
     ],
     "u_1333f556dd06": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "PantsuVoice",
-        "updatedAt": 1793041326035
+        "voiceName": "AnimeVost",
+        "updatedAt": 1793041148694
       }
     ]
   },
@@ -221,9 +221,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Flarrow Films",
-        "currentTime": 1707,
+        "currentTime": 1625,
         "duration": 5971,
-        "updatedAt": 1793042990668
+        "updatedAt": 1793042906268
       }
     },
     "u_80ab0d1134f5": {
@@ -245,9 +245,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Flarrow Films",
-        "currentTime": 720,
+        "currentTime": 662,
         "duration": 5971,
-        "updatedAt": 1793041992359
+        "updatedAt": 1793041922642
       }
     }
   },
@@ -1767,9 +1767,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 1836.6814240740002,
+        "currentTime": 1921.3007467796665,
         "rate": 1,
-        "updatedAt": 1793043119492
+        "updatedAt": 1793043204653
       },
       "messages": [
         {
@@ -3116,6 +3116,25 @@
           "replyTo": null,
           "reactions": {},
           "createdAt": 1793043118860
+        },
+        {
+          "id": "m_e01826b077",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "Красиво снято, не ожидала)",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793043206491
         }
       ],
       "viewOnceStore": {}
