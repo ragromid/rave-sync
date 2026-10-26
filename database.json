@@ -15,12 +15,12 @@
         "watchSeconds": 0,
         "moviesWatched": 0,
         "episodesWatched": 1,
-        "roomsCreated": 2,
+        "roomsCreated": 3,
         "messagesSent": 17,
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040187206,
+      "lastSeenAt": 1793040211296,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -682,6 +682,69 @@
         "currentTime": 0,
         "rate": 1,
         "updatedAt": 1792999099576
+      },
+      "messages": [],
+      "viewOnceStore": {}
+    },
+    "5JMX3M": {
+      "code": "5JMX3M",
+      "name": "Человек-бензопила. Фильм: История Резе",
+      "isPublic": false,
+      "hostId": "u_805b52bfc220",
+      "hostOnlyControl": false,
+      "createdAt": 1793040211242,
+      "participants": [
+        {
+          "socketId": "http_u_805b52bfc220",
+          "id": "u_805b52bfc220",
+          "username": "rashid",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊",
+          "color": "#1de9b6",
+          "inVoice": false,
+          "muted": false
+        }
+      ],
+      "media": {
+        "type": "z01",
+        "title": "Человек-бензопила. Фильм: История Резе",
+        "poster": "https://imagetmdb.com/t/p/w500/f4Bv4JWv85zHSisuq7SD2WeuJGr.jpg",
+        "backdrop": "https://imagetmdb.com/t/p/w1280/gqTz24ZRsCP6AKjARmEivY7m0cK.jpg",
+        "movie": {
+          "id": 1218925,
+          "tmdb_id": 1218925,
+          "imdb_id": "tt30472557",
+          "kinopoisk_id": "5430477",
+          "type": "movie",
+          "serial": 0,
+          "title": "Человек-бензопила. Фильм: История Резе",
+          "original_title": "劇場版 チェンソーマン レゼ篇",
+          "original_language": "ja",
+          "overview": "Молодой охотник на демонов Дэндзи, который ждал свидания со своей возлюбленной Макимой, попадает под ливень. Укрывшись от дождя, он случайно встречает девушку по имени Резе, работающую в соседнем кафе. Та добродушно ему улыбается, и разговор становится более непринужденным. После этой встречи повседневная жизнь Дэндзи начинает меняться.",
+          "release_date": "2025-09-19",
+          "year": "2025",
+          "vote_average": 8.5,
+          "poster": "https://imagetmdb.com/t/p/w500/f4Bv4JWv85zHSisuq7SD2WeuJGr.jpg",
+          "backdrop": "https://imagetmdb.com/t/p/w1280/gqTz24ZRsCP6AKjARmEivY7m0cK.jpg",
+          "poster_path": "/f4Bv4JWv85zHSisuq7SD2WeuJGr.jpg",
+          "backdrop_path": "/gqTz24ZRsCP6AKjARmEivY7m0cK.jpg",
+          "number_of_seasons": 0,
+          "runtime": 100,
+          "genres": [
+            "мультфильм",
+            "боевик",
+            "мелодрама",
+            "фэнтези"
+          ]
+        },
+        "streamUrl": "",
+        "streamType": "hls"
+      },
+      "playback": {
+        "playing": false,
+        "currentTime": 0,
+        "rate": 1,
+        "updatedAt": 1793040211242
       },
       "messages": [],
       "viewOnceStore": {}
