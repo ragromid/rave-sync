@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040488097,
+      "lastSeenAt": 1793040496729,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040488070
+      "lastSeenAt": 1793040496367
     }
   ],
   "friendships": [
@@ -157,11 +157,12 @@
             "фэнтези"
           ]
         },
+        "balancerKey": "filmix",
         "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1792965688026
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "updatedAt": 1793040247007
       }
     ]
   },
@@ -183,9 +184,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "currentTime": 3354,
+        "currentTime": 425,
         "duration": 5999,
-        "updatedAt": 1793040429609
+        "updatedAt": 1793040430600
       }
     },
     "u_80ab0d1134f5": {
@@ -700,7 +701,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": false,
+      "isPublic": true,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -772,10 +773,10 @@
         "subtitles": []
       },
       "playback": {
-        "playing": true,
-        "currentTime": 46.06300073299246,
+        "playing": false,
+        "currentTime": 54.64209355467399,
         "rate": 1,
-        "updatedAt": 1793040488097
+        "updatedAt": 1793040496729
       },
       "messages": [
         {
@@ -967,7 +968,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040477166
+          "createdAt": 1793040477166,
+          "read": false,
+          "updatedAt": 1793040477166
         }
       ],
       "viewOnceStore": {}
