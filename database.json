@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040570732,
+      "lastSeenAt": 1793040585956,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040571263
+      "lastSeenAt": 1793040586005
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
-        "balancer": "Filmix",
+        "balancerKey": "kodik",
+        "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
-        "updatedAt": 1793040247007
+        "voiceName": "AnimeVost",
+        "updatedAt": 1793040516339
       }
     ]
   },
@@ -179,14 +179,14 @@
         "updatedAt": 1793001267614
       },
       "1218925": {
-        "balancerKey": "filmix",
-        "balancerName": "Filmix",
+        "balancerKey": "kodik",
+        "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "currentTime": 64,
+        "voiceName": "AnimeVost",
+        "currentTime": 54,
         "duration": 5999,
-        "updatedAt": 1793040509333
+        "updatedAt": 1793040516339
       }
     },
     "u_80ab0d1134f5": {
@@ -704,7 +704,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": true,
+      "isPublic": false,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -777,9 +777,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 52.007394378333686,
+        "currentTime": 67.03144674899958,
         "rate": 1,
-        "updatedAt": 1793040570732
+        "updatedAt": 1793040585956
       },
       "messages": [
         {
