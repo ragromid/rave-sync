@@ -1729,7 +1729,7 @@
     input.value = '';
   });
 
-  // Mobile Room Quick Switcher (💬 Чат | 🎞️ Озвучка / Серии | 👥 Зрители)
+  // Mobile Room Quick Switcher (💬 Комната | 💌 Друзья | 🎞️ Озвучка | 👥 Зрители)
   function setMobileRoomTab(tabName) {
     state.mobileRoomTab = tabName;
     const layout = document.querySelector('.room-layout');
@@ -1741,7 +1741,7 @@
       $('z01Panel').classList.remove('hidden');
     } else {
       layout?.classList.remove('mobile-tab-z01');
-      const rtab = tabName === 'users' ? 'users' : 'chat';
+      const rtab = tabName === 'users' ? 'users' : (tabName === 'dms' ? 'dms' : 'chat');
       document.querySelectorAll('.side-tab').forEach(t => t.classList.toggle('active', t.dataset.rtab === rtab));
       document.querySelectorAll('.rtab-content').forEach(c => c.classList.remove('active'));
       $(`rtab-${rtab}`)?.classList.add('active');
@@ -1750,6 +1750,8 @@
         $('chatUnreadBadge')?.classList.add('hidden');
         const box = $('chatMessages');
         if (box) box.scrollTop = box.scrollHeight;
+      } else if (rtab === 'dms') {
+        renderRoomDmFriendsList();
       }
     }
   }
@@ -1758,12 +1760,15 @@
     btn.addEventListener('click', () => setMobileRoomTab(btn.dataset.mrtab));
   });
 
-  // Desktop Sidebar tabs (Chat / Participants)
+  // Desktop Sidebar tabs (Chat / Friends DM / Participants)
   document.querySelectorAll('.side-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.side-tab').forEach(t => t.classList.toggle('active', t === tab));
       document.querySelectorAll('.rtab-content').forEach(c => c.classList.remove('active'));
       $(`rtab-${tab.dataset.rtab}`).classList.add('active');
+      if (tab.dataset.rtab === 'dms') {
+        renderRoomDmFriendsList();
+      }
     });
   });
 
@@ -1784,10 +1789,43 @@
     setTimeout(() => el.remove(), 2600);
   }
 
-  // ================= FRIENDS & INVITES =================
+  // ================= FRIENDS & PRIVATE CHAT (DMs) =================
+  let activeDmFriendId = null;
+  let roomActiveDmFriendId = null;
+
+  function formatMsgTime(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function updateDmBadges() {
+    const unreadDmTotal = (state.friends || []).reduce((acc, f) => acc + (f.unreadCount || 0), 0);
+    const totalNavBadge = (state.incomingRequests?.length || 0) + unreadDmTotal;
+
+    const reqBadge = $('friendsReqBadge');
+    if (totalNavBadge > 0) {
+      reqBadge.textContent = totalNavBadge;
+      reqBadge.classList.remove('hidden');
+    } else {
+      reqBadge.classList.add('hidden');
+    }
+
+    ['roomDmBadge', 'roomDmBadgeMobile'].forEach(id => {
+      const b = $(id);
+      if (!b) return;
+      if (unreadDmTotal > 0) {
+        b.textContent = unreadDmTotal;
+        b.classList.remove('hidden');
+      } else {
+        b.classList.add('hidden');
+      }
+    });
+  }
+
   async function loadFriends() {
     if (!state.user) {
-      $('friendsList').innerHTML = '<div style="color:var(--text-muted);padding:20px 0;">Войдите в аккаунт, чтобы добавлять друзей и приглашать их в комнаты.</div>';
+      $('friendsList').innerHTML = '<div style="color:var(--text-muted);padding:20px 0;">Войдите в аккаунт, чтобы добавлять друзей и переписываться с ними.</div>';
       return;
     }
     try {
@@ -1796,15 +1834,14 @@
       state.incomingRequests = data.incoming || [];
       state.outgoingRequests = data.outgoing || [];
 
-      const reqBadge = $('friendsReqBadge');
-      if (state.incomingRequests.length > 0) {
-        reqBadge.textContent = state.incomingRequests.length;
-        reqBadge.classList.remove('hidden');
-      } else {
-        reqBadge.classList.add('hidden');
-      }
-
+      updateDmBadges();
       renderFriendsView();
+      renderRoomDmFriendsList();
+
+      if (activeDmFriendId) {
+        const f = state.friends.find(x => x.id === activeDmFriendId);
+        if (f) updateDmHeader(f);
+      }
     } catch {}
   }
 
@@ -1850,33 +1887,268 @@
 
     state.friends.forEach(f => {
       const row = document.createElement('div');
-      row.className = 'user-row';
+      row.className = `user-row ${activeDmFriendId === f.id ? 'active-dm' : ''}`;
+      row.style.cursor = 'pointer';
       const roomStatus = f.currentRoom
         ? `🍿 Смотрит: ${f.currentRoom.mediaTitle}`
-        : (f.online ? 'В сети' : 'Не в сети');
+        : (f.lastMessage ? `${f.lastMessage.fromId === state.user?.id ? 'Вы: ' : ''}${f.lastMessage.text}` : (f.online ? 'В сети' : 'Не в сети'));
 
       row.innerHTML = `
-        <div class="user-row-left" style="cursor:pointer;">
+        <div class="user-row-left">
           <span class="status-dot ${f.online ? 'online' : ''}"></span>
           <div class="avatar-circle" style="background:${esc(f.color)}">${avatarInnerHtml(f)}</div>
-          <div>
+          <div style="min-width:0;">
             <div class="user-row-name">${esc(f.displayName)}</div>
-            <div class="user-row-sub">${esc(roomStatus)}</div>
+            <div class="user-row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;">${esc(roomStatus)}</div>
           </div>
         </div>
-        <div style="display:flex;gap:6px;">
-          ${f.currentRoom ? `<button class="pill-btn tiny accent" data-join-friend="${esc(f.currentRoom.code)}">Присоединиться</button>` : ''}
-          ${state.room && f.online ? `<button class="pill-btn tiny" data-invite-friend="${esc(f.id)}">Позвать</button>` : ''}
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          ${f.unreadCount > 0 ? `<span class="nav-badge inline-badge">${f.unreadCount}</span>` : ''}
+          ${f.currentRoom ? `<button class="pill-btn tiny accent" data-join-friend="${esc(f.currentRoom.code)}" title="Войти в комнату друга">▶️</button>` : ''}
+          <button class="pill-btn tiny" data-chat-friend="${esc(f.id)}">💬 Чат</button>
         </div>
       `;
-      row.querySelector('.user-row-left').onclick = () => openUserCard(f.id);
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('[data-join-friend]')) return;
+        openFriendChat(f.id);
+      });
       const joinBtn = row.querySelector('[data-join-friend]');
-      if (joinBtn) joinBtn.onclick = () => joinRoomByCode(f.currentRoom.code);
-      const invBtn = row.querySelector('[data-invite-friend]');
-      if (invBtn) invBtn.onclick = () => socket.emit('room:invite', { friendId: f.id });
+      if (joinBtn) joinBtn.onclick = (e) => {
+        e.stopPropagation();
+        joinRoomByCode(f.currentRoom.code);
+      };
       fList.appendChild(row);
     });
   }
+
+  function updateDmHeader(friend) {
+    setAvatarElement($('dmFriendAvatar'), friend, '🦊');
+    $('dmFriendName').textContent = friend.displayName;
+    const statusTxt = friend.currentRoom
+      ? `🍿 Смотрит: ${friend.currentRoom.mediaTitle}`
+      : (friend.online ? '🟢 В сети' : '⚪ Не в сети');
+    $('dmFriendStatus').textContent = statusTxt;
+    $('dmFriendHeaderMeta').onclick = () => openUserCard(friend.id);
+
+    const joinBtn = $('dmJoinRoomBtn');
+    if (friend.currentRoom) {
+      joinBtn.classList.remove('hidden');
+      joinBtn.onclick = () => joinRoomByCode(friend.currentRoom.code);
+    } else {
+      joinBtn.classList.add('hidden');
+    }
+
+    const invBtn = $('dmInviteRoomBtn');
+    if (state.room && friend.online) {
+      invBtn.classList.remove('hidden');
+      invBtn.onclick = () => socket.emit('room:invite', { friendId: friend.id });
+    } else {
+      invBtn.classList.add('hidden');
+    }
+  }
+
+  function createDmBubbleEl(msg) {
+    const isOwn = state.user && msg.fromId === state.user.id;
+    const el = document.createElement('div');
+    el.className = `chat-msg ${isOwn ? 'own' : ''}`;
+    const u = msg.sender || (isOwn ? state.user : {});
+    el.innerHTML = `
+      <div class="chat-av" style="background:${esc(u?.color || '#7c5cff')}">${avatarInnerHtml(u)}</div>
+      <div class="chat-bubble">
+        <div class="chat-text">${esc(msg.text)}</div>
+        <div class="chat-time">${esc(formatMsgTime(msg.createdAt))}</div>
+      </div>
+    `;
+    const av = el.querySelector('.chat-av');
+    if (av && u?.id) av.onclick = () => openUserCard(u.id);
+    return el;
+  }
+
+  async function openFriendChat(friendId) {
+    activeDmFriendId = friendId;
+    $('friendsLayout')?.classList.add('chat-open');
+    $('dmEmptyPrompt')?.classList.add('hidden');
+    $('dmActiveBox')?.classList.remove('hidden');
+
+    const localFriend = state.friends.find(x => x.id === friendId);
+    if (localFriend) {
+      localFriend.unreadCount = 0;
+      updateDmHeader(localFriend);
+    }
+    updateDmBadges();
+    renderFriendsView();
+
+    const box = $('dmMessages');
+    box.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Загрузка переписки...</div>';
+
+    try {
+      const data = await api(`/api/dms/${encodeURIComponent(friendId)}`);
+      if (data.friend) updateDmHeader(data.friend);
+      box.innerHTML = '';
+      const msgs = data.messages || [];
+      if (msgs.length === 0) {
+        box.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.84rem;">Сообщений пока нет. Напишите привет! 👋</div>';
+      } else {
+        msgs.forEach(m => box.appendChild(createDmBubbleEl(m)));
+        box.scrollTop = box.scrollHeight;
+      }
+      $('dmInput')?.focus();
+    } catch (e) {
+      box.innerHTML = `<div style="text-align:center;color:var(--danger);padding:20px;">${esc(e.message)}</div>`;
+    }
+  }
+
+  $('dmBackBtn')?.addEventListener('click', () => {
+    $('friendsLayout')?.classList.remove('chat-open');
+  });
+
+  $('dmForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!activeDmFriendId) return;
+    const input = $('dmInput');
+    const text = input.value.trim();
+    if (!text) return;
+    socket.emit('dm:send', { toId: activeDmFriendId, text });
+    input.value = '';
+  });
+
+  // Friends Private Chat inside Watch Party Room (#rtab-dms)
+  function renderRoomDmFriendsList() {
+    const container = $('roomDmFriendsList');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!state.friends.length) {
+      container.innerHTML = '<div style="color:var(--text-muted);padding:16px;font-size:0.84rem;text-align:center;">Добавьте друзей во вкладке «Друзья», чтобы переписываться с ними прямо во время просмотра.</div>';
+      return;
+    }
+    state.friends.forEach(f => {
+      const row = document.createElement('div');
+      row.className = 'user-row';
+      row.style.cursor = 'pointer';
+      const sub = f.lastMessage
+        ? `${f.lastMessage.fromId === state.user?.id ? 'Вы: ' : ''}${f.lastMessage.text}`
+        : (f.online ? '🟢 В сети' : '⚪ Не в сети');
+      row.innerHTML = `
+        <div class="user-row-left">
+          <span class="status-dot ${f.online ? 'online' : ''}"></span>
+          <div class="avatar-circle" style="background:${esc(f.color)}">${avatarInnerHtml(f)}</div>
+          <div style="min-width:0;">
+            <div class="user-row-name">${esc(f.displayName)}</div>
+            <div class="user-row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;">${esc(sub)}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          ${f.unreadCount > 0 ? `<span class="nav-badge inline-badge">${f.unreadCount}</span>` : ''}
+          <span class="pill-btn tiny">💬</span>
+        </div>
+      `;
+      row.onclick = () => openRoomDmChat(f.id);
+      container.appendChild(row);
+    });
+  }
+
+  async function openRoomDmChat(friendId) {
+    roomActiveDmFriendId = friendId;
+    $('roomDmFriendsView')?.classList.add('hidden');
+    $('roomDmChatView')?.classList.remove('hidden');
+
+    const f = state.friends.find(x => x.id === friendId);
+    if (f) {
+      f.unreadCount = 0;
+      setAvatarElement($('roomDmFriendAvatar'), f, '🦊');
+      $('roomDmFriendName').textContent = f.displayName;
+      $('roomDmInviteBtn').onclick = () => socket.emit('room:invite', { friendId: f.id });
+    }
+    updateDmBadges();
+    renderRoomDmFriendsList();
+
+    const box = $('roomDmMessages');
+    box.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:16px;font-size:0.82rem;">Загрузка...</div>';
+    try {
+      const data = await api(`/api/dms/${encodeURIComponent(friendId)}`);
+      box.innerHTML = '';
+      (data.messages || []).forEach(m => box.appendChild(createDmBubbleEl(m)));
+      box.scrollTop = box.scrollHeight;
+      $('roomDmInput')?.focus();
+    } catch {}
+  }
+
+  $('roomDmBackBtn')?.addEventListener('click', () => {
+    roomActiveDmFriendId = null;
+    $('roomDmChatView')?.classList.add('hidden');
+    $('roomDmFriendsView')?.classList.remove('hidden');
+    renderRoomDmFriendsList();
+  });
+
+  $('roomDmForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!roomActiveDmFriendId) return;
+    const input = $('roomDmInput');
+    const text = input.value.trim();
+    if (!text) return;
+    socket.emit('dm:send', { toId: roomActiveDmFriendId, text });
+    input.value = '';
+  });
+
+  // Real-time incoming/outgoing Direct Message handler
+  socket.on('dm:message', (msg) => {
+    if (!state.user) return;
+    const otherId = msg.fromId === state.user.id ? msg.toId : msg.fromId;
+    const friend = state.friends.find(x => x.id === otherId);
+    if (friend) {
+      friend.lastMessage = {
+        text: msg.text,
+        fromId: msg.fromId,
+        createdAt: msg.createdAt
+      };
+    }
+
+    const isViewingInFriendsPage = state.currentView === 'friends' && activeDmFriendId === otherId;
+    const isViewingInRoomSidebar = state.currentView === 'room' && roomActiveDmFriendId === otherId && !$('roomDmChatView')?.classList.contains('hidden');
+
+    if (activeDmFriendId === otherId) {
+      const box = $('dmMessages');
+      if (box) {
+        if (box.querySelector('div[style*="text-align:center"]')) box.innerHTML = '';
+        box.appendChild(createDmBubbleEl(msg));
+        box.scrollTop = box.scrollHeight;
+      }
+    }
+
+    if (roomActiveDmFriendId === otherId) {
+      const rBox = $('roomDmMessages');
+      if (rBox) {
+        rBox.appendChild(createDmBubbleEl(msg));
+        rBox.scrollTop = rBox.scrollHeight;
+      }
+    }
+
+    if (msg.fromId !== state.user.id) {
+      if (isViewingInFriendsPage || isViewingInRoomSidebar) {
+        socket.emit('dm:read', { friendId: otherId });
+      } else {
+        if (friend) friend.unreadCount = (friend.unreadCount || 0) + 1;
+        showToast(
+          `💌 ${msg.sender?.displayName || 'Друг'}: ${msg.text}`,
+          'Ответить',
+          () => {
+            if (state.currentView === 'room') {
+              setMobileRoomTab('dms');
+              openRoomDmChat(otherId);
+            } else {
+              switchView('friends');
+              openFriendChat(otherId);
+            }
+          },
+          6500
+        );
+      }
+    }
+
+    updateDmBadges();
+    renderFriendsView();
+    renderRoomDmFriendsList();
+  });
 
   async function respondFriend(requestId, accept) {
     try {

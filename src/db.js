@@ -27,7 +27,8 @@ const DEFAULT_DB = {
   friendships: [], // { id, fromId, toId, status: 'pending' | 'accepted', createdAt }
   bookmarks: {},   // userId -> [ movieObj ]
   history: {},     // userId -> [ { movie, balancer, balancerKey, season, episode, voiceName, currentTime, duration, updatedAt } ]
-  progress: {}     // userId -> { [movieId]: { balancerKey, balancerName, season, episode, voiceName, currentTime, duration, updatedAt } }
+  progress: {},    // userId -> { [movieId]: { balancerKey, balancerName, season, episode, voiceName, currentTime, duration, updatedAt } }
+  dms: {}          // pairKey ("u1:u2") -> [ { id, fromId, toId, text, createdAt, read } ]
 };
 
 let db = loadLocalDb();
@@ -66,7 +67,8 @@ function mergeDb(base, incoming) {
     friendships: Array.isArray(incoming.friendships) ? incoming.friendships : (base?.friendships || []),
     bookmarks: { ...(base?.bookmarks || {}), ...(incoming.bookmarks && typeof incoming.bookmarks === 'object' ? incoming.bookmarks : {}) },
     history: { ...(base?.history || {}), ...(incoming.history && typeof incoming.history === 'object' ? incoming.history : {}) },
-    progress: { ...(base?.progress || {}), ...(incoming.progress && typeof incoming.progress === 'object' ? incoming.progress : {}) }
+    progress: { ...(base?.progress || {}), ...(incoming.progress && typeof incoming.progress === 'object' ? incoming.progress : {}) },
+    dms: { ...(base?.dms || {}), ...(incoming.dms && typeof incoming.dms === 'object' ? incoming.dms : {}) }
   };
   return out;
 }
@@ -446,19 +448,36 @@ function removeFriend(userId, friendId) {
   saveDb();
 }
 
+function getDmPairKey(userA, userB) {
+  return [String(userA), String(userB)].sort().join(':');
+}
+
 function getFriendsData(userId) {
   const friends = [];
   const incoming = [];
   const outgoing = [];
+  if (!db.dms) db.dms = {};
 
   for (const f of db.friendships) {
     if (f.status === 'accepted') {
-      if (f.fromId === userId) {
-        const u = getUserById(f.toId);
-        if (u) friends.push(u);
-      } else if (f.toId === userId) {
-        const u = getUserById(f.fromId);
-        if (u) friends.push(u);
+      const friendId = f.fromId === userId ? f.toId : (f.toId === userId ? f.fromId : null);
+      if (friendId) {
+        const u = getUserById(friendId);
+        if (u) {
+          const pairKey = getDmPairKey(userId, friendId);
+          const msgs = db.dms[pairKey] || [];
+          const unreadCount = msgs.filter(m => m.toId === userId && !m.read).length;
+          const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+          friends.push({
+            ...u,
+            unreadCount,
+            lastMessage: lastMsg ? {
+              text: lastMsg.text,
+              fromId: lastMsg.fromId,
+              createdAt: lastMsg.createdAt
+            } : null
+          });
+        }
       }
     } else if (f.status === 'pending') {
       if (f.toId === userId) {
@@ -471,6 +490,71 @@ function getFriendsData(userId) {
     }
   }
   return { friends, incoming, outgoing };
+}
+
+function getDirectMessages(userId, friendId) {
+  if (!db.dms) db.dms = {};
+  const pairKey = getDmPairKey(userId, friendId);
+  const msgs = db.dms[pairKey] || [];
+  let changed = false;
+  for (const m of msgs) {
+    if (m.toId === userId && !m.read) {
+      m.read = true;
+      changed = true;
+    }
+  }
+  if (changed) saveDb();
+  return msgs.map(m => ({
+    ...m,
+    sender: getUserById(m.fromId)
+  }));
+}
+
+function markDirectMessagesRead(userId, friendId) {
+  if (!db.dms) db.dms = {};
+  const pairKey = getDmPairKey(userId, friendId);
+  const msgs = db.dms[pairKey] || [];
+  let changed = false;
+  for (const m of msgs) {
+    if (m.toId === userId && !m.read) {
+      m.read = true;
+      changed = true;
+    }
+  }
+  if (changed) saveDb();
+}
+
+function sendDirectMessage(fromId, toId, text) {
+  const cleanText = String(text || '').trim().slice(0, 600);
+  if (!cleanText) throw new Error('Пустое сообщение');
+  const sender = getUserById(fromId);
+  const recipient = getUserById(toId);
+  if (!sender || !recipient) throw new Error('Пользователь не найден');
+
+  if (!db.dms) db.dms = {};
+  const pairKey = getDmPairKey(fromId, toId);
+  if (!db.dms[pairKey]) db.dms[pairKey] = [];
+
+  const msg = {
+    id: 'dm_' + crypto.randomBytes(6).toString('hex'),
+    fromId,
+    toId,
+    text: cleanText,
+    createdAt: Date.now(),
+    read: false
+  };
+  db.dms[pairKey].push(msg);
+  if (db.dms[pairKey].length > 150) {
+    db.dms[pairKey] = db.dms[pairKey].slice(-150);
+  }
+  incrementUserStat(fromId, 'messagesSent', 1);
+  saveDb();
+
+  return {
+    ...msg,
+    sender,
+    recipient
+  };
 }
 
 function toggleBookmark(userId, movie) {
@@ -631,6 +715,9 @@ module.exports = {
   respondFriendRequest,
   removeFriend,
   getFriendsData,
+  getDirectMessages,
+  sendDirectMessage,
+  markDirectMessagesRead,
   toggleBookmark,
   getBookmarks,
   addWatchHistory,

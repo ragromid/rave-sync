@@ -151,27 +151,69 @@
           <div id="publicRoomsGrid" class="rooms-grid"></div>
         </section>
 
-        <!-- VIEW 3: FRIENDS (Social, Presence, Invites) -->
-        <section id="view-friends" class="view-page">
-          <div class="page-header">
-            <h2>Друзья</h2>
-          </div>
+        <!-- VIEW 3: FRIENDS & PRIVATE CHAT (Social, Presence, Invites, Direct Messages) -->
+        <section id="view-friends" class="view-page friends-view-page">
+          <div class="friends-layout" id="friendsLayout">
+            <!-- Left Column: Friends List & Search -->
+            <div class="friends-list-pane">
+              <div class="page-header">
+                <h2>Друзья и чаты</h2>
+              </div>
 
-          <div class="friends-search-bar">
-            <input type="text" id="friendSearchInput" placeholder="Найти друга по логину или имени..." autocomplete="off" />
-            <button id="friendSearchBtn" class="btn primary">Найти</button>
-          </div>
+              <div class="friends-search-bar">
+                <input type="text" id="friendSearchInput" placeholder="Найти друга по логину или имени..." autocomplete="off" />
+                <button id="friendSearchBtn" class="btn primary">Найти</button>
+              </div>
 
-          <div id="friendSearchResults" class="friends-list hidden"></div>
+              <div id="friendSearchResults" class="friends-list hidden"></div>
 
-          <div id="incomingRequestsBlock" class="section-block hidden">
-            <div class="section-head"><div class="section-title">Входящие заявки</div></div>
-            <div id="incomingRequestsList" class="friends-list"></div>
-          </div>
+              <div id="incomingRequestsBlock" class="section-block hidden">
+                <div class="section-head"><div class="section-title">Входящие заявки</div></div>
+                <div id="incomingRequestsList" class="friends-list"></div>
+              </div>
 
-          <div class="section-block">
-            <div class="section-head"><div class="section-title">Мои друзья</div></div>
-            <div id="friendsList" class="friends-list"></div>
+              <div class="section-block">
+                <div class="section-head"><div class="section-title">Мои друзья</div></div>
+                <div id="friendsList" class="friends-list"></div>
+              </div>
+            </div>
+
+            <!-- Right Column: Dedicated Private Chat with Selected Friend -->
+            <div class="friends-chat-pane" id="friendChatPane">
+              <div id="dmEmptyPrompt" class="dm-empty-prompt">
+                <div style="font-size:2.4rem;">💬</div>
+                <h3>Личный чат с друзьями</h3>
+                <p>Выберите друга слева, чтобы написать сообщение или позвать в комнату</p>
+              </div>
+
+              <div id="dmActiveBox" class="dm-active-box hidden">
+                <div class="dm-header">
+                  <button type="button" id="dmBackBtn" class="icon-btn dm-back-btn" title="Назад к списку друзей">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                  <div class="dm-friend-meta" id="dmFriendHeaderMeta" style="cursor:pointer;">
+                    <div id="dmFriendAvatar" class="avatar-circle">🦊</div>
+                    <div style="min-width:0;">
+                      <div id="dmFriendName" class="user-row-name">Друг</div>
+                      <div id="dmFriendStatus" class="user-row-sub">В сети</div>
+                    </div>
+                  </div>
+                  <div class="dm-header-actions">
+                    <button type="button" id="dmJoinRoomBtn" class="pill-btn tiny accent hidden">▶️ Войти к другу</button>
+                    <button type="button" id="dmInviteRoomBtn" class="pill-btn tiny hidden">🍿 Позвать</button>
+                  </div>
+                </div>
+
+                <div id="dmMessages" class="chat-messages dm-messages"></div>
+
+                <form id="dmForm" class="chat-input-row">
+                  <input type="text" id="dmInput" placeholder="Написать другу..." autocomplete="off" />
+                  <button type="submit" class="send-btn" title="Отправить">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                  </button>
+                </form>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -275,13 +317,16 @@
               <!-- Mobile Room Quick Switcher (Chat first & easily accessible right under player) -->
               <div class="mobile-room-tabs" id="mobileRoomTabs">
                 <button type="button" class="m-rtab active" data-mrtab="chat">
-                  💬 Чат <span id="chatUnreadBadge" class="nav-badge inline-badge hidden">0</span>
+                  💬 Комната <span id="chatUnreadBadge" class="nav-badge inline-badge hidden">0</span>
+                </button>
+                <button type="button" class="m-rtab" data-mrtab="dms">
+                  💌 Друзья <span id="roomDmBadgeMobile" class="nav-badge inline-badge hidden">0</span>
                 </button>
                 <button type="button" class="m-rtab" data-mrtab="z01">
-                  🎞️ Озвучка / Серии
+                  🎞️ Озвучка
                 </button>
                 <button type="button" class="m-rtab" data-mrtab="users">
-                  👥 Зрители (<span id="roomUserCountMobile">1</span>)
+                  👥 (<span id="roomUserCountMobile">1</span>)
                 </button>
               </div>
 
@@ -297,25 +342,50 @@
               </div>
             </div>
 
-            <!-- Right / Bottom: Rave Chat & Participants Sidebar -->
+            <!-- Right / Bottom: Rave Chat, Friends Chat & Participants Sidebar -->
             <aside class="room-sidebar" id="roomSidebar">
               <div class="sidebar-tabs">
-                <button class="side-tab active" data-rtab="chat">💬 Чат</button>
-                <button class="side-tab" data-rtab="users">👥 Участники (<span id="roomUserCount">1</span>)</button>
+                <button class="side-tab active" data-rtab="chat">💬 Комната</button>
+                <button class="side-tab" data-rtab="dms">💌 Друзья <span id="roomDmBadge" class="nav-badge inline-badge hidden">0</span></button>
+                <button class="side-tab" data-rtab="users">👥 (<span id="roomUserCount">1</span>)</button>
               </div>
 
-              <!-- Tab 1: Live Chat -->
+              <!-- Tab 1: Live Room Chat -->
               <div id="rtab-chat" class="rtab-content active">
                 <div id="chatMessages" class="chat-messages"></div>
                 <form id="chatForm" class="chat-input-row">
-                  <input type="text" id="chatInput" placeholder="Написать в чат..." autocomplete="off" />
+                  <input type="text" id="chatInput" placeholder="Написать в комнату..." autocomplete="off" />
                   <button type="submit" class="send-btn" title="Отправить">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                   </button>
                 </form>
               </div>
 
-              <!-- Tab 2: Participants List -->
+              <!-- Tab 2: Friends Private Chat inside Room -->
+              <div id="rtab-dms" class="rtab-content">
+                <div id="roomDmFriendsView" class="room-dm-friends-view">
+                  <div id="roomDmFriendsList" class="participants-list"></div>
+                </div>
+                <div id="roomDmChatView" class="room-dm-chat-view hidden">
+                  <div class="dm-header compact">
+                    <button type="button" id="roomDmBackBtn" class="icon-btn tiny" title="К списку друзей">←</button>
+                    <div class="dm-friend-meta" id="roomDmFriendMeta">
+                      <div id="roomDmFriendAvatar" class="avatar-circle" style="width:26px;height:26px;font-size:0.85rem;">🦊</div>
+                      <div id="roomDmFriendName" class="user-row-name" style="font-size:0.85rem;">Друг</div>
+                    </div>
+                    <button type="button" id="roomDmInviteBtn" class="pill-btn tiny accent">🍿 Позвать</button>
+                  </div>
+                  <div id="roomDmMessages" class="chat-messages"></div>
+                  <form id="roomDmForm" class="chat-input-row">
+                    <input type="text" id="roomDmInput" placeholder="Личное сообщение другу..." autocomplete="off" />
+                    <button type="submit" class="send-btn" title="Отправить">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Tab 3: Participants List -->
               <div id="rtab-users" class="rtab-content">
                 <div id="roomParticipantsList" class="participants-list"></div>
               </div>

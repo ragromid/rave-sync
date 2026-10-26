@@ -321,6 +321,38 @@ app.delete('/api/friends/:friendId', authMiddleware, (req, res) => {
   res.json({ ok: true });
 });
 
+app.get('/api/dms/:friendId', authMiddleware, (req, res) => {
+  const friend = db.getUserById(req.params.friendId);
+  if (!friend) return res.status(404).json({ error: 'Друг не найден' });
+  const messages = db.getDirectMessages(req.user.id, friend.id);
+  res.json({
+    friend: {
+      ...friend,
+      ...getUserPresence(friend.id)
+    },
+    messages
+  });
+});
+
+app.post('/api/dms/:friendId', authMiddleware, (req, res) => {
+  try {
+    const { text } = req.body || {};
+    const msg = db.sendDirectMessage(req.user.id, req.params.friendId, text);
+    // Emit to all sockets of recipient and sender
+    for (const uid of [req.user.id, req.params.friendId]) {
+      const sids = userSockets.get(uid);
+      if (sids) {
+        for (const sid of sids) {
+          io.to(sid).emit('dm:message', msg);
+        }
+      }
+    }
+    res.json({ message: msg });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // ================= BOOKMARKS & HISTORY ROUTES =================
 
 app.get('/api/bookmarks', authMiddleware, (req, res) => {
@@ -1059,6 +1091,29 @@ io.on('connection', (socket) => {
       });
     }
     socket.emit('toast', { type: 'success', text: 'Приглашение отправлено!' });
+  });
+
+  // Direct Messages (Friends Private Chat)
+  socket.on('dm:send', ({ toId, text }) => {
+    if (!currentUser || !toId) return;
+    try {
+      const msg = db.sendDirectMessage(currentUser.id, toId, text);
+      for (const uid of [currentUser.id, toId]) {
+        const sids = userSockets.get(uid);
+        if (sids) {
+          for (const sid of sids) {
+            io.to(sid).emit('dm:message', msg);
+          }
+        }
+      }
+    } catch (e) {
+      socket.emit('toast', { type: 'error', text: e.message });
+    }
+  });
+
+  socket.on('dm:read', ({ friendId }) => {
+    if (!currentUser || !friendId) return;
+    db.markDirectMessagesRead(currentUser.id, friendId);
   });
 
   // WebRTC Voice Chat signaling inside room
