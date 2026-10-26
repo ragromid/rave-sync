@@ -157,7 +157,16 @@
   let notifBannerDismissed = false;
   const notifiedDmIds = new Set();
   const notifiedReqIds = new Set();
+  const notifiedEventIds = new Set();
   let initialFriendsLoaded = false;
+  let friendsPollInFlight = false;
+  let dmPollInFlight = false;
+
+  socket.on('connect', () => {
+    if (state.token) {
+      socket.emit('auth:identify', { token: state.token });
+    }
+  });
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').then(reg => {
@@ -1788,11 +1797,12 @@
     });
   }, 2500);
 
-  // Serverless HTTP DM poll when in Friends / Room DMs on Vercel
-  setInterval(async () => {
-    if (socket.connected || !state.user) return;
+  // Fast HTTP DM poll when in Friends / Room DMs
+  async function pollActiveDmChat() {
+    if (!state.user || dmPollInFlight) return;
     const targetFriendId = state.currentView === 'friends' ? activeDmFriendId : (state.currentView === 'room' ? roomActiveDmFriendId : null);
     if (!targetFriendId) return;
+    dmPollInFlight = true;
     try {
       const data = await api(`/api/dms/${encodeURIComponent(targetFriendId)}`);
       if (data.friend) {
@@ -1801,8 +1811,11 @@
         if (activeDmFriendId === data.friend.id) updateDmHeader(data.friend);
       }
       syncDmMessagesFromPoll(targetFriendId, data.messages || []);
-    } catch {}
-  }, 2000);
+    } catch {} finally {
+      dmPollInFlight = false;
+    }
+  }
+  setInterval(pollActiveDmChat, 1200);
 
   $('resyncPlayerBtn').addEventListener('click', async () => {
     if (socket.connected) {
@@ -2666,7 +2679,7 @@
               title: friend.displayName || 'Друг',
               body: preview,
               user: friend,
-              data: { friendId, tag: 'dm-' + friendId },
+              data: { friendId, tag: 'dm-msg-' + m.id },
               onClick: () => {
                 if (state.currentView === 'room') {
                   setMobileRoomTab('dms');
@@ -2837,18 +2850,14 @@
     comp.replyTo = null;
     renderComposerBar('room');
 
-    if (socket.connected) {
-      socket.emit('chat:send', payload);
-    } else {
-      try {
-        const res = await api(`/api/rooms/${encodeURIComponent(state.room.code)}/chat`, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        if (res.message) appendChatMessage(res.message, false);
-      } catch (err) {
-        showToast(err.message);
-      }
+    try {
+      const res = await api(`/api/rooms/${encodeURIComponent(state.room.code)}/chat`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      if (res.message) appendChatMessage(res.message, false);
+    } catch (err) {
+      showToast(err.message);
     }
   });
 
@@ -2969,6 +2978,8 @@
       $('friendsList').innerHTML = '<div style="color:var(--text-muted);padding:20px 0;">Войдите в аккаунт, чтобы добавлять друзей и переписываться с ними.</div>';
       return;
     }
+    if (friendsPollInFlight) return;
+    friendsPollInFlight = true;
     try {
       const data = await api('/api/friends');
       const newFriends = data.friends || [];
@@ -2977,16 +2988,21 @@
 
       // Detect new incoming DMs & friend requests for notifications
       for (const f of newFriends) {
-        if (f.lastMessage && f.lastMessage.id && f.lastMessage.fromId !== state.user.id) {
+        const incomingCandidates = Array.isArray(f.recentIncoming) && f.recentIncoming.length > 0
+          ? f.recentIncoming
+          : (f.lastMessage && f.lastMessage.fromId !== state.user.id ? [f.lastMessage] : []);
+
+        for (const msgItem of incomingCandidates) {
+          if (!msgItem || !msgItem.id || msgItem.fromId === state.user.id) continue;
           if (!initialFriendsLoaded) {
-            notifiedDmIds.add(f.lastMessage.id);
-          } else if (!notifiedDmIds.has(f.lastMessage.id)) {
-            notifiedDmIds.add(f.lastMessage.id);
+            notifiedDmIds.add(msgItem.id);
+          } else if (!notifiedDmIds.has(msgItem.id)) {
+            notifiedDmIds.add(msgItem.id);
             triggerAppNotification({
               title: f.displayName,
-              body: f.lastMessage.text || 'Новое сообщение',
+              body: msgItem.text || 'Новое сообщение',
               user: f,
-              data: { friendId: f.id, tag: 'dm-' + f.id },
+              data: { friendId: f.id, tag: 'dm-msg-' + msgItem.id },
               onClick: () => {
                 if (state.currentView === 'room') {
                   setMobileRoomTab('dms');
@@ -2997,6 +3013,9 @@
                 }
               }
             });
+            if (activeDmFriendId === f.id || roomActiveDmFriendId === f.id) {
+              pollActiveDmChat();
+            }
           }
         }
       }
@@ -3018,6 +3037,15 @@
       }
 
       for (const n of serverNotifs) {
+        if (!n) continue;
+        if (!initialFriendsLoaded) {
+          if (n.id) notifiedEventIds.add(n.id);
+          if (n.msgId) notifiedDmIds.add(n.msgId);
+          continue;
+        }
+        if (n.id && notifiedEventIds.has(n.id)) continue;
+        if (n.id) notifiedEventIds.add(n.id);
+
         if (n.type === 'room_invite' && n.invitePayload) {
           const { from, room } = n.invitePayload;
           triggerAppNotification({
@@ -3025,7 +3053,7 @@
             body: `Смотреть вместе: «${room.mediaTitle}»`,
             user: from,
             kind: 'invite',
-            data: { roomCode: room.code, tag: 'invite-' + room.code },
+            data: { roomCode: room.code, tag: 'invite-' + (n.id || room.code) },
             onClick: () => joinRoomByCode(room.code)
           });
         } else if (n.type === 'dm_message') {
@@ -3036,7 +3064,7 @@
               title: n.title || n.from?.displayName || 'Новое сообщение',
               body: n.body || 'Новое сообщение',
               user: n.from,
-              data: { friendId: senderId, tag: 'dm-' + (senderId || Date.now()) },
+              data: { friendId: senderId, tag: 'dm-msg-' + (n.msgId || n.id || Date.now()) },
               onClick: () => {
                 if (!senderId) return switchView('friends');
                 if (state.currentView === 'room') {
@@ -3048,12 +3076,16 @@
                 }
               }
             });
+            if (senderId && (activeDmFriendId === senderId || roomActiveDmFriendId === senderId)) {
+              pollActiveDmChat();
+            }
           }
         } else if (n.title) {
           triggerAppNotification({
             title: n.title,
             body: n.body || '',
             kind: 'invite',
+            data: { tag: 'ntf-' + (n.id || Date.now()) },
             onClick: () => switchView('friends')
           });
         }
@@ -3072,13 +3104,28 @@
         const f = state.friends.find(x => x.id === activeDmFriendId);
         if (f) updateDmHeader(f);
       }
-    } catch {}
+    } catch {} finally {
+      friendsPollInFlight = false;
+    }
   }
 
-  // Background poll every 2.5s for new notifications, DMs, friend requests & online status
+  // Fast background poll every 1.5s for new notifications, DMs, friend requests & online status
   setInterval(() => {
     if (state.user) loadFriends();
-  }, 2500);
+  }, 1500);
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && state.user) {
+      loadFriends();
+      pollActiveDmChat();
+    }
+  });
+  window.addEventListener('focus', () => {
+    if (state.user) {
+      loadFriends();
+      pollActiveDmChat();
+    }
+  });
 
   function renderFriendsView() {
     // Incoming requests
@@ -3269,18 +3316,14 @@
       renderComposerBar(composerKey);
     }
 
-    if (socket.connected) {
-      socket.emit('dm:send', payload);
-    } else {
-      try {
-        const res = await api(`/api/dms/${encodeURIComponent(friendId)}`, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        if (res.message) handleIncomingOrOutgoingDm(res.message);
-      } catch (err) {
-        showToast(err.message);
-      }
+    try {
+      const res = await api(`/api/dms/${encodeURIComponent(friendId)}`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      if (res.message) handleIncomingOrOutgoingDm(res.message);
+    } catch (err) {
+      showToast(err.message);
     }
   }
 
@@ -3415,7 +3458,7 @@
           title: msg.sender?.displayName || friend?.displayName || 'Друг',
           body: previewText,
           user: msg.sender || friend,
-          data: { friendId: otherId, tag: 'dm-' + otherId },
+          data: { friendId: otherId, tag: 'dm-msg-' + msg.id },
           onClick: () => {
             if (state.currentView === 'room') {
               setMobileRoomTab('dms');

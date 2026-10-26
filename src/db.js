@@ -55,6 +55,7 @@ let cloudInitialized = false;
 let lastCloudLoadAt = 0;
 let cloudInitPromise = null;
 let cloudFileSha = null;
+let lastCloudCommitSha = null;
 let cloudSyncTimer = null;
 let cloudSyncInFlight = null;
 let cloudPendingSync = false;
@@ -255,13 +256,13 @@ async function ensureCloudLoaded() {
     await cloudInitPromise;
     return;
   }
-  // On Vercel Serverless, refresh from cloud if more than 1.2s elapsed since last pull
-  if (process.env.VERCEL && Date.now() - lastCloudLoadAt > 1200 && !cloudSyncInFlight) {
+  // On Vercel Serverless, refresh from cloud if more than 800ms elapsed since last pull
+  if (process.env.VERCEL && Date.now() - lastCloudLoadAt > 800 && !cloudSyncInFlight) {
     await initCloudDb();
   }
 }
 
-// Initialize & pull persistent DB from cloud branch on server startup
+// Initialize & pull persistent DB from cloud branch on server startup or serverless refresh
 async function initCloudDb() {
   const token = getCloudToken();
   if (!token) {
@@ -271,21 +272,23 @@ async function initCloudDb() {
   const headers = {
     'Authorization': `Bearer ${token}`,
     'Accept': 'application/vnd.github+json',
-    'Cache-Control': 'no-cache',
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'If-None-Match': `"bypass-${Date.now()}-${Math.random()}"`,
     'User-Agent': 'RaveLampa-Server'
   };
 
   try {
-    // 1. Check if `db-storage` branch exists; if not, create it from `main`
-    const branchRes = await fetch(`https://api.github.com/repos/${GH_REPO}/git/ref/heads/${GH_BRANCH}`, {
+    // 1. Check `db-storage` branch ref to get exact latest commit SHA (bypasses /contents/ branch CDN cache)
+    const branchRes = await fetch(`https://api.github.com/repos/${GH_REPO}/git/ref/heads/${GH_BRANCH}?t=${Date.now()}`, {
       headers,
-      signal: AbortSignal.timeout(8000)
+      signal: AbortSignal.timeout(7000)
     });
 
+    let commitSha = '';
     if (branchRes.status === 404) {
       const mainRes = await fetch(`https://api.github.com/repos/${GH_REPO}/git/ref/heads/main`, {
         headers,
-        signal: AbortSignal.timeout(8000)
+        signal: AbortSignal.timeout(7000)
       });
       if (mainRes.ok) {
         const mainRef = await mainRes.json();
@@ -296,13 +299,24 @@ async function initCloudDb() {
             ref: `refs/heads/${GH_BRANCH}`,
             sha: mainRef.object.sha
           }),
-          signal: AbortSignal.timeout(8000)
+          signal: AbortSignal.timeout(7000)
         });
+        commitSha = mainRef.object?.sha || '';
       }
+    } else if (branchRes.ok) {
+      const branchData = await branchRes.json();
+      commitSha = branchData?.object?.sha || '';
     }
 
-    // 2. Fetch `database.json` from `db-storage` branch (cache-busted)
-    const fileRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE_PATH}?ref=${GH_BRANCH}&t=${Date.now()}`, {
+    // Fast path: if commit SHA on `db-storage` has not changed since our last pull, skip downloading database.json
+    if (cloudInitialized && commitSha && commitSha === lastCloudCommitSha && cloudFileSha) {
+      lastCloudLoadAt = Date.now();
+      return;
+    }
+
+    // 2. Fetch `database.json` by exact commitSha (immutable ref -> 0% CDN staleness!)
+    const refParam = commitSha || GH_BRANCH;
+    const fileRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE_PATH}?ref=${refParam}&t=${Date.now()}`, {
       headers,
       signal: AbortSignal.timeout(8000)
     });
@@ -310,6 +324,7 @@ async function initCloudDb() {
     if (fileRes.ok) {
       const fileData = await fileRes.json();
       cloudFileSha = fileData.sha;
+      if (commitSha) lastCloudCommitSha = commitSha;
       const contentStr = Buffer.from(fileData.content || '', 'base64').toString('utf8');
       const remoteDb = JSON.parse(contentStr);
       // Merge remote DB with any local changes
@@ -317,45 +332,56 @@ async function initCloudDb() {
       try { fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8'); } catch {}
       cloudInitialized = true;
       lastCloudLoadAt = Date.now();
-      console.log(`[CloudDB] Loaded persistent database from GitHub (${db.users.length} users)`);
     } else if (fileRes.status === 404) {
       cloudInitialized = true;
       lastCloudLoadAt = Date.now();
       await pushToCloudDb();
-      console.log(`[CloudDB] Initialized new database.json on GitHub (${GH_BRANCH})`);
     } else {
       cloudInitialized = true;
       lastCloudLoadAt = Date.now();
-      console.error('[CloudDB] Unexpected status from GitHub:', fileRes.status);
     }
   } catch (e) {
     cloudInitialized = true;
     lastCloudLoadAt = Date.now();
-    console.error('[CloudDB] Startup sync warning:', e.message);
+    console.error('[CloudDB] Sync warning:', e.message);
   }
 }
 
 async function _doPushToCloudDb() {
   const token = getCloudToken();
   if (!token) return;
-  const headers = {
-    'Authorization': `Bearer ${token}`,
-    'Accept': 'application/vnd.github+json',
-    'Content-Type': 'application/json',
-    'Cache-Control': 'no-cache',
-    'User-Agent': 'RaveLampa-Server'
-  };
 
-  for (let attempt = 0; attempt < 2; attempt++) {
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'If-None-Match': `"bypass-${Date.now()}-${attempt}"`,
+      'User-Agent': 'RaveLampa-Server'
+    };
     try {
-      if (!cloudFileSha || attempt > 0) {
-        const getRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE_PATH}?ref=${GH_BRANCH}&t=${Date.now()}`, {
+      // Always verify latest commit SHA on branch before PUT so concurrent writes are merged cleanly
+      const branchRes = await fetch(`https://api.github.com/repos/${GH_REPO}/git/ref/heads/${GH_BRANCH}?t=${Date.now()}`, {
+        headers,
+        signal: AbortSignal.timeout(6000)
+      });
+      let remoteCommitSha = '';
+      if (branchRes.ok) {
+        const bData = await branchRes.json();
+        remoteCommitSha = bData?.object?.sha || '';
+      }
+
+      if (!cloudFileSha || attempt > 0 || (remoteCommitSha && remoteCommitSha !== lastCloudCommitSha)) {
+        const refParam = remoteCommitSha || GH_BRANCH;
+        const getRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE_PATH}?ref=${refParam}&t=${Date.now()}`, {
           headers,
           signal: AbortSignal.timeout(7000)
         });
         if (getRes.ok) {
           const j = await getRes.json();
           cloudFileSha = j.sha;
+          if (remoteCommitSha) lastCloudCommitSha = remoteCommitSha;
           try {
             const remoteDb = JSON.parse(Buffer.from(j.content || '', 'base64').toString('utf8'));
             db = mergeDb(remoteDb, db);
@@ -381,10 +407,13 @@ async function _doPushToCloudDb() {
       if (putRes.ok) {
         const putData = await putRes.json();
         cloudFileSha = putData.content?.sha || cloudFileSha;
+        lastCloudCommitSha = putData.commit?.sha || lastCloudCommitSha;
         lastCloudLoadAt = Date.now();
         return;
       } else if (putRes.status === 409 || putRes.status === 422) {
         cloudFileSha = null;
+        lastCloudCommitSha = null;
+        await new Promise(r => setTimeout(r, 150 * (attempt + 1)));
         continue;
       } else {
         console.error('[CloudDB] Push HTTP error:', putRes.status);
@@ -694,6 +723,13 @@ function getDmPairKey(userA, userB) {
   return [String(userA), String(userB)].sort().join(':');
 }
 
+function formatDmPreview(m) {
+  if (!m) return '';
+  if (m.viewOnce) return m.viewed ? '💨 Фото просмотрено' : '💣 Одноразовое фото';
+  if (m.imageUrl || m.hasImage) return m.text ? `📷 ${m.text}` : '📷 Фотография';
+  return m.text || '';
+}
+
 function getFriendsData(userId) {
   const friends = [];
   const incoming = [];
@@ -710,22 +746,23 @@ function getFriendsData(userId) {
           const msgs = db.dms[pairKey] || [];
           const unreadCount = msgs.filter(m => m.toId === userId && !m.read).length;
           const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
-          let lastPreview = '';
-          if (lastMsg) {
-            if (lastMsg.viewOnce) {
-              lastPreview = lastMsg.viewed ? '💨 Фото просмотрено' : '💣 Одноразовое фото';
-            } else if (lastMsg.imageUrl) {
-              lastPreview = lastMsg.text ? `📷 ${lastMsg.text}` : '📷 Фотография';
-            } else {
-              lastPreview = lastMsg.text || '';
-            }
-          }
+          const recentIncoming = msgs
+            .filter(m => m.fromId === friendId && m.id)
+            .slice(-6)
+            .map(m => ({
+              id: m.id,
+              text: formatDmPreview(m),
+              fromId: m.fromId,
+              createdAt: m.createdAt
+            }));
+
           friends.push({
             ...u,
             unreadCount,
+            recentIncoming,
             lastMessage: lastMsg ? {
               id: lastMsg.id,
-              text: lastPreview,
+              text: formatDmPreview(lastMsg),
               fromId: lastMsg.fromId,
               createdAt: lastMsg.createdAt
             } : null
@@ -756,7 +793,9 @@ function getDirectMessages(userId, friendId) {
       changed = true;
     }
   }
-  if (changed) saveDb(false);
+  if (changed) {
+    try { fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8'); } catch {}
+  }
   return msgs.map(m => ({
     ...m,
     // For view-once photos, do not expose raw imageUrl in history list until explicitly opened!
@@ -1126,14 +1165,12 @@ function popUserNotifications(userId) {
   if (!userId || !db.notifications || !Array.isArray(db.notifications[userId]) || db.notifications[userId].length === 0) {
     return [];
   }
-  const items = db.notifications[userId].slice();
-  if (!db.deletedMessages) db.deletedMessages = {};
-  for (const it of items) {
-    if (it && it.id) db.deletedMessages[it.id] = Date.now();
-  }
-  db.notifications[userId] = [];
-  saveDb(false);
-  return items;
+  const now = Date.now();
+  // Keep notifications from the last 90 seconds so concurrent/retried GET /api/friends polls never drop an event,
+  // and do NOT trigger pushToCloudDb() on read-only polling!
+  const recent = db.notifications[userId].filter(n => n && (now - (n.createdAt || 0) < 90000));
+  db.notifications[userId] = recent;
+  return recent;
 }
 
 module.exports = {
