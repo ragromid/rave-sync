@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793047144772,
+      "lastSeenAt": 1793047153814,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 1,
         "episodesWatched": 0,
         "roomsCreated": 2,
-        "messagesSent": 77,
+        "messagesSent": 78,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793047144410
+      "lastSeenAt": 1793047154942
     }
   ],
   "friendships": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "updatedAt": 1793046115878
+        "voiceName": "Force Media",
+        "updatedAt": 1793046112108
       }
     ]
   },
@@ -221,9 +221,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Force Media",
-        "currentTime": 4981,
+        "currentTime": 5104,
         "duration": 5999,
-        "updatedAt": 1793046599739
+        "updatedAt": 1793046731555
       }
     },
     "u_80ab0d1134f5": {
@@ -244,10 +244,10 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "currentTime": 4603,
-        "duration": 5971,
-        "updatedAt": 1793046115878
+        "voiceName": "Force Media",
+        "currentTime": 4509,
+        "duration": 5999,
+        "updatedAt": 1793046123929
       }
     }
   },
@@ -1767,9 +1767,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 5513.426922413667,
+        "currentTime": 5520.678069551001,
         "rate": 1,
-        "updatedAt": 1793047143425
+        "updatedAt": 1793047150960
       },
       "messages": [
         {
@@ -3527,7 +3527,9 @@
               "u_805b52bfc220"
             ]
           },
-          "createdAt": 1793047056507
+          "createdAt": 1793047056507,
+          "read": false,
+          "updatedAt": 1793047056507
         },
         {
           "id": "m_322f4da269",
@@ -3546,7 +3548,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793047089662
+          "createdAt": 1793047089662,
+          "read": false,
+          "updatedAt": 1793047089662
         },
         {
           "id": "m_63cebfc05b",
@@ -3565,7 +3569,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793047114362
+          "createdAt": 1793047114362,
+          "read": false,
+          "updatedAt": 1793047114362
         },
         {
           "id": "m_f9a8a49a42",
@@ -3588,7 +3594,28 @@
               "u_1333f556dd06"
             ]
           },
-          "createdAt": 1793047135151
+          "createdAt": 1793047135151,
+          "read": false,
+          "updatedAt": 1793047135151
+        },
+        {
+          "id": "m_474b9edd2a",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "точно))",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793047153928
         }
       ],
       "viewOnceStore": {}
