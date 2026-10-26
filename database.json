@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041189848,
+      "lastSeenAt": 1793041203661,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041189817
+      "lastSeenAt": 1793041204551
     }
   ],
   "friendships": [
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
-        "balancer": "Filmix",
+        "balancerKey": "kodik",
+        "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
-        "updatedAt": 1793040247007
+        "voiceName": "Flarrow Films",
+        "updatedAt": 1793040858095
       }
     ],
     "u_1333f556dd06": [
@@ -198,8 +198,8 @@
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "AniStar",
-        "updatedAt": 1793041170472
+        "voiceName": "AnimeVost",
+        "updatedAt": 1793041148694
       }
     ]
   },
@@ -216,14 +216,14 @@
         "updatedAt": 1793001267614
       },
       "1218925": {
-        "balancerKey": "filmix",
-        "balancerName": "Filmix",
+        "balancerKey": "kodik",
+        "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
-        "currentTime": 203,
+        "voiceName": "Flarrow Films",
+        "currentTime": 131,
         "duration": 5971,
-        "updatedAt": 1793040996864
+        "updatedAt": 1793040858095
       }
     },
     "u_80ab0d1134f5": {
@@ -244,10 +244,10 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "currentTime": 158,
-        "duration": 5971,
-        "updatedAt": 1793040872994
+        "voiceName": "AnimeVost",
+        "currentTime": 661,
+        "duration": 6015,
+        "updatedAt": 1793041180278
       }
     }
   },
@@ -741,7 +741,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": true,
+      "isPublic": false,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -814,9 +814,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 395.5644210976903,
+        "currentTime": 408.08537173769105,
         "rate": 1,
-        "updatedAt": 1793041189266
+        "updatedAt": 1793041201990
       },
       "messages": [
         {
@@ -1757,9 +1757,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 666.0775145356665,
+        "currentTime": 505.3984029166668,
         "rate": 1,
-        "updatedAt": 1793041188725
+        "updatedAt": 1793041204551
       },
       "messages": [],
       "viewOnceStore": {}
