@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040297958,
+      "lastSeenAt": 1793040309298,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040298566
+      "lastSeenAt": 1793040309309
     }
   ],
   "friendships": [
@@ -564,8 +564,7 @@
         "title": "Rashid Sultanov",
         "body": "кончи мне в рот"
       }
-    ],
-    "u_1333f556dd06": []
+    ]
   },
   "savedRooms": {
     "393HNX": {
@@ -754,10 +753,10 @@
         "subtitles": []
       },
       "playback": {
-        "playing": false,
-        "currentTime": 9.035888418653453,
+        "playing": true,
+        "currentTime": 8.458333333333334,
         "rate": 1,
-        "updatedAt": 1793040259883
+        "updatedAt": 1793040309298
       },
       "messages": [
         {
