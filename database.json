@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040679979,
+      "lastSeenAt": 1793040690925,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 0,
         "episodesWatched": 0,
         "roomsCreated": 0,
-        "messagesSent": 9,
+        "messagesSent": 10,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040679390
+      "lastSeenAt": 1793040690763
     }
   ],
   "friendships": [
@@ -777,9 +777,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 21.45749232399224,
+        "currentTime": 33.93949353233434,
         "rate": 1,
-        "updatedAt": 1793040678421
+        "updatedAt": 1793040690925
       },
       "messages": [
         {
@@ -1210,6 +1210,25 @@
           "replyTo": null,
           "reactions": {},
           "createdAt": 1793040679390
+        },
+        {
+          "id": "m_0b82492717",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "У меня в начало вернулось(",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793040690763
         }
       ],
       "viewOnceStore": {}
