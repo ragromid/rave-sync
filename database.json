@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041144726,
+      "lastSeenAt": 1793041148618,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -96,7 +96,7 @@
       },
       "stats": {
         "watchSeconds": 0,
-        "moviesWatched": 0,
+        "moviesWatched": 1,
         "episodesWatched": 0,
         "roomsCreated": 2,
         "messagesSent": 17,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793041144690
+      "lastSeenAt": 1793041148850
     }
   ],
   "friendships": [
@@ -157,12 +157,49 @@
             "фэнтези"
           ]
         },
+        "balancerKey": "filmix",
+        "balancer": "Filmix",
+        "season": 0,
+        "episode": 0,
+        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "updatedAt": 1793040416330
+      }
+    ],
+    "u_1333f556dd06": [
+      {
+        "movie": {
+          "id": 1218925,
+          "tmdb_id": 1218925,
+          "imdb_id": "tt30472557",
+          "kinopoisk_id": "5430477",
+          "type": "movie",
+          "serial": 0,
+          "title": "Человек-бензопила. Фильм: История Резе",
+          "original_title": "劇場版 チェンソーマン レゼ篇",
+          "original_language": "ja",
+          "overview": "Молодой охотник на демонов Дэндзи, который ждал свидания со своей возлюбленной Макимой, попадает под ливень. Укрывшись от дождя, он случайно встречает девушку по имени Резе, работающую в соседнем кафе. Та добродушно ему улыбается, и разговор становится более непринужденным. После этой встречи повседневная жизнь Дэндзи начинает меняться.",
+          "release_date": "2025-09-19",
+          "year": "2025",
+          "vote_average": 8.5,
+          "poster": "https://imagetmdb.com/t/p/w500/f4Bv4JWv85zHSisuq7SD2WeuJGr.jpg",
+          "backdrop": "https://imagetmdb.com/t/p/w1280/gqTz24ZRsCP6AKjARmEivY7m0cK.jpg",
+          "poster_path": "/f4Bv4JWv85zHSisuq7SD2WeuJGr.jpg",
+          "backdrop_path": "/gqTz24ZRsCP6AKjARmEivY7m0cK.jpg",
+          "number_of_seasons": 0,
+          "runtime": 100,
+          "genres": [
+            "мультфильм",
+            "боевик",
+            "мелодрама",
+            "фэнтези"
+          ]
+        },
         "balancerKey": "kodik",
         "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "updatedAt": 1793040858095
+        "voiceName": "AnimeVost",
+        "updatedAt": 1793041148694
       }
     ]
   },
@@ -179,14 +216,14 @@
         "updatedAt": 1793001267614
       },
       "1218925": {
-        "balancerKey": "kodik",
-        "balancerName": "Kodik",
+        "balancerKey": "filmix",
+        "balancerName": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Flarrow Films",
-        "currentTime": 131,
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "currentTime": 220,
         "duration": 5971,
-        "updatedAt": 1793040858095
+        "updatedAt": 1793041014191
       }
     },
     "u_80ab0d1134f5": {
@@ -210,7 +247,7 @@
         "voiceName": "AnimeVost",
         "currentTime": 5,
         "duration": 6016,
-        "updatedAt": 1793040524978
+        "updatedAt": 1793041148697
       }
     }
   },
@@ -1618,7 +1655,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793041126955
+          "createdAt": 1793041126955,
+          "read": false,
+          "updatedAt": 1793041126955
         }
       ],
       "viewOnceStore": {}
@@ -1703,14 +1742,24 @@
             "фэнтези"
           ]
         },
-        "streamUrl": "",
-        "streamType": "hls"
+        "balancerKey": "kodik",
+        "balancerName": "Kodik",
+        "season": 0,
+        "episode": 0,
+        "voiceName": "AnimeVost",
+        "quality": "720p",
+        "rawUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/939a4538683d454c0567d64f855d2646:2026102701/720.mp4:hls:manifest.m3u8",
+        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2Fab71b0b2-d64f-41b7-b388-335074b36330%2F939a4538683d454c0567d64f855d2646%3A2026102701%2F720.mp4%3Ahls%3Amanifest.m3u8",
+        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/939a4538683d454c0567d64f855d2646:2026102701/720.mp4:hls:manifest.m3u8",
+        "streamUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/939a4538683d454c0567d64f855d2646:2026102701/720.mp4:hls:manifest.m3u8",
+        "streamType": "hls",
+        "subtitles": []
       },
       "playback": {
-        "playing": false,
+        "playing": true,
         "currentTime": 0,
         "rate": 1,
-        "updatedAt": 1793041143759
+        "updatedAt": 1793041148850
       },
       "messages": [],
       "viewOnceStore": {}
