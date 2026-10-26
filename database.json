@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793042189262,
+      "lastSeenAt": 1793042223871,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -99,7 +99,7 @@
         "moviesWatched": 1,
         "episodesWatched": 0,
         "roomsCreated": 2,
-        "messagesSent": 31,
+        "messagesSent": 32,
         "reactionsSent": 0
       },
       "createdAt": 1793001337414,
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793042188700
+      "lastSeenAt": 1793042225382
     }
   ],
   "friendships": [
@@ -1767,9 +1767,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 913.9897443550001,
+        "currentTime": 948.784114717,
         "rate": 1,
-        "updatedAt": 1793042188012
+        "updatedAt": 1793042223239
       },
       "messages": [
         {
@@ -2483,6 +2483,30 @@
             ]
           },
           "createdAt": 1793042180739
+        },
+        {
+          "id": "m_0fad1c4ee9",
+          "system": false,
+          "user": {
+            "id": "u_1333f556dd06",
+            "displayName": "Sabina",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#e040fb"
+          },
+          "text": "жааль)",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": {
+            "id": "m_6039f9b02b",
+            "senderName": "Rashid Sultanov",
+            "text": "неа)",
+            "hasPhoto": false
+          },
+          "reactions": {},
+          "createdAt": 1793042225382
         }
       ],
       "viewOnceStore": {}
