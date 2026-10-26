@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040648388,
+      "lastSeenAt": 1793040654738,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -157,12 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "kodik",
-        "balancer": "Kodik",
+        "balancerKey": "filmix",
+        "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "AnimeVost",
-        "updatedAt": 1793040516339
+        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "updatedAt": 1793040247007
       }
     ]
   },
@@ -179,14 +179,14 @@
         "updatedAt": 1793001267614
       },
       "1218925": {
-        "balancerKey": "kodik",
-        "balancerName": "Kodik",
+        "balancerKey": "filmix",
+        "balancerName": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "AnimeVost",
-        "currentTime": 54,
+        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "currentTime": 64,
         "duration": 5999,
-        "updatedAt": 1793040516339
+        "updatedAt": 1793040509333
       }
     },
     "u_80ab0d1134f5": {
@@ -704,7 +704,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": false,
+      "isPublic": true,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
@@ -766,20 +766,20 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "AnimeVost",
+        "voiceName": "Flarrow Films",
         "quality": "720p",
-        "rawUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/a27024d1d30fa21b50cfbd211cb18255:2026102622/720.mp4:hls:manifest.m3u8",
-        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2Fab71b0b2-d64f-41b7-b388-335074b36330%2Fa27024d1d30fa21b50cfbd211cb18255%3A2026102622%2F720.mp4%3Ahls%3Amanifest.m3u8",
-        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/a27024d1d30fa21b50cfbd211cb18255:2026102622/720.mp4:hls:manifest.m3u8",
-        "streamUrl": "https://cloud2.solodcdn.com/useruploads/ab71b0b2-d64f-41b7-b388-335074b36330/a27024d1d30fa21b50cfbd211cb18255:2026102622/720.mp4:hls:manifest.m3u8",
+        "rawUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/b662c36aab4b2d08c6820fc04c53e092:2026102622/720.mp4:hls:manifest.m3u8",
+        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fcloud2.solodcdn.com%2Fuseruploads%2Fb1c4c826-01f0-4162-a8e7-357892019fc4%2Fb662c36aab4b2d08c6820fc04c53e092%3A2026102622%2F720.mp4%3Ahls%3Amanifest.m3u8",
+        "recommendedUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/b662c36aab4b2d08c6820fc04c53e092:2026102622/720.mp4:hls:manifest.m3u8",
+        "streamUrl": "https://cloud2.solodcdn.com/useruploads/b1c4c826-01f0-4162-a8e7-357892019fc4/b662c36aab4b2d08c6820fc04c53e092:2026102622/720.mp4:hls:manifest.m3u8",
         "streamType": "hls",
         "subtitles": []
       },
       "playback": {
         "playing": true,
-        "currentTime": 129.42506448,
+        "currentTime": 0,
         "rate": 1,
-        "updatedAt": 1793040648353
+        "updatedAt": 1793040654690
       },
       "messages": [
         {
@@ -1148,7 +1148,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040625581
+          "createdAt": 1793040625581,
+          "read": false,
+          "updatedAt": 1793040625581
         },
         {
           "id": "m_a0d3332e08",
@@ -1167,7 +1169,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793040648169
+          "createdAt": 1793040648169,
+          "read": false,
+          "updatedAt": 1793040648169
         }
       ],
       "viewOnceStore": {}
