@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793010505797,
-      "lastSeenAt": 1793010583028,
+      "lastSeenAt": 1793010592138,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -644,16 +644,6 @@
           "displayName": "Murad",
           "avatar": "🔥",
           "color": "#7c5cff",
-          "inVoice": false,
-          "muted": false
-        },
-        {
-          "socketId": "http_u_805b52bfc220",
-          "id": "u_805b52bfc220",
-          "username": "rashid",
-          "displayName": "Rashid Sultanov",
-          "avatar": "🦊",
-          "color": "#1de9b6",
           "inVoice": false,
           "muted": false
         }
