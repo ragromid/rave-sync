@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793041918555,
+      "lastSeenAt": 1793041922160,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -220,10 +220,10 @@
         "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "PantsuVoice",
-        "currentTime": 659,
-        "duration": 6015,
-        "updatedAt": 1793041915009
+        "voiceName": "Flarrow Films",
+        "currentTime": 661,
+        "duration": 5971,
+        "updatedAt": 1793041922111
       }
     },
     "u_80ab0d1134f5": {
@@ -1767,9 +1767,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 661.8208814083334,
+        "currentTime": 662.0378814083335,
         "rate": 1,
-        "updatedAt": 1793041917581
+        "updatedAt": 1793041922160
       },
       "messages": [
         {
