@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040510651,
+      "lastSeenAt": 1793040516339,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040508669
+      "lastSeenAt": 1793040516656
     }
   ],
   "friendships": [
@@ -157,11 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancer": "Filmix",
+        "balancerKey": "kodik",
+        "balancer": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1792965688026
+        "voiceName": "AnimeVost",
+        "updatedAt": 1793040516339
       }
     ]
   },
@@ -178,14 +179,14 @@
         "updatedAt": 1793001267614
       },
       "1218925": {
-        "balancerKey": "filmix",
-        "balancerName": "Filmix",
+        "balancerKey": "kodik",
+        "balancerName": "Kodik",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
+        "voiceName": "AnimeVost",
         "currentTime": 54,
         "duration": 5999,
-        "updatedAt": 1793040496930
+        "updatedAt": 1793040516339
       }
     },
     "u_80ab0d1134f5": {
