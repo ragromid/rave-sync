@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040398747,
+      "lastSeenAt": 1793040416516,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -107,7 +107,7 @@
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": [],
-      "lastSeenAt": 1793040398483
+      "lastSeenAt": 1793040416018
     }
   ],
   "friendships": [
@@ -183,9 +183,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
-        "currentTime": 4700,
+        "currentTime": 358,
         "duration": 5971,
-        "updatedAt": 1793040371529
+        "updatedAt": 1793040404174
       }
     },
     "u_80ab0d1134f5": {
@@ -753,20 +753,20 @@
         "balancerName": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Flarrow Films)",
+        "voiceName": "Дубляж (1080+, ru, Force Media)",
         "quality": "720p",
-        "rawUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1313/Chainsaw.Man.Movie.2025.D.ru.FlarrowFilms.WEBDL.1080pp_720.mp4",
-        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fnl105.cdnsqu.com%2Fs%2FFHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg%2FUHD_1313%2FChainsaw.Man.Movie.2025.D.ru.FlarrowFilms.WEBDL.1080pp_720.mp4",
-        "recommendedUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1313/Chainsaw.Man.Movie.2025.D.ru.FlarrowFilms.WEBDL.1080pp_720.mp4",
-        "streamUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1313/Chainsaw.Man.Movie.2025.D.ru.FlarrowFilms.WEBDL.1080pp_720.mp4",
+        "rawUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1212/Chainsaw.Man.The.Movie.Reze.Arc.2025.D.ru.ForceMedia.WEBDL.1080pp_720.mp4",
+        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fnl105.cdnsqu.com%2Fs%2FFHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg%2FUHD_1212%2FChainsaw.Man.The.Movie.Reze.Arc.2025.D.ru.ForceMedia.WEBDL.1080pp_720.mp4",
+        "recommendedUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1212/Chainsaw.Man.The.Movie.Reze.Arc.2025.D.ru.ForceMedia.WEBDL.1080pp_720.mp4",
+        "streamUrl": "https://nl105.cdnsqu.com/s/FHlpYdHenhq9FUTpXBl2IgVUFBQUFBQXhnT1VFUjFXQWhnaUJKUkVBVkxrOG5VejdOUnc9PQ.KbXVeKxuhn9GfjYBDaXfUmLKPHBBqXEzXrASvg/UHD_1212/Chainsaw.Man.The.Movie.Reze.Arc.2025.D.ru.ForceMedia.WEBDL.1080pp_720.mp4",
         "streamType": "mp4",
         "subtitles": []
       },
       "playback": {
         "playing": true,
-        "currentTime": 352.8955208749971,
+        "currentTime": 0,
         "rate": 1,
-        "updatedAt": 1793040397946
+        "updatedAt": 1793040416516
       },
       "messages": [
         {
