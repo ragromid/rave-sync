@@ -351,7 +351,7 @@ app.get('/api/friends', authMiddleware, (req, res) => {
   });
 });
 
-app.post('/api/friends/request', authMiddleware, (req, res) => {
+app.post('/api/friends/request', authMiddleware, async (req, res) => {
   try {
     const { target } = req.body || {};
     const result = db.sendFriendRequest(req.user.id, target);
@@ -371,13 +371,14 @@ app.post('/api/friends/request', authMiddleware, (req, res) => {
         body: `${req.user.avatar} ${req.user.displayName} хочет добавить вас в друзья`
       });
     }
+    if (process.env.VERCEL) await db.flushCloudDb();
     res.json(result);
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
 
-app.post('/api/friends/respond', authMiddleware, (req, res) => {
+app.post('/api/friends/respond', authMiddleware, async (req, res) => {
   try {
     const { requestId, accept } = req.body || {};
     const rel = db.respondFriendRequest(req.user.id, requestId, !!accept);
@@ -399,13 +400,14 @@ app.post('/api/friends/respond', authMiddleware, (req, res) => {
         body: `${req.user.avatar} ${req.user.displayName} принял(а) вашу заявку в друзья`
       });
     }
+    if (process.env.VERCEL) await db.flushCloudDb();
     res.json({ ok: true });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
 
-app.delete('/api/friends/:friendId', authMiddleware, (req, res) => {
+app.delete('/api/friends/:friendId', authMiddleware, async (req, res) => {
   db.removeFriend(req.user.id, req.params.friendId);
   const otherSockets = userSockets.get(req.params.friendId);
   if (otherSockets) {
@@ -413,6 +415,7 @@ app.delete('/api/friends/:friendId', authMiddleware, (req, res) => {
       io.to(sid).emit('friends:update');
     }
   }
+  if (process.env.VERCEL) await db.flushCloudDb();
   res.json({ ok: true });
 });
 
@@ -429,7 +432,7 @@ app.get('/api/dms/:friendId', authMiddleware, (req, res) => {
   });
 });
 
-app.post('/api/dms/:friendId', authMiddleware, (req, res) => {
+app.post('/api/dms/:friendId', authMiddleware, async (req, res) => {
   try {
     const msg = db.sendDirectMessage(req.user.id, req.params.friendId, req.body || {});
     // Emit to all sockets of recipient and sender
@@ -441,13 +444,26 @@ app.post('/api/dms/:friendId', authMiddleware, (req, res) => {
         }
       }
     }
+    const targetSockets = userSockets.get(req.params.friendId);
+    if (!targetSockets || targetSockets.size === 0) {
+      const preview = msg.text || (msg.viewOnce ? '💣 Одноразовое фото' : (msg.hasImage ? '📷 Фотография' : 'Новое сообщение'));
+      db.pushUserNotification(req.params.friendId, {
+        type: 'dm_message',
+        msgId: msg.id,
+        fromId: req.user.id,
+        from: msg.sender,
+        title: msg.sender?.displayName || req.user.displayName,
+        body: preview
+      });
+    }
+    if (process.env.VERCEL) await db.flushCloudDb();
     res.json({ message: msg });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
 
-app.post('/api/dms/:friendId/react', authMiddleware, (req, res) => {
+app.post('/api/dms/:friendId/react', authMiddleware, async (req, res) => {
   try {
     const { messageId, emoji } = req.body || {};
     const msg = db.toggleDmReaction(req.user.id, req.params.friendId, messageId, emoji);
@@ -459,13 +475,14 @@ app.post('/api/dms/:friendId/react', authMiddleware, (req, res) => {
         }
       }
     }
+    if (process.env.VERCEL) await db.flushCloudDb();
     res.json({ message: msg });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
 
-app.post('/api/dms/:friendId/view-once', authMiddleware, (req, res) => {
+app.post('/api/dms/:friendId/view-once', authMiddleware, async (req, res) => {
   try {
     const { messageId } = req.body || {};
     const result = db.consumeDmViewOnce(req.user.id, req.params.friendId, messageId);
@@ -477,13 +494,14 @@ app.post('/api/dms/:friendId/view-once', authMiddleware, (req, res) => {
         }
       }
     }
+    if (process.env.VERCEL) await db.flushCloudDb();
     res.json(result);
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
 
-app.put('/api/dms/:friendId/:messageId', authMiddleware, (req, res) => {
+app.put('/api/dms/:friendId/:messageId', authMiddleware, async (req, res) => {
   try {
     const msg = db.editDirectMessage(req.user.id, req.params.friendId, req.params.messageId, req.body?.text);
     for (const uid of [req.user.id, req.params.friendId]) {
@@ -494,13 +512,14 @@ app.put('/api/dms/:friendId/:messageId', authMiddleware, (req, res) => {
         }
       }
     }
+    if (process.env.VERCEL) await db.flushCloudDb();
     res.json({ message: msg });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
 
-app.delete('/api/dms/:friendId/:messageId', authMiddleware, (req, res) => {
+app.delete('/api/dms/:friendId/:messageId', authMiddleware, async (req, res) => {
   try {
     const result = db.deleteDirectMessage(req.user.id, req.params.friendId, req.params.messageId);
     for (const uid of [req.user.id, req.params.friendId]) {
@@ -511,6 +530,7 @@ app.delete('/api/dms/:friendId/:messageId', authMiddleware, (req, res) => {
         }
       }
     }
+    if (process.env.VERCEL) await db.flushCloudDb();
     res.json(result);
   } catch (e) {
     res.status(400).json({ error: e.message });
@@ -1140,7 +1160,7 @@ app.post('/api/rooms/:code/sync', authMiddleware, (req, res) => {
   res.json({ room: serializeRoom(room, false) });
 });
 
-app.post('/api/rooms/:code/chat', authMiddleware, (req, res) => {
+app.post('/api/rooms/:code/chat', authMiddleware, async (req, res) => {
   try {
     hydrateRoomsFromDb();
     const code = String(req.params.code || '').trim().toUpperCase();
@@ -1148,13 +1168,14 @@ app.post('/api/rooms/:code/chat', authMiddleware, (req, res) => {
     if (!room) return res.status(404).json({ error: 'Комната не найдена' });
     const msg = createRoomChatMessage(room, req.user, req.body || {});
     io.to(code).emit('chat:message', msg);
+    if (process.env.VERCEL) await db.flushCloudDb();
     res.json({ message: msg });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
 
-app.post('/api/rooms/:code/chat/react', authMiddleware, (req, res) => {
+app.post('/api/rooms/:code/chat/react', authMiddleware, async (req, res) => {
   try {
     hydrateRoomsFromDb();
     const code = String(req.params.code || '').trim().toUpperCase();
@@ -1162,13 +1183,14 @@ app.post('/api/rooms/:code/chat/react', authMiddleware, (req, res) => {
     if (!room) return res.status(404).json({ error: 'Комната не найдена' });
     const msg = toggleRoomChatReaction(room, req.user.id, req.body?.messageId, req.body?.emoji);
     io.to(code).emit('chat:updated', msg);
+    if (process.env.VERCEL) await db.flushCloudDb();
     res.json({ message: msg });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
 
-app.post('/api/rooms/:code/chat/view-once', authMiddleware, (req, res) => {
+app.post('/api/rooms/:code/chat/view-once', authMiddleware, async (req, res) => {
   try {
     hydrateRoomsFromDb();
     const code = String(req.params.code || '').trim().toUpperCase();
@@ -1176,13 +1198,14 @@ app.post('/api/rooms/:code/chat/view-once', authMiddleware, (req, res) => {
     if (!room) return res.status(404).json({ error: 'Комната не найдена' });
     const result = consumeRoomChatViewOnce(room, req.user.id, req.body?.messageId);
     io.to(code).emit('chat:updated', result.message);
+    if (process.env.VERCEL) await db.flushCloudDb();
     res.json(result);
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
 
-app.put('/api/rooms/:code/chat/:messageId', authMiddleware, (req, res) => {
+app.put('/api/rooms/:code/chat/:messageId', authMiddleware, async (req, res) => {
   try {
     hydrateRoomsFromDb();
     const code = String(req.params.code || '').trim().toUpperCase();
@@ -1197,13 +1220,14 @@ app.put('/api/rooms/:code/chat/:messageId', authMiddleware, (req, res) => {
     msg.editedAt = Date.now();
     persistRoomsToDb();
     io.to(code).emit('chat:updated', msg);
+    if (process.env.VERCEL) await db.flushCloudDb();
     res.json({ message: msg });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
 
-app.delete('/api/rooms/:code/chat/:messageId', authMiddleware, (req, res) => {
+app.delete('/api/rooms/:code/chat/:messageId', authMiddleware, async (req, res) => {
   try {
     hydrateRoomsFromDb();
     const code = String(req.params.code || '').trim().toUpperCase();
@@ -1217,13 +1241,14 @@ app.delete('/api/rooms/:code/chat/:messageId', authMiddleware, (req, res) => {
     const removed = room.messages.splice(idx, 1)[0];
     persistRoomsToDb();
     io.to(code).emit('chat:deleted', { id: removed.id });
+    if (process.env.VERCEL) await db.flushCloudDb();
     res.json({ id: removed.id, deleted: true });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
 
-app.post('/api/rooms/:code/invite', authMiddleware, (req, res) => {
+app.post('/api/rooms/:code/invite', authMiddleware, async (req, res) => {
   try {
     hydrateRoomsFromDb();
     const code = String(req.params.code || '').trim().toUpperCase();
@@ -1260,6 +1285,7 @@ app.post('/api/rooms/:code/invite', authMiddleware, (req, res) => {
         invitePayload
       });
     }
+    if (process.env.VERCEL) await db.flushCloudDb();
     res.json({ ok: true });
   } catch (e) {
     res.status(400).json({ error: e.message });

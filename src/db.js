@@ -45,6 +45,8 @@ const DEFAULT_DB = {
   progress: {},    // userId -> { [movieId]: { balancerKey, balancerName, season, episode, voiceName, currentTime, duration, updatedAt } }
   dms: {},         // pairKey ("u1:u2") -> [ { id, fromId, toId, text, createdAt, read } ]
   deletedUsers: {}, // userId -> deletedAt timestamp (so deleted users are not re-added during merge)
+  deletedMessages: {}, // msgId -> deletedAt timestamp (so deleted DMs are not re-added during merge)
+  notifications: {},   // userId -> [ { id, type, title, body, createdAt, ... } ]
   savedRooms: {}   // roomCode -> serialized room state for serverless/Vercel persistence
 };
 
@@ -54,7 +56,7 @@ let lastCloudLoadAt = 0;
 let cloudInitPromise = null;
 let cloudFileSha = null;
 let cloudSyncTimer = null;
-let cloudSyncInFlight = false;
+let cloudSyncInFlight = null;
 let cloudPendingSync = false;
 
 function loadLocalDb() {
@@ -93,7 +95,30 @@ function mergeUserRecord(a, b) {
     bio: newer.bio !== undefined ? newer.bio : (older.bio || ''),
     isAdmin: newer.isAdmin !== undefined ? newer.isAdmin : !!older.isAdmin,
     stats: mergedStats,
+    lastSeenAt: Math.max(a.lastSeenAt || 0, b.lastSeenAt || 0),
     updatedAt: Math.max(aTime, bTime)
+  };
+}
+
+function mergeDmMessage(a, b) {
+  if (!a) return b;
+  if (!b) return a;
+  const aMod = Math.max(a.updatedAt || 0, a.editedAt || 0, a.viewedAt || 0, a.createdAt || 0);
+  const bMod = Math.max(b.updatedAt || 0, b.editedAt || 0, b.viewedAt || 0, b.createdAt || 0);
+  const newer = bMod >= aMod ? b : a;
+  const older = bMod >= aMod ? a : b;
+  const viewed = !!(a.viewed || b.viewed);
+  return {
+    ...older,
+    ...newer,
+    text: (b.editedAt || 0) >= (a.editedAt || 0) ? (b.text ?? a.text) : (a.text ?? b.text),
+    editedAt: Math.max(a.editedAt || 0, b.editedAt || 0) || undefined,
+    read: !!(a.read || b.read),
+    viewed,
+    viewedAt: Math.max(a.viewedAt || 0, b.viewedAt || 0) || undefined,
+    imageUrl: viewed ? '' : (newer.imageUrl || older.imageUrl || ''),
+    reactions: newer.reactions || older.reactions || {},
+    updatedAt: Math.max(aMod, bMod)
   };
 }
 
@@ -102,6 +127,10 @@ function mergeDb(base, incoming) {
   const deletedUsers = {
     ...(base?.deletedUsers || {}),
     ...(incoming.deletedUsers && typeof incoming.deletedUsers === 'object' ? incoming.deletedUsers : {})
+  };
+  const deletedMessages = {
+    ...(base?.deletedMessages || {}),
+    ...(incoming.deletedMessages && typeof incoming.deletedMessages === 'object' ? incoming.deletedMessages : {})
   };
 
   const userMap = new Map();
@@ -127,15 +156,93 @@ function mergeDb(base, incoming) {
     }
   }
 
+  // Deep-merge Direct Messages per conversation pairKey by message.id
+  const mergedDms = {};
+  const dmKeys = new Set([
+    ...Object.keys(base?.dms && typeof base.dms === 'object' ? base.dms : {}),
+    ...Object.keys(incoming.dms && typeof incoming.dms === 'object' ? incoming.dms : {})
+  ]);
+  for (const pairKey of dmKeys) {
+    const msgMap = new Map();
+    const listA = Array.isArray(base?.dms?.[pairKey]) ? base.dms[pairKey] : [];
+    const listB = Array.isArray(incoming?.dms?.[pairKey]) ? incoming.dms[pairKey] : [];
+    for (const m of listA) {
+      if (m && m.id && !deletedMessages[m.id]) msgMap.set(m.id, m);
+    }
+    for (const m of listB) {
+      if (m && m.id && !deletedMessages[m.id]) {
+        const prev = msgMap.get(m.id);
+        msgMap.set(m.id, mergeDmMessage(prev, m));
+      }
+    }
+    mergedDms[pairKey] = Array.from(msgMap.values())
+      .sort((x, y) => (x.createdAt || 0) - (y.createdAt || 0))
+      .slice(-150);
+  }
+
+  // Deep-merge savedRooms by roomCode (combining messages by id)
+  const mergedRooms = {};
+  const roomCodes = new Set([
+    ...Object.keys(base?.savedRooms && typeof base.savedRooms === 'object' ? base.savedRooms : {}),
+    ...Object.keys(incoming.savedRooms && typeof incoming.savedRooms === 'object' ? incoming.savedRooms : {})
+  ]);
+  for (const code of roomCodes) {
+    const rA = base?.savedRooms?.[code];
+    const rB = incoming?.savedRooms?.[code];
+    if (!rA) { mergedRooms[code] = rB; continue; }
+    if (!rB) { mergedRooms[code] = rA; continue; }
+    const timeA = rA.playback?.updatedAt || rA.createdAt || 0;
+    const timeB = rB.playback?.updatedAt || rB.createdAt || 0;
+    const newerR = timeB >= timeA ? rB : rA;
+    const olderR = timeB >= timeA ? rA : rB;
+    const rMsgMap = new Map();
+    for (const m of (Array.isArray(olderR.messages) ? olderR.messages : [])) {
+      if (m && m.id && !deletedMessages[m.id]) rMsgMap.set(m.id, m);
+    }
+    for (const m of (Array.isArray(newerR.messages) ? newerR.messages : [])) {
+      if (m && m.id && !deletedMessages[m.id]) {
+        const prev = rMsgMap.get(m.id);
+        rMsgMap.set(m.id, mergeDmMessage(prev, m));
+      }
+    }
+    mergedRooms[code] = {
+      ...olderR,
+      ...newerR,
+      messages: Array.from(rMsgMap.values())
+        .sort((x, y) => (x.createdAt || 0) - (y.createdAt || 0))
+        .slice(-100)
+    };
+  }
+
+  // Merge notifications per userId by notif.id
+  const mergedNotifs = {};
+  const notifUsers = new Set([
+    ...Object.keys(base?.notifications && typeof base.notifications === 'object' ? base.notifications : {}),
+    ...Object.keys(incoming.notifications && typeof incoming.notifications === 'object' ? incoming.notifications : {})
+  ]);
+  for (const uid of notifUsers) {
+    const nMap = new Map();
+    for (const n of (Array.isArray(base?.notifications?.[uid]) ? base.notifications[uid] : [])) {
+      if (n && n.id && !deletedMessages[n.id]) nMap.set(n.id, n);
+    }
+    for (const n of (Array.isArray(incoming?.notifications?.[uid]) ? incoming.notifications[uid] : [])) {
+      if (n && n.id && !deletedMessages[n.id]) nMap.set(n.id, n);
+    }
+    const arr = Array.from(nMap.values()).sort((x, y) => (x.createdAt || 0) - (y.createdAt || 0)).slice(-25);
+    if (arr.length > 0) mergedNotifs[uid] = arr;
+  }
+
   const out = {
     users: Array.from(userMap.values()),
     friendships: Array.from(fMap.values()),
     bookmarks: { ...(base?.bookmarks || {}), ...(incoming.bookmarks && typeof incoming.bookmarks === 'object' ? incoming.bookmarks : {}) },
     history: { ...(base?.history || {}), ...(incoming.history && typeof incoming.history === 'object' ? incoming.history : {}) },
     progress: { ...(base?.progress || {}), ...(incoming.progress && typeof incoming.progress === 'object' ? incoming.progress : {}) },
-    dms: { ...(base?.dms || {}), ...(incoming.dms && typeof incoming.dms === 'object' ? incoming.dms : {}) },
+    dms: mergedDms,
     deletedUsers,
-    savedRooms: { ...(base?.savedRooms || {}), ...(incoming.savedRooms && typeof incoming.savedRooms === 'object' ? incoming.savedRooms : {}) }
+    deletedMessages,
+    notifications: mergedNotifs,
+    savedRooms: mergedRooms
   };
   return out;
 }
@@ -148,8 +255,8 @@ async function ensureCloudLoaded() {
     await cloudInitPromise;
     return;
   }
-  // On Vercel Serverless, refresh from cloud if more than 3.5s elapsed since last pull
-  if (process.env.VERCEL && Date.now() - lastCloudLoadAt > 3500 && !cloudSyncInFlight) {
+  // On Vercel Serverless, refresh from cloud if more than 1.2s elapsed since last pull
+  if (process.env.VERCEL && Date.now() - lastCloudLoadAt > 1200 && !cloudSyncInFlight) {
     await initCloudDb();
   }
 }
@@ -164,6 +271,7 @@ async function initCloudDb() {
   const headers = {
     'Authorization': `Bearer ${token}`,
     'Accept': 'application/vnd.github+json',
+    'Cache-Control': 'no-cache',
     'User-Agent': 'RaveLampa-Server'
   };
 
@@ -193,8 +301,8 @@ async function initCloudDb() {
       }
     }
 
-    // 2. Fetch `database.json` from `db-storage` branch
-    const fileRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE_PATH}?ref=${GH_BRANCH}`, {
+    // 2. Fetch `database.json` from `db-storage` branch (cache-busted)
+    const fileRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE_PATH}?ref=${GH_BRANCH}&t=${Date.now()}`, {
       headers,
       signal: AbortSignal.timeout(8000)
     });
@@ -227,76 +335,93 @@ async function initCloudDb() {
   }
 }
 
+async function _doPushToCloudDb() {
+  const token = getCloudToken();
+  if (!token) return;
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/vnd.github+json',
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+    'User-Agent': 'RaveLampa-Server'
+  };
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      if (!cloudFileSha || attempt > 0) {
+        const getRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE_PATH}?ref=${GH_BRANCH}&t=${Date.now()}`, {
+          headers,
+          signal: AbortSignal.timeout(7000)
+        });
+        if (getRes.ok) {
+          const j = await getRes.json();
+          cloudFileSha = j.sha;
+          try {
+            const remoteDb = JSON.parse(Buffer.from(j.content || '', 'base64').toString('utf8'));
+            db = mergeDb(remoteDb, db);
+            fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
+          } catch {}
+        }
+      }
+
+      const body = {
+        message: `Sync DB (${db.users.length} users)`,
+        content: Buffer.from(JSON.stringify(db, null, 2), 'utf8').toString('base64'),
+        branch: GH_BRANCH
+      };
+      if (cloudFileSha) body.sha = cloudFileSha;
+
+      const putRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE_PATH}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(10000)
+      });
+
+      if (putRes.ok) {
+        const putData = await putRes.json();
+        cloudFileSha = putData.content?.sha || cloudFileSha;
+        lastCloudLoadAt = Date.now();
+        return;
+      } else if (putRes.status === 409 || putRes.status === 422) {
+        cloudFileSha = null;
+        continue;
+      } else {
+        console.error('[CloudDB] Push HTTP error:', putRes.status);
+        return;
+      }
+    } catch (e) {
+      console.error('[CloudDB] Push warning:', e.message);
+      return;
+    }
+  }
+}
+
 async function pushToCloudDb() {
   if (!cloudInitialized) {
     cloudPendingSync = true;
     return;
   }
-  const token = getCloudToken();
-  if (!token) return;
   if (cloudSyncInFlight) {
     cloudPendingSync = true;
-    return;
+    return cloudSyncInFlight;
   }
-  cloudSyncInFlight = true;
-  const headers = {
-    'Authorization': `Bearer ${token}`,
-    'Accept': 'application/vnd.github+json',
-    'Content-Type': 'application/json',
-    'User-Agent': 'RaveLampa-Server'
-  };
-
-  try {
-    // Get current SHA and merge remote if we don't have SHA yet
-    if (!cloudFileSha) {
-      const getRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE_PATH}?ref=${GH_BRANCH}`, {
-        headers,
-        signal: AbortSignal.timeout(7000)
-      });
-      if (getRes.ok) {
-        const j = await getRes.json();
-        cloudFileSha = j.sha;
-        try {
-          const remoteDb = JSON.parse(Buffer.from(j.content || '', 'base64').toString('utf8'));
-          db = mergeDb(remoteDb, db);
-          fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
-        } catch {}
-      }
-    }
-
-    const body = {
-      message: `Sync DB (${db.users.length} users)`,
-      content: Buffer.from(JSON.stringify(db, null, 2), 'utf8').toString('base64'),
-      branch: GH_BRANCH
-    };
-    if (cloudFileSha) body.sha = cloudFileSha;
-
-    const putRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE_PATH}`, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(10000)
-    });
-
-    if (putRes.ok) {
-      const putData = await putRes.json();
-      cloudFileSha = putData.content?.sha || cloudFileSha;
-    } else if (putRes.status === 409 || putRes.status === 422) {
-      // SHA conflict: reset SHA so next run fetches remote, merges, and pushes cleanly
-      cloudFileSha = null;
-      cloudPendingSync = true;
-    } else {
-      console.error('[CloudDB] Push HTTP error:', putRes.status);
-    }
-  } catch (e) {
-    console.error('[CloudDB] Push warning:', e.message);
-  } finally {
-    cloudSyncInFlight = false;
+  cloudSyncInFlight = _doPushToCloudDb().finally(() => {
+    cloudSyncInFlight = null;
     if (cloudPendingSync) {
       cloudPendingSync = false;
-      setTimeout(pushToCloudDb, 400);
+      pushToCloudDb();
     }
+  });
+  return cloudSyncInFlight;
+}
+
+async function flushCloudDb() {
+  if (cloudSyncTimer) {
+    clearTimeout(cloudSyncTimer);
+    cloudSyncTimer = null;
   }
+  await pushToCloudDb();
 }
 
 function saveDb(immediateCloud = true) {
@@ -728,6 +853,7 @@ function toggleDmReaction(userId, friendId, messageId, emoji) {
   } else {
     msg.reactions[cleanEmoji].push(userId);
   }
+  msg.updatedAt = Date.now();
   saveDb(true);
   const sender = getUserById(msg.fromId);
   return {
@@ -752,6 +878,7 @@ function consumeDmViewOnce(userId, friendId, messageId) {
   const dataUrl = msg.imageUrl;
   msg.viewed = true;
   msg.viewedAt = Date.now();
+  msg.updatedAt = Date.now();
   msg.imageUrl = ''; // Permanently wipe photo after 1 view
   saveDb(true);
   const sender = getUserById(msg.fromId);
@@ -783,6 +910,7 @@ function editDirectMessage(userId, friendId, messageId, newText) {
   if (!clean && !msg.hasImage && !msg.imageUrl) throw new Error('Текст сообщения не может быть пустым');
   msg.text = clean;
   msg.editedAt = Date.now();
+  msg.updatedAt = Date.now();
   saveDb(true);
   const sender = getUserById(msg.fromId);
   return {
@@ -800,6 +928,8 @@ function deleteDirectMessage(userId, friendId, messageId) {
   if (idx === -1) throw new Error('Сообщение не найдено');
   if (msgs[idx].fromId !== userId) throw new Error('Можно удалять только свои сообщения');
   const removed = msgs.splice(idx, 1)[0];
+  if (!db.deletedMessages) db.deletedMessages = {};
+  db.deletedMessages[removed.id] = Date.now();
   saveDb(true);
   return { id: removed.id, fromId: removed.fromId, toId: removed.toId, deleted: true };
 }
@@ -997,6 +1127,10 @@ function popUserNotifications(userId) {
     return [];
   }
   const items = db.notifications[userId].slice();
+  if (!db.deletedMessages) db.deletedMessages = {};
+  for (const it of items) {
+    if (it && it.id) db.deletedMessages[it.id] = Date.now();
+  }
   db.notifications[userId] = [];
   saveDb(false);
   return items;
@@ -1005,6 +1139,7 @@ function popUserNotifications(userId) {
 module.exports = {
   initCloudDb,
   ensureCloudLoaded,
+  flushCloudDb,
   saveRoomsSnapshot,
   getSavedRoomsSnapshot,
   pushUserNotification,

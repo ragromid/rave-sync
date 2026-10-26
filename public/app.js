@@ -355,32 +355,40 @@
     }, 6000);
   }
 
+  let titleFlashTimer = null;
+  function flashTabTitle(text) {
+    clearTimeout(titleFlashTimer);
+    document.title = `💬 ${text} — RaveLampa`;
+    titleFlashTimer = setTimeout(() => {
+      document.title = 'RaveLampa — Кинотеатр с друзьями';
+    }, 5000);
+  }
+
   function triggerAppNotification({ title, body, user, onClick, data = {}, kind = 'message', forceSystem = false }) {
     playNotificationSound(kind);
     showTelegramTopCard({ title, body, user, onClick });
+    flashTabTitle(title);
 
     if ('Notification' in window && Notification.permission === 'granted') {
-      if (forceSystem || document.hidden || !document.hasFocus()) {
-        const opts = {
-          body,
-          tag: data.tag || 'ravelampa-' + Date.now(),
-          data,
-          renotify: true
-        };
-        if (swRegistration && typeof swRegistration.showNotification === 'function') {
-          swRegistration.showNotification(title, opts).catch(() => {
-            try { new Notification(title, opts); } catch {}
-          });
-        } else {
-          try {
-            const n = new Notification(title, opts);
-            n.onclick = () => {
-              window.focus();
-              n.close();
-              if (typeof onClick === 'function') onClick();
-            };
-          } catch {}
-        }
+      const opts = {
+        body,
+        tag: data.tag || 'ravelampa-' + Date.now(),
+        data,
+        renotify: true
+      };
+      if (swRegistration && typeof swRegistration.showNotification === 'function') {
+        swRegistration.showNotification(title, opts).catch(() => {
+          try { new Notification(title, opts); } catch {}
+        });
+      } else {
+        try {
+          const n = new Notification(title, opts);
+          n.onclick = () => {
+            window.focus();
+            n.close();
+            if (typeof onClick === 'function') onClick();
+          };
+        } catch {}
       }
     }
   }
@@ -2620,7 +2628,7 @@
     messages.forEach(m => {
       const existing = box.querySelector(`[data-msg-id="${CSS.escape(m.id)}"]`);
       if (!existing) {
-        appendChatMessage(m, false);
+        appendChatMessage(m, true);
       } else {
         const nextSig = JSON.stringify({ t: m.text, e: m.editedAt, v: m.viewed, r: m.read, rx: m.reactions });
         if (existing.dataset.msgSig !== nextSig) {
@@ -2649,6 +2657,27 @@
           const compTarget = boxId === 'roomDmMessages' ? 'roomDm' : 'dm';
           box.appendChild(createRichMessageElement(m, 'dm', compTarget, friendId));
           box.scrollTop = box.scrollHeight;
+
+          if (state.user && m.fromId !== state.user.id && !notifiedDmIds.has(m.id)) {
+            notifiedDmIds.add(m.id);
+            const friend = state.friends.find(x => x.id === friendId) || m.sender || { id: friendId, displayName: 'Друг' };
+            const preview = m.text || (m.viewOnce ? '💣 Одноразовое фото' : '📷 Фотография');
+            triggerAppNotification({
+              title: friend.displayName || 'Друг',
+              body: preview,
+              user: friend,
+              data: { friendId, tag: 'dm-' + friendId },
+              onClick: () => {
+                if (state.currentView === 'room') {
+                  setMobileRoomTab('dms');
+                  openRoomDmChat(friendId);
+                } else {
+                  switchView('friends');
+                  openFriendChat(friendId);
+                }
+              }
+            });
+          }
         } else {
           const nextSig = JSON.stringify({ t: m.text, e: m.editedAt, v: m.viewed, r: m.read, rx: m.reactions });
           if (existing.dataset.msgSig !== nextSig) {
@@ -2710,7 +2739,10 @@
   function renderRoomMessages(messages) {
     const box = $('chatMessages');
     box.innerHTML = '';
-    messages.forEach(m => appendChatMessage(m, false));
+    messages.forEach(m => {
+      if (m.id) notifiedDmIds.add(m.id);
+      appendChatMessage(m, false);
+    });
   }
 
   function spawnVideoChatPill(msg) {
@@ -2737,7 +2769,8 @@
     if (!msg.system && isLive) {
       spawnVideoChatPill(msg);
       const isOwn = state.user && msg.user?.id === state.user.id;
-      if (!isOwn && (document.hidden || state.mobileRoomTab !== 'chat')) {
+      if (!isOwn && (!msg.id || !notifiedDmIds.has(msg.id))) {
+        if (msg.id) notifiedDmIds.add(msg.id);
         if (state.mobileRoomTab !== 'chat') {
           state.unreadChatCount++;
           const badge = $('chatUnreadBadge');
@@ -2746,18 +2779,14 @@
             badge.classList.remove('hidden');
           }
         }
-        if (document.hidden) {
-          const preview = msg.text || (msg.viewOnce ? '🔥 Одноразовое фото' : '📷 Фотография');
-          triggerAppNotification({
-            title: `${msg.user?.displayName || 'Участник'} (в комнате)`,
-            body: preview,
-            user: msg.user,
-            data: { roomCode: state.room?.code, tag: 'roomchat-' + msg.id },
-            onClick: () => setMobileRoomTab('chat')
-          });
-        } else {
-          playNotificationSound('message');
-        }
+        const preview = msg.text || (msg.viewOnce ? '🔥 Одноразовое фото' : '📷 Фотография');
+        triggerAppNotification({
+          title: `${msg.user?.displayName || 'Участник'} (в комнате)`,
+          body: preview,
+          user: msg.user,
+          data: { roomCode: state.room?.code, tag: 'roomchat-' + (msg.id || Date.now()) },
+          onClick: () => setMobileRoomTab('chat')
+        });
       }
     }
     box.appendChild(el);
@@ -2953,25 +2982,21 @@
             notifiedDmIds.add(f.lastMessage.id);
           } else if (!notifiedDmIds.has(f.lastMessage.id)) {
             notifiedDmIds.add(f.lastMessage.id);
-            const isViewing = (state.currentView === 'friends' && activeDmFriendId === f.id && !document.hidden) ||
-                              (state.currentView === 'room' && roomActiveDmFriendId === f.id && !$('roomDmChatView')?.classList.contains('hidden') && !document.hidden);
-            if (!isViewing) {
-              triggerAppNotification({
-                title: f.displayName,
-                body: f.lastMessage.text || 'Новое сообщение',
-                user: f,
-                data: { friendId: f.id, tag: 'dm-' + f.id },
-                onClick: () => {
-                  if (state.currentView === 'room') {
-                    setMobileRoomTab('dms');
-                    openRoomDmChat(f.id);
-                  } else {
-                    switchView('friends');
-                    openFriendChat(f.id);
-                  }
+            triggerAppNotification({
+              title: f.displayName,
+              body: f.lastMessage.text || 'Новое сообщение',
+              user: f,
+              data: { friendId: f.id, tag: 'dm-' + f.id },
+              onClick: () => {
+                if (state.currentView === 'room') {
+                  setMobileRoomTab('dms');
+                  openRoomDmChat(f.id);
+                } else {
+                  switchView('friends');
+                  openFriendChat(f.id);
                 }
-              });
-            }
+              }
+            });
           }
         }
       }
@@ -3003,6 +3028,27 @@
             data: { roomCode: room.code, tag: 'invite-' + room.code },
             onClick: () => joinRoomByCode(room.code)
           });
+        } else if (n.type === 'dm_message') {
+          if (!n.msgId || !notifiedDmIds.has(n.msgId)) {
+            if (n.msgId) notifiedDmIds.add(n.msgId);
+            const senderId = n.fromId || n.from?.id;
+            triggerAppNotification({
+              title: n.title || n.from?.displayName || 'Новое сообщение',
+              body: n.body || 'Новое сообщение',
+              user: n.from,
+              data: { friendId: senderId, tag: 'dm-' + (senderId || Date.now()) },
+              onClick: () => {
+                if (!senderId) return switchView('friends');
+                if (state.currentView === 'room') {
+                  setMobileRoomTab('dms');
+                  openRoomDmChat(senderId);
+                } else {
+                  switchView('friends');
+                  openFriendChat(senderId);
+                }
+              }
+            });
+          }
         } else if (n.title) {
           triggerAppNotification({
             title: n.title,
@@ -3029,10 +3075,10 @@
     } catch {}
   }
 
-  // Background poll every 4.5s for new notifications, DMs, friend requests & online status
+  // Background poll every 2.5s for new notifications, DMs, friend requests & online status
   setInterval(() => {
     if (state.user) loadFriends();
-  }, 4500);
+  }, 2500);
 
   function renderFriendsView() {
     // Incoming requests
@@ -3161,7 +3207,10 @@
       if (msgs.length === 0) {
         box.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.84rem;">Сообщений пока нет. Напишите привет или отправьте фото! 👋📷</div>';
       } else {
-        msgs.forEach(m => box.appendChild(createRichMessageElement(m, 'dm', 'dm', friendId)));
+        msgs.forEach(m => {
+          if (m.id) notifiedDmIds.add(m.id);
+          box.appendChild(createRichMessageElement(m, 'dm', 'dm', friendId));
+        });
         refreshMessageGrouping(box);
         box.scrollTop = box.scrollHeight;
       }
@@ -3295,7 +3344,10 @@
     try {
       const data = await api(`/api/dms/${encodeURIComponent(friendId)}`);
       box.innerHTML = '';
-      (data.messages || []).forEach(m => box.appendChild(createRichMessageElement(m, 'dm', 'roomDm', friendId)));
+      (data.messages || []).forEach(m => {
+        if (m.id) notifiedDmIds.add(m.id);
+        box.appendChild(createRichMessageElement(m, 'dm', 'roomDm', friendId));
+      });
       refreshMessageGrouping(box);
       box.scrollTop = box.scrollHeight;
       $('roomDmInput')?.focus();
@@ -3321,6 +3373,7 @@
     const previewText = msg.text || (msg.viewOnce ? '🔥 Одноразовое фото' : (msg.hasPhoto || msg.hasImage || msg.imageUrl ? '📷 Фотография' : ''));
     if (friend) {
       friend.lastMessage = {
+        id: msg.id,
         text: previewText,
         fromId: msg.fromId,
         createdAt: msg.createdAt
@@ -3350,12 +3403,14 @@
     }
 
     if (msg.fromId !== state.user.id) {
-      notifiedDmIds.add(msg.id);
       if ((isViewingInFriendsPage || isViewingInRoomSidebar) && !document.hidden) {
         socket.emit('dm:read', { friendId: otherId });
-        playNotificationSound('message');
-      } else {
-        if (friend) friend.unreadCount = (friend.unreadCount || 0) + 1;
+      } else if (friend) {
+        friend.unreadCount = (friend.unreadCount || 0) + 1;
+      }
+
+      if (!notifiedDmIds.has(msg.id)) {
+        notifiedDmIds.add(msg.id);
         triggerAppNotification({
           title: msg.sender?.displayName || friend?.displayName || 'Друг',
           body: previewText,
