@@ -14,13 +14,13 @@
       "stats": {
         "watchSeconds": 0,
         "moviesWatched": 0,
-        "episodesWatched": 1,
+        "episodesWatched": 2,
         "roomsCreated": 3,
         "messagesSent": 17,
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040212796,
+      "lastSeenAt": 1793040216409,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -157,11 +157,12 @@
             "фэнтези"
           ]
         },
-        "balancer": "Filmix",
-        "season": 0,
-        "episode": 0,
-        "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1792965688026
+        "balancerKey": "aniliberty",
+        "balancer": "AniLiberty",
+        "season": 1,
+        "episode": 1,
+        "voiceName": "",
+        "updatedAt": 1793040215788
       }
     ]
   },
@@ -176,6 +177,16 @@
         "currentTime": 522,
         "duration": 1450,
         "updatedAt": 1793001267614
+      },
+      "1218925": {
+        "balancerKey": "aniliberty",
+        "balancerName": "AniLiberty",
+        "season": 1,
+        "episode": 1,
+        "voiceName": "",
+        "currentTime": 0,
+        "duration": 0,
+        "updatedAt": 1793040215789
       }
     },
     "u_80ab0d1134f5": {
@@ -534,7 +545,8 @@
         "replyTo": null,
         "reactions": {},
         "createdAt": 1793025683256,
-        "read": false
+        "read": false,
+        "updatedAt": 1793025683256
       }
     ]
   },
@@ -689,7 +701,7 @@
     "5JMX3M": {
       "code": "5JMX3M",
       "name": "Человек-бензопила. Фильм: История Резе",
-      "isPublic": false,
+      "isPublic": true,
       "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793040211242,
