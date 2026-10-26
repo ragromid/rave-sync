@@ -22,27 +22,6 @@
       "updatedAt": 1792993656702
     },
     {
-      "id": "u_226eb830d92e",
-      "username": "test",
-      "displayName": "test",
-      "passwordHash": "67d6a3f17564579279ee0c6c137b83d9:0886c9afb940414361e912cb20b73b7d3b703682c25313290fd5744817b332e0afc3f553d20426c2502ece790156e0c0d762ef56062c4e1a3e05c2c50b9ec5b3",
-      "avatar": "🦄",
-      "color": "#00d2ff",
-      "bio": "",
-      "createdAt": 1792965927568,
-      "avatarUrl": "",
-      "isAdmin": false,
-      "stats": {
-        "watchSeconds": 0,
-        "moviesWatched": 0,
-        "episodesWatched": 0,
-        "roomsCreated": 0,
-        "messagesSent": 0,
-        "reactionsSent": 0
-      },
-      "updatedAt": 1792965927568
-    },
-    {
       "id": "u_80ab0d1134f5",
       "username": "muraadzz_",
       "displayName": "Murad",
@@ -175,5 +154,7 @@
       }
     ]
   },
-  "deletedUsers": {}
+  "deletedUsers": {
+    "u_226eb830d92e": 1792993976756
+  }
 }
