@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793040218808,
+      "lastSeenAt": 1793040221323,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -753,10 +753,10 @@
         "streamType": "hls"
       },
       "playback": {
-        "playing": true,
-        "currentTime": 0,
+        "playing": false,
+        "currentTime": 3.265777589333997,
         "rate": 1,
-        "updatedAt": 1793040217210
+        "updatedAt": 1793040221323
       },
       "messages": [],
       "viewOnceStore": {}
