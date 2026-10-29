@@ -549,6 +549,8 @@
       c === 66 ||       // Android KEYCODE_ENTER
       c === 29443 ||    // Samsung Tizen Enter / OK
       c === 10182 ||    // LG webOS Select
+      c === 1536 ||     // LG webOS Wheel Click
+      c === 1537 ||     // LG webOS Wheel Click Alt
       c === 10252       // Smart TV OK
     );
   }
