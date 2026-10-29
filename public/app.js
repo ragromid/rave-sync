@@ -855,7 +855,10 @@
 
     for (const item of items) {
       const card = document.createElement('div');
-      card.className = 'poster-card';
+      card.className = 'poster-card tv-focusable';
+      card.tabIndex = 0;
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', item.title || 'Фильм');
       const posterUrl = item.poster || item.backdrop || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300"><rect width="200" height="300" fill="%23171a29"/></svg>';
       card.innerHTML = `
         <div class="poster-art">
@@ -872,6 +875,13 @@
         <div class="poster-sub">${esc(item.year || '')}</div>
       `;
       card.addEventListener('click', () => openMovieModal(item));
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.keyCode === 13) {
+          e.preventDefault();
+          e.stopPropagation();
+          openMovieModal(item);
+        }
+      });
       container.appendChild(card);
     }
   }
@@ -962,6 +972,14 @@
 
     $('modalPlayInCurrentRoomBtn').classList.toggle('hidden', !state.room);
     $('movieModal').classList.remove('hidden');
+
+    // Auto-focus primary Watch button so Smart TV remote OK/Enter immediately starts watching
+    setTimeout(() => {
+      const primaryBtn = state.room ? $('modalPlayInCurrentRoomBtn') : $('modalStartPublicRoomBtn');
+      if (primaryBtn && !primaryBtn.classList.contains('hidden')) {
+        primaryBtn.focus();
+      }
+    }, 60);
 
     // Enrich details in background (imdb_id, kinopoisk_id)
     try {
@@ -1063,7 +1081,9 @@
 
   function createRoomCardEl(r) {
     const el = document.createElement('div');
-    el.className = 'room-card';
+    el.className = 'room-card tv-focusable';
+    el.tabIndex = 0;
+    el.setAttribute('role', 'button');
     const bannerImg = r.media?.backdrop || r.media?.poster || '';
     const avatarsHtml = (r.participants || []).slice(0, 5).map(p => `<span title="${esc(p.displayName)}" style="background:${esc(p.color || 'var(--bg-elevated)')}">${avatarInnerHtml(p)}</span>`).join('');
     const epInfo = r.media?.season && r.media?.episode ? ` · S${r.media.season}E${r.media.episode}` : '';
@@ -1083,6 +1103,13 @@
       </div>
     `;
     el.addEventListener('click', () => joinRoomByCode(r.code));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ' || e.keyCode === 13) {
+        e.preventDefault();
+        e.stopPropagation();
+        joinRoomByCode(r.code);
+      }
+    });
     return el;
   }
 
@@ -2290,11 +2317,92 @@
     });
   });
 
+  // 2D Spatial D-Pad Navigation for Smart TV Remotes (Catalog, Modals, Z01 Voices/Episodes, Sidebar)
+  function isElemVisible(el) {
+    if (!el || el.disabled) return false;
+    if (el.closest('.hidden')) return false;
+    const style = window.getComputedStyle(el);
+    if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
+    const r = el.getBoundingClientRect();
+    return r.width > 4 && r.height > 4;
+  }
+
+  function getFocusableElements() {
+    const openModal = document.querySelector('.modal-backdrop:not(.hidden)');
+    if (openModal) {
+      return Array.from(openModal.querySelectorAll('button, [href], input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])')).filter(isElemVisible);
+    }
+    const selector = '.poster-card, .room-card, .cat-pill, .ep-btn, .z01-seg-btn, .z01-opt, .tv-ctrl-btn, .tv-timeline-bar, .nav-item, .bnav-item, button, input:not([type="hidden"])';
+    return Array.from(document.querySelectorAll(selector)).filter(el => {
+      if (!isElemVisible(el)) return false;
+      const viewPage = el.closest('.view-page');
+      if (viewPage && !viewPage.classList.contains('active')) return false;
+      return true;
+    });
+  }
+
+  function moveSpatialDpadFocus(dir) {
+    setSmartTvMode(true);
+    const items = getFocusableElements();
+    if (!items.length) return false;
+
+    const cur = document.activeElement;
+    if (!cur || cur === document.body || !items.includes(cur)) {
+      const firstPoster = items.find(el => el.classList.contains('poster-card') || el.classList.contains('room-card')) || items[0];
+      firstPoster.focus();
+      firstPoster.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return true;
+    }
+
+    const curRect = cur.getBoundingClientRect();
+    const cx = curRect.left + curRect.width / 2;
+    const cy = curRect.top + curRect.height / 2;
+
+    let bestEl = null;
+    let bestScore = Infinity;
+
+    for (const el of items) {
+      if (el === cur) continue;
+      const r = el.getBoundingClientRect();
+      const ex = r.left + r.width / 2;
+      const ey = r.top + r.height / 2;
+      const dx = ex - cx;
+      const dy = ey - cy;
+
+      if (dir === 'left' && dx >= -6) continue;
+      if (dir === 'right' && dx <= 6) continue;
+      if (dir === 'up' && dy >= -6) continue;
+      if (dir === 'down' && dy <= 6) continue;
+
+      const primaryDist = (dir === 'left' || dir === 'right') ? Math.abs(dx) : Math.abs(dy);
+      const crossDist = (dir === 'left' || dir === 'right') ? Math.abs(dy) : Math.abs(dx);
+
+      // Weight cross-axis distance heavier so D-Pad stays in the same row/column naturally
+      const score = primaryDist + crossDist * 2.6;
+      if (score < bestScore) {
+        bestScore = score;
+        bestEl = el;
+      }
+    }
+
+    if (bestEl) {
+      bestEl.focus();
+      bestEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      return true;
+    }
+    return false;
+  }
+
   // Global Smart TV Remote (D-Pad / Media Keys / WebOS / Tizen / Android TV) Key Handler
   window.addEventListener('keydown', (e) => {
     const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
     const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target?.isContentEditable;
-    if (isInput) return;
+    if (isInput) {
+      if (e.key === 'Escape' || e.keyCode === 10009 || e.keyCode === 461) {
+        e.target.blur();
+      }
+      return;
+    }
 
     const key = e.key || '';
     const kc = e.keyCode || e.which || 0;
@@ -2351,8 +2459,41 @@
       }
     }
 
-    // 2. Room Video Player Keyboard & D-Pad Shortcuts when in Room view
     const anyModalOpen = document.querySelectorAll('.modal-backdrop:not(.hidden)').length > 0;
+    const dirMap = {
+      ArrowLeft: 'left', 37: 'left',
+      ArrowRight: 'right', 39: 'right',
+      ArrowUp: 'up', 38: 'up',
+      ArrowDown: 'down', 40: 'down'
+    };
+    const dpadDir = dirMap[key] || dirMap[kc] || null;
+
+    // 2. If any modal is open OR we are in Catalog / Rooms / Saved / Friends view -> D-Pad navigates cards & buttons!
+    const hasLoadedStream = !!(state.room?.media?.streamUrl || state.room?.media?.youtubeId);
+    const inZ01OrOverlay = document.activeElement && (
+      document.activeElement.closest('#z01Panel') ||
+      document.activeElement.closest('#playerEmptyOverlay') ||
+      document.activeElement.closest('.room-topbar')
+    );
+
+    if (anyModalOpen || state.currentView !== 'room' || !hasLoadedStream || inZ01OrOverlay) {
+      if (dpadDir) {
+        e.preventDefault();
+        moveSpatialDpadFocus(dpadDir);
+        return;
+      }
+      if (key === 'Enter' || kc === 13) {
+        const active = document.activeElement;
+        if (active && active !== document.body && active.tagName !== 'BUTTON' && active.tagName !== 'A') {
+          e.preventDefault();
+          active.click();
+          return;
+        }
+      }
+      return;
+    }
+
+    // 3. Room Video Player Keyboard & D-Pad Shortcuts when video is active in Room view
     if (state.currentView === 'room' && state.room && !anyModalOpen) {
       const osd = $('tvPlayerOsd');
       const controlsRow = $('tvControlsRow');
@@ -2371,7 +2512,7 @@
       // Enter / OK on TV remote: if no specific button is focused (or body/video is focused), toggle Play/Pause & wake OSD!
       if (key === 'Enter' || kc === 13) {
         const focusedTag = document.activeElement ? document.activeElement.tagName.toUpperCase() : '';
-        if (!focusedTag || focusedTag === 'BODY' || focusedTag === 'VIDEO' || document.activeElement === $('playerWrapper')) {
+        if (!focusedTag || focusedTag === 'BODY' || focusedTag === 'VIDEO' || document.activeElement === $('playerWrapper') || isTimelineFocused) {
           e.preventDefault();
           toggleTvPlayPause();
           return;
@@ -2381,7 +2522,7 @@
       // Left / Right Arrows:
       // - If focused inside TV control buttons row, move focus Left/Right between buttons!
       // - Otherwise (or if focused on timeline/video/body), seek -10s / +10s!
-      if (key === 'ArrowLeft' || kc === 37) {
+      if (dpadDir === 'left') {
         if (activeInControls && !isTimelineFocused) {
           e.preventDefault();
           const btns = Array.from(controlsRow.querySelectorAll('.tv-ctrl-btn'));
@@ -2395,7 +2536,7 @@
         return;
       }
 
-      if (key === 'ArrowRight' || kc === 39) {
+      if (dpadDir === 'right') {
         if (activeInControls && !isTimelineFocused) {
           e.preventDefault();
           const btns = Array.from(controlsRow.querySelectorAll('.tv-ctrl-btn'));
@@ -2409,10 +2550,10 @@
         return;
       }
 
-      // Up / Down Arrows in Room:
-      // - ArrowDown wakes OSD and focuses the Play/Pause button (or moves from timeline to buttons)
-      // - ArrowUp adjusts volume +10% (or moves from buttons to timeline)
-      if (key === 'ArrowDown' || kc === 40) {
+      // Down Arrow in Room:
+      // - Wakes OSD and focuses Play/Pause button
+      // - If already in TV control buttons row, moves down to Z01 panel (voices/episodes)
+      if (dpadDir === 'down') {
         if (osd && osd.classList.contains('hidden')) {
           e.preventDefault();
           wakeTvOsd(true);
@@ -2424,18 +2565,30 @@
           wakeTvOsd();
           return;
         }
-        if (!activeInControls) {
-          e.preventDefault();
-          adjustTvVolume(-0.1);
-          return;
+        if (activeInControls) {
+          const z01First = document.querySelector('#z01Panel:not(.hidden) button');
+          if (z01First) {
+            e.preventDefault();
+            z01First.focus();
+            z01First.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            return;
+          }
         }
+        e.preventDefault();
+        adjustTvVolume(-0.1);
+        return;
       }
 
-      if (key === 'ArrowUp' || kc === 38) {
+      if (dpadDir === 'up') {
         if (activeInControls) {
           e.preventDefault();
           $('tvTimelineBar')?.focus();
           wakeTvOsd();
+          return;
+        }
+        if (isTimelineFocused) {
+          e.preventDefault();
+          $('leaveRoomBtn')?.focus();
           return;
         }
         e.preventDefault();
