@@ -273,6 +273,9 @@
                     <span id="roomCodeLabel">#CODE</span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                   </button>
+                  <button id="openTvRemoteBtn" class="pill-btn tiny" title="Пульт для телевизора / Smart TV управление">
+                    <span>📺 Пульт ТВ</span>
+                  </button>
                   <button id="inviteFriendsModalBtn" class="pill-btn tiny accent" title="Пригласить друзей">
                     <span>+ Друг</span>
                   </button>
@@ -315,6 +318,62 @@
 
                 <!-- Floating Reactions Layer -->
                 <div id="reactionsLayer" class="reactions-layer"></div>
+
+                <!-- Smart TV Center Action Feedback (⏪ -10с / ▶️ Play / ⏩ +10с / 🔊) -->
+                <div id="tvCenterFeedback" class="tv-center-feedback hidden">
+                  <div class="tv-feedback-icon" id="tvFeedbackIcon">▶️</div>
+                  <div class="tv-feedback-text" id="tvFeedbackText">Воспроизведение</div>
+                </div>
+
+                <!-- Smart TV / Remote Control On-Screen Overlay (OSD) -->
+                <div id="tvPlayerOsd" class="tv-player-osd hidden">
+                  <div class="tv-timeline-row">
+                    <span id="tvTimeCurrent" class="tv-time-label">00:00</span>
+                    <div id="tvTimelineBar" class="tv-timeline-bar tv-focusable" tabindex="0" role="slider" aria-label="Полоса перемотки видео">
+                      <div id="tvTimelineFill" class="tv-timeline-fill"></div>
+                      <div id="tvTimelineThumb" class="tv-timeline-thumb"></div>
+                    </div>
+                    <span id="tvTimeDuration" class="tv-time-label">00:00</span>
+                  </div>
+                  <div class="tv-controls-row" id="tvControlsRow">
+                    <button type="button" id="tvPrevEpBtn" class="tv-ctrl-btn tv-focusable" title="Предыдущая серия (P)">
+                      <span class="tv-ctrl-ico">⏮</span>
+                      <span class="tv-ctrl-lbl">Пред.</span>
+                    </button>
+                    <button type="button" id="tvRewindBtn" class="tv-ctrl-btn tv-focusable" title="Назад 10 сек (←)">
+                      <span class="tv-ctrl-ico">⏪</span>
+                      <span class="tv-ctrl-lbl">-10 сек</span>
+                    </button>
+                    <button type="button" id="tvPlayPauseBtn" class="tv-ctrl-btn primary tv-focusable" title="Плей / Пауза (OK / Enter / Пробел)">
+                      <span class="tv-ctrl-ico" id="tvPlayPauseIcon">▶️</span>
+                      <span class="tv-ctrl-lbl" id="tvPlayPauseLabel">Плей</span>
+                    </button>
+                    <button type="button" id="tvForwardBtn" class="tv-ctrl-btn tv-focusable" title="Вперёд 10 сек (→)">
+                      <span class="tv-ctrl-ico">⏩</span>
+                      <span class="tv-ctrl-lbl">+10 сек</span>
+                    </button>
+                    <button type="button" id="tvNextEpBtn" class="tv-ctrl-btn tv-focusable" title="Следующая серия (N)">
+                      <span class="tv-ctrl-ico">⏭</span>
+                      <span class="tv-ctrl-lbl">След.</span>
+                    </button>
+                    <button type="button" id="tvMuteBtn" class="tv-ctrl-btn tv-focusable" title="Звук Вкл/Выкл (M / ↑↓)">
+                      <span class="tv-ctrl-ico" id="tvMuteIcon">🔊</span>
+                      <span class="tv-ctrl-lbl" id="tvVolumeLabel">100%</span>
+                    </button>
+                    <button type="button" id="tvSourceBtn" class="tv-ctrl-btn tv-focusable" title="Озвучка, серии и источник">
+                      <span class="tv-ctrl-ico">🎞️</span>
+                      <span class="tv-ctrl-lbl">Серии / Озв.</span>
+                    </button>
+                    <button type="button" id="tvCinemaBtn" class="tv-ctrl-btn tv-focusable" title="Режим ТВ (широкий экран без чата)">
+                      <span class="tv-ctrl-ico">📺</span>
+                      <span class="tv-ctrl-lbl">На весь ТВ</span>
+                    </button>
+                    <button type="button" id="tvFullscreenBtn" class="tv-ctrl-btn tv-focusable" title="Полный экран (F)">
+                      <span class="tv-ctrl-ico">⛶</span>
+                      <span class="tv-ctrl-lbl">Экран</span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <!-- Quick Emoji Reaction Strip + Sync Resync Button -->
@@ -330,6 +389,9 @@
                   <button class="emoji-btn" data-emoji="🤯">🤯</button>
                 </div>
                 <div class="player-quick-tools">
+                  <button id="toggleTvOsdBtn" class="pill-btn tiny ghost" title="Показать кнопки управления для пульта ТВ">
+                    <span>📺 Кнопки ТВ</span>
+                  </button>
                   <button id="toggleProxyStreamBtn" class="pill-btn tiny ghost" title="Переключить прокси потока (если видео не грузится)">
                     <span>⚡ Прокси: Авто</span>
                   </button>
@@ -695,6 +757,89 @@
           <span class="tg-menu-icon">🗑️</span>
           <span>Удалить</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SMART TV REMOTE CONTROL DECK (Управление ТВ с пульта или телефона) -->
+  <div id="tvRemoteModal" class="modal-backdrop hidden">
+    <div class="modal-card tv-remote-card">
+      <button class="modal-close" data-close="tvRemoteModal">✕</button>
+      <div class="tv-remote-header">
+        <div class="tv-remote-badge">📺 ПУЛЬТ УПРАВЛЕНИЯ ТВ</div>
+        <h3 id="tvRemoteMovieTitle">Управление видео в комнате</h3>
+        <p class="modal-sub">Управляйте видео кнопками пульта телевизора (стрелки ◀ ▶ ▲ ▼ и OK) или с телефона (если телевизор открыт в этой же комнате)</p>
+      </div>
+
+      <!-- Current Timecode Display -->
+      <div class="tv-remote-status">
+        <span id="tvRemoteTimeText">00:00 / 00:00</span>
+        <span id="tvRemoteStateBadge" class="badge tiny">Синхронно</span>
+      </div>
+
+      <!-- Big Tactile D-Pad / Media Remote Pad -->
+      <div class="tv-remote-pad">
+        <div class="tv-remote-row">
+          <button type="button" class="tv-rbtn" data-tv-cmd="seek_-30">
+            <span class="tv-rbtn-ico">⏪</span>
+            <span class="tv-rbtn-lbl">-30 сек</span>
+          </button>
+          <button type="button" class="tv-rbtn" data-tv-cmd="seek_-10">
+            <span class="tv-rbtn-ico">◀</span>
+            <span class="tv-rbtn-lbl">-10 сек</span>
+          </button>
+          <button type="button" class="tv-rbtn primary-circle" data-tv-cmd="toggle_play" id="tvRemotePlayBtn">
+            <span class="tv-rbtn-ico" id="tvRemotePlayIcon">⏯</span>
+            <span class="tv-rbtn-lbl" id="tvRemotePlayLbl">Плей / Пауза</span>
+          </button>
+          <button type="button" class="tv-rbtn" data-tv-cmd="seek_+10">
+            <span class="tv-rbtn-ico">▶</span>
+            <span class="tv-rbtn-lbl">+10 сек</span>
+          </button>
+          <button type="button" class="tv-rbtn" data-tv-cmd="seek_+30">
+            <span class="tv-rbtn-ico">⏩</span>
+            <span class="tv-rbtn-lbl">+30 сек</span>
+          </button>
+        </div>
+
+        <div class="tv-remote-row">
+          <button type="button" class="tv-rbtn" data-tv-cmd="prev_ep">
+            <span class="tv-rbtn-ico">⏮</span>
+            <span class="tv-rbtn-lbl">Пред. серия</span>
+          </button>
+          <button type="button" class="tv-rbtn" data-tv-cmd="vol_down">
+            <span class="tv-rbtn-ico">🔉</span>
+            <span class="tv-rbtn-lbl">Тише</span>
+          </button>
+          <button type="button" class="tv-rbtn" data-tv-cmd="toggle_mute">
+            <span class="tv-rbtn-ico">🔇</span>
+            <span class="tv-rbtn-lbl">Без звука</span>
+          </button>
+          <button type="button" class="tv-rbtn" data-tv-cmd="vol_up">
+            <span class="tv-rbtn-ico">🔊</span>
+            <span class="tv-rbtn-lbl">Громче</span>
+          </button>
+          <button type="button" class="tv-rbtn" data-tv-cmd="next_ep">
+            <span class="tv-rbtn-ico">⏭</span>
+            <span class="tv-rbtn-lbl">След. серия</span>
+          </button>
+        </div>
+
+        <div class="tv-remote-row actions-row">
+          <button type="button" class="btn glass full" data-tv-cmd="toggle_tv_mode" id="tvModeToggleBtn">
+            🖥️ Режим Smart TV (крупные кнопки для пульта)
+          </button>
+          <button type="button" class="btn glass full" data-tv-cmd="open_z01">
+            🎞️ Выбрать озвучку / серию / сезон
+          </button>
+        </div>
+      </div>
+
+      <div class="tv-remote-tips">
+        <div><strong>На пульте телевизора:</strong></div>
+        <div>• <strong>OK / Enter / Пробел</strong> — Пауза / Воспроизведение</div>
+        <div>• <strong>Стрелки ◀ / ▶</strong> — Перемотка на -10 / +10 секунд</div>
+        <div>• <strong>Стрелки ▲ / ▼</strong> — Громкость или выбор кнопок плеера</div>
       </div>
     </div>
   </div>

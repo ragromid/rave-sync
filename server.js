@@ -1203,7 +1203,7 @@ app.post('/api/rooms/:code/sync', authMiddleware, (req, res) => {
   const room = rooms.get(code);
   if (!room) return res.status(404).json({ error: 'Комната не найдена' });
 
-  const { action, currentTime, playing, rate, media, settings } = req.body || {};
+  const { action, currentTime, playing, rate, media, settings, clientId, volume, muted, remoteCmd } = req.body || {};
 
   // Ensure user is listed in participants
   const hasUser = Array.from(room.participants.values()).some(p => p.id === req.user.id);
@@ -1229,30 +1229,57 @@ app.post('/api/rooms/:code/sync', authMiddleware, (req, res) => {
   if (canControl) {
     if (media) {
       room.media = media;
-      room.playback = { playing: true, currentTime: 0, rate: 1, updatedAt: Date.now() };
+      room.playback = {
+        playing: true,
+        currentTime: 0,
+        rate: 1,
+        updatedAt: Date.now(),
+        lastAction: 'media_changed',
+        lastActionId: 'act_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        lastActionAt: Date.now(),
+        actorClientId: clientId || '',
+        actor: { id: req.user.id, displayName: req.user.displayName, avatar: req.user.avatar }
+      };
       io.to(code).emit('room:media_changed', {
         media: room.media,
         playback: { ...room.playback, serverTime: Date.now() }
       });
       stateChangedImmediate = true;
-    } else if (action === 'play' || action === 'pause' || action === 'seek' || action === 'heartbeat') {
+    } else if (action === 'play' || action === 'pause' || action === 'seek' || action === 'rate' || action === 'remote' || action === 'heartbeat') {
       const effectiveNow = getEffectiveTime(room.playback);
-      room.playback = {
-        playing: typeof playing === 'boolean' ? playing : room.playback.playing,
-        currentTime: typeof currentTime === 'number' && !isNaN(currentTime) ? Math.max(0, currentTime) : effectiveNow,
-        rate: typeof rate === 'number' ? rate : (room.playback.rate || 1),
-        updatedAt: Date.now()
-      };
-      if (action !== 'heartbeat') {
-        io.to(code).emit('player:sync', {
-          ...room.playback,
-          action,
-          serverTime: Date.now(),
-          actor: { id: req.user.id, displayName: req.user.displayName, avatar: req.user.avatar }
-        });
-        stateChangedImmediate = true;
+      const isRecentExplicitCmd = room.playback && room.playback.lastActionAt && (Date.now() - room.playback.lastActionAt < 4000);
+      // Do not let a passive heartbeat from another tab overwrite an explicit command issued within the last 4 seconds
+      if (action === 'heartbeat' && isRecentExplicitCmd && clientId && room.playback.actorClientId && room.playback.actorClientId !== clientId) {
+        // Ignore stale heartbeat so remote command wins
       } else {
-        stateChangedLazy = true;
+        const nextPlayback = {
+          ...room.playback,
+          playing: typeof playing === 'boolean' ? playing : room.playback.playing,
+          currentTime: typeof currentTime === 'number' && !isNaN(currentTime) ? Math.max(0, currentTime) : effectiveNow,
+          rate: typeof rate === 'number' ? rate : (room.playback.rate || 1),
+          updatedAt: Date.now()
+        };
+        if (typeof volume === 'number') nextPlayback.volume = Math.max(0, Math.min(1, volume));
+        if (typeof muted === 'boolean') nextPlayback.muted = muted;
+        if (action !== 'heartbeat') {
+          nextPlayback.lastAction = remoteCmd || action;
+          nextPlayback.lastActionId = 'act_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+          nextPlayback.lastActionAt = Date.now();
+          nextPlayback.actorClientId = clientId || '';
+          nextPlayback.actor = { id: req.user.id, displayName: req.user.displayName, avatar: req.user.avatar };
+        }
+        room.playback = nextPlayback;
+        if (action !== 'heartbeat') {
+          io.to(code).emit('player:sync', {
+            ...room.playback,
+            action: remoteCmd || action,
+            serverTime: Date.now(),
+            actor: nextPlayback.actor
+          });
+          stateChangedImmediate = true;
+        } else {
+          stateChangedLazy = true;
+        }
       }
     }
     if (settings && room.hostId === req.user.id) {
@@ -1553,8 +1580,8 @@ io.on('connection', (socket) => {
     leaveCurrentRoom();
   });
 
-  // Synchronized playback (Play, Pause, Seek, Rate)
-  socket.on('player:sync', ({ action, currentTime, playing, rate }) => {
+  // Synchronized playback (Play, Pause, Seek, Rate, Volume, Remote Commands)
+  socket.on('player:sync', ({ action, currentTime, playing, rate, clientId, volume, muted, remoteCmd }) => {
     const meta = socketMeta.get(socket.id);
     if (!meta || !meta.roomCode || !currentUser) return;
     const room = rooms.get(meta.roomCode);
@@ -1582,28 +1609,37 @@ io.on('connection', (socket) => {
       });
     }
 
-    room.playback = {
+    const nextPlayback = {
+      ...room.playback,
       playing: typeof playing === 'boolean' ? playing : room.playback.playing,
       currentTime: typeof currentTime === 'number' && !isNaN(currentTime) ? Math.max(0, currentTime) : effectiveNow,
       rate: typeof rate === 'number' ? rate : (room.playback.rate || 1),
-      updatedAt: Date.now()
-    };
-    persistRoomsToDb();
-
-    socket.to(room.code).emit('player:sync', {
-      ...room.playback,
-      action: action || 'sync',
-      serverTime: Date.now(),
+      updatedAt: Date.now(),
+      lastAction: remoteCmd || action || 'sync',
+      lastActionId: 'act_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+      lastActionAt: Date.now(),
+      actorClientId: clientId || '',
       actor: {
         id: currentUser.id,
         displayName: currentUser.displayName,
         avatar: currentUser.avatar
       }
+    };
+    if (typeof volume === 'number') nextPlayback.volume = Math.max(0, Math.min(1, volume));
+    if (typeof muted === 'boolean') nextPlayback.muted = muted;
+    room.playback = nextPlayback;
+    persistRoomsToDb();
+
+    socket.to(room.code).emit('player:sync', {
+      ...room.playback,
+      action: remoteCmd || action || 'sync',
+      serverTime: Date.now(),
+      actor: nextPlayback.actor
     });
   });
 
   // Continuous heartbeat from host / active player to keep all devices tightly in sync
-  socket.on('player:heartbeat', ({ currentTime, playing, rate }) => {
+  socket.on('player:heartbeat', ({ currentTime, playing, rate, clientId }) => {
     const meta = socketMeta.get(socket.id);
     if (!meta || !meta.roomCode || !currentUser) return;
     const room = rooms.get(meta.roomCode);
@@ -1612,8 +1648,11 @@ io.on('connection', (socket) => {
     // Only accept authoritative heartbeat from host (or anyone if host isn't in room)
     if (room.hostId !== currentUser.id) return;
     if (typeof currentTime !== 'number' || isNaN(currentTime)) return;
+    const isRecentExplicitCmd = room.playback && room.playback.lastActionAt && (Date.now() - room.playback.lastActionAt < 4000);
+    if (isRecentExplicitCmd && clientId && room.playback.actorClientId && room.playback.actorClientId !== clientId) return;
 
     room.playback = {
+      ...room.playback,
       playing: typeof playing === 'boolean' ? playing : room.playback.playing,
       currentTime: Math.max(0, currentTime),
       rate: typeof rate === 'number' ? rate : (room.playback.rate || 1),

@@ -44,6 +44,10 @@
     },
 
     // Player & Sync
+    clientId: 'dev_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now().toString(36),
+    lastAppliedActionId: '',
+    tvMode: /SmartTV|Tizen|Web0S|WebOS|NetCast|BRAVIA|AFT|Android TV|GoogleTV|Viera|Hisense|VIDAA|PhilipsTV|Opera TV|HbbTV/i.test(navigator.userAgent || ''),
+    tvCinemaMode: false,
     hls: null,
     ytPlayer: null,
     ytReady: false,
@@ -1772,12 +1776,12 @@
   // Bind HTML5 Video Events for Real-Time Room Synchronization
   const mainVideo = $('mainVideo');
 
-  function emitPlayerSync(action) {
+  function emitPlayerSync(action, extra = {}) {
     if (!state.room || state.suppressSyncEmit) return;
     if (!state.room.media || state.room.media.streamType === 'youtube') return;
 
     // Guard: if this device just loaded the stream at 0:00 while the room is already ahead, request sync instead of resetting room!
-    if (Date.now() < state.justLoadedMediaUntil && (mainVideo.currentTime || 0) < 2) {
+    if (Date.now() < state.justLoadedMediaUntil && (mainVideo.currentTime || 0) < 2 && action !== 'seek' && action !== 'remote') {
       socket.emit('player:request_sync');
       return;
     }
@@ -1788,9 +1792,11 @@
 
     const payload = {
       action,
-      playing: !mainVideo.paused,
-      currentTime: mainVideo.currentTime || 0,
-      rate: mainVideo.playbackRate || 1
+      playing: typeof extra.playing === 'boolean' ? extra.playing : !mainVideo.paused,
+      currentTime: typeof extra.currentTime === 'number' ? extra.currentTime : (mainVideo.currentTime || 0),
+      rate: mainVideo.playbackRate || 1,
+      clientId: state.clientId,
+      ...extra
     };
 
     if (socket.connected) {
@@ -1799,6 +1805,10 @@
       api(`/api/rooms/${encodeURIComponent(state.room.code)}/sync`, {
         method: 'POST',
         body: JSON.stringify(payload)
+      }).then(res => {
+        if (res?.room?.playback?.lastActionId) {
+          state.lastAppliedActionId = res.room.playback.lastActionId;
+        }
       }).catch(() => {});
     }
 
@@ -1823,15 +1833,29 @@
     }
   }
 
-  mainVideo.addEventListener('play', () => emitPlayerSync('play'));
+  mainVideo.addEventListener('play', () => {
+    updateTvOsdUi();
+    emitPlayerSync('play');
+  });
   mainVideo.addEventListener('pause', () => {
+    updateTvOsdUi();
     if (mainVideo.seeking) return;
     emitPlayerSync('pause');
   });
-  mainVideo.addEventListener('seeked', () => emitPlayerSync('seek'));
+  mainVideo.addEventListener('seeked', () => {
+    updateTvOsdUi();
+    emitPlayerSync('seek');
+  });
+  mainVideo.addEventListener('timeupdate', () => {
+    updateTvOsdUi();
+  });
+  mainVideo.addEventListener('loadedmetadata', () => {
+    updateTvOsdUi();
+  });
   mainVideo.addEventListener('ratechange', () => emitPlayerSync('rate'));
   mainVideo.addEventListener('volumechange', () => {
     if (!mainVideo.muted) $('unmuteSyncBtn').classList.add('hidden');
+    updateTvOsdUi();
   });
 
   // Periodic 2.5s Heartbeat for tight multi-device sync + watch time stats + Serverless HTTP Room Poll
@@ -1842,9 +1866,10 @@
     if (!socket.connected) {
       try {
         const isHost = state.user && state.room.hostId === state.user.id;
-        const body = isHost && state.room.media && state.room.media.streamType !== 'youtube' && !mainVideo.paused
-          ? { action: 'heartbeat', playing: true, currentTime: mainVideo.currentTime || 0, rate: mainVideo.playbackRate || 1 }
-          : {};
+        const recentlyActed = Date.now() - state.lastSyncAt < 3500;
+        const body = isHost && state.room.media && state.room.media.streamType !== 'youtube' && !mainVideo.paused && !recentlyActed
+          ? { action: 'heartbeat', playing: true, currentTime: mainVideo.currentTime || 0, rate: mainVideo.playbackRate || 1, clientId: state.clientId }
+          : { clientId: state.clientId };
         const res = await api(`/api/rooms/${encodeURIComponent(state.room.code)}/sync`, {
           method: 'POST',
           body: JSON.stringify(body)
@@ -1858,8 +1883,15 @@
           syncRoomMessagesFromPoll(res.room.messages || []);
           if (nextMediaUrl && nextMediaUrl !== prevMediaUrl) {
             loadMediaIntoPlayer(res.room.media, res.room.playback);
-          } else if (!isHost && res.room.playback) {
-            applyRemoteSync(res.room.playback, true);
+          } else if (res.room.playback) {
+            const pb = res.room.playback;
+            const hasNewExplicitCmd = pb.lastActionId && pb.lastActionId !== state.lastAppliedActionId && pb.actorClientId !== state.clientId;
+            if (hasNewExplicitCmd) {
+              state.lastAppliedActionId = pb.lastActionId;
+              applyRemoteSync({ ...pb, action: pb.lastAction || 'sync' }, false);
+            } else if (!isHost) {
+              applyRemoteSync(pb, true);
+            }
           }
         }
       } catch {}
@@ -1873,7 +1905,8 @@
       playing: !mainVideo.paused,
       currentTime: mainVideo.currentTime || 0,
       rate: mainVideo.playbackRate || 1,
-      watchDelta: 2.5
+      watchDelta: 2.5,
+      clientId: state.clientId
     });
   }, 2500);
 
@@ -1913,11 +1946,29 @@
     if (!state.room || !state.room.media || state.room.media.streamType === 'youtube') return;
     if (!mainVideo.src && !state.hls) return;
 
+    if (data.lastActionId) {
+      state.lastAppliedActionId = data.lastActionId;
+    }
+
     const targetTime = Number(data.currentTime) || 0;
     const drift = Math.abs((mainVideo.currentTime || 0) - targetTime);
-    const threshold = isHeartbeat ? 1.8 : 1.2;
+    const threshold = isHeartbeat ? 1.8 : 1.0;
 
     state.suppressSyncEmit = true;
+
+    // Remote volume / mute control (e.g. from Phone TV Remote to Smart TV)
+    if (!isHeartbeat && (data.action === 'volume' || data.action === 'mute')) {
+      if (typeof data.volume === 'number') {
+        mainVideo.volume = Math.max(0, Math.min(1, data.volume));
+      }
+      if (typeof data.muted === 'boolean') {
+        mainVideo.muted = data.muted;
+        $('unmuteSyncBtn').classList.toggle('hidden', !mainVideo.muted);
+      }
+      const volPct = mainVideo.muted ? 'Без звука' : `${Math.round(mainVideo.volume * 100)}%`;
+      showTvCenterFeedback(mainVideo.muted ? '🔇' : '🔊', `Громкость: ${volPct}`);
+      updateTvOsdUi();
+    }
 
     if (drift > threshold || data.action === 'seek' || data.action === 'resync') {
       try { mainVideo.currentTime = targetTime; } catch {}
@@ -1933,17 +1984,27 @@
     if (data.playing && mainVideo.paused) {
       mainVideo.play().then(() => {
         $('unmuteSyncBtn').classList.toggle('hidden', !mainVideo.muted);
+        updateTvOsdUi();
       }).catch(() => {
         mainVideo.muted = true;
         $('unmuteSyncBtn').classList.remove('hidden');
         mainVideo.play().catch(() => {});
+        updateTvOsdUi();
       });
-      if (!isHeartbeat && data.actor) showSyncBadge(`${data.actor.avatar || '▶️'} ${data.actor.displayName} нажал(а) Play`);
+      if (!isHeartbeat && data.actor) {
+        showSyncBadge(`${data.actor.avatar || '▶️'} ${data.actor.displayName} нажал(а) Play`);
+        showTvCenterFeedback('▶️', 'Воспроизведение');
+      }
     } else if (!data.playing && !mainVideo.paused && !isHeartbeat) {
       mainVideo.pause();
-      if (data.actor) showSyncBadge(`${data.actor.avatar || '⏸️'} ${data.actor.displayName} поставил(а) на паузу`);
+      updateTvOsdUi();
+      if (data.actor) {
+        showSyncBadge(`${data.actor.avatar || '⏸️'} ${data.actor.displayName} поставил(а) на паузу`);
+        showTvCenterFeedback('⏸️', 'Пауза');
+      }
     }
 
+    updateTvOsdUi();
     setTimeout(() => { state.suppressSyncEmit = false; }, 450);
   }
 
@@ -1955,6 +2016,456 @@
     clearTimeout(syncBadgeTimer);
     syncBadgeTimer = setTimeout(() => el.classList.add('hidden'), 2000);
   }
+
+  // ================= SMART TV PLAYER OSD, REMOTE DECK & D-PAD ENGINE =================
+  let tvOsdHideTimer = null;
+  let tvFeedbackTimer = null;
+
+  function formatTvTime(sec) {
+    const s = Math.max(0, Math.floor(Number(sec) || 0));
+    const hrs = Math.floor(s / 3600);
+    const mins = Math.floor((s % 3600) / 60);
+    const rem = s % 60;
+    const mm = mins < 10 ? '0' + mins : String(mins);
+    const ss = rem < 10 ? '0' + rem : String(rem);
+    return hrs > 0 ? `${hrs}:${mm}:${ss}` : `${mm}:${ss}`;
+  }
+
+  function showTvCenterFeedback(icon, text) {
+    const box = $('tvCenterFeedback');
+    const icoEl = $('tvFeedbackIcon');
+    const txtEl = $('tvFeedbackText');
+    if (!box || !icoEl || !txtEl) return;
+    icoEl.textContent = icon || '▶️';
+    txtEl.textContent = text || '';
+    box.classList.remove('hidden');
+    clearTimeout(tvFeedbackTimer);
+    tvFeedbackTimer = setTimeout(() => {
+      box.classList.add('hidden');
+    }, 1150);
+  }
+
+  function updateTvOsdUi() {
+    const cur = mainVideo.currentTime || 0;
+    const dur = (mainVideo.duration && isFinite(mainVideo.duration)) ? mainVideo.duration : 0;
+    const pct = dur > 0 ? Math.min(100, Math.max(0, (cur / dur) * 100)) : 0;
+
+    if ($('tvTimeCurrent')) $('tvTimeCurrent').textContent = formatTvTime(cur);
+    if ($('tvTimeDuration')) $('tvTimeDuration').textContent = formatTvTime(dur);
+    if ($('tvTimelineFill')) $('tvTimelineFill').style.width = `${pct.toFixed(2)}%`;
+    if ($('tvTimelineThumb')) $('tvTimelineThumb').style.left = `${pct.toFixed(2)}%`;
+
+    const isPaused = mainVideo.paused;
+    if ($('tvPlayPauseIcon')) $('tvPlayPauseIcon').textContent = isPaused ? '▶️' : '⏸️';
+    if ($('tvPlayPauseLabel')) $('tvPlayPauseLabel').textContent = isPaused ? 'Плей' : 'Пауза';
+
+    const volPct = mainVideo.muted ? 'Выкл' : `${Math.round((mainVideo.volume ?? 1) * 100)}%`;
+    if ($('tvMuteIcon')) $('tvMuteIcon').textContent = (mainVideo.muted || mainVideo.volume === 0) ? '🔇' : '🔊';
+    if ($('tvVolumeLabel')) $('tvVolumeLabel').textContent = volPct;
+
+    // Also update Remote Deck modal if open
+    if ($('tvRemoteTimeText')) {
+      $('tvRemoteTimeText').textContent = `${formatTvTime(cur)} / ${formatTvTime(dur)}`;
+    }
+    if ($('tvRemoteStateBadge')) {
+      $('tvRemoteStateBadge').textContent = isPaused ? '⏸ Пауза' : '▶️ Идёт показ';
+    }
+    if ($('tvRemotePlayIcon')) {
+      $('tvRemotePlayIcon').textContent = isPaused ? '▶️' : '⏸️';
+    }
+    if ($('tvRemotePlayLbl')) {
+      $('tvRemotePlayLbl').textContent = isPaused ? 'Плей' : 'Пауза';
+    }
+  }
+
+  function wakeTvOsd(focusFirstBtn = false) {
+    const osd = $('tvPlayerOsd');
+    if (!osd || !state.room || !state.room.media) return;
+    updateTvOsdUi();
+    osd.classList.remove('hidden');
+    clearTimeout(tvOsdHideTimer);
+    if (focusFirstBtn) {
+      const playBtn = $('tvPlayPauseBtn');
+      if (playBtn && !osd.contains(document.activeElement)) {
+        playBtn.focus();
+      }
+    }
+    tvOsdHideTimer = setTimeout(() => {
+      // Keep visible if paused or if user is actively focusing a TV control button
+      if (mainVideo.paused) return;
+      if (osd.contains(document.activeElement) && state.tvMode) return;
+      osd.classList.add('hidden');
+    }, 4200);
+  }
+
+  function toggleTvPlayPause() {
+    if (!state.room || !state.room.media) return;
+    wakeTvOsd();
+    if (mainVideo.paused) {
+      mainVideo.play().then(() => {
+        showTvCenterFeedback('▶️', 'Воспроизведение');
+        updateTvOsdUi();
+      }).catch(() => {
+        mainVideo.muted = true;
+        $('unmuteSyncBtn').classList.remove('hidden');
+        mainVideo.play().catch(() => {});
+        showTvCenterFeedback('▶️', 'Воспроизведение');
+        updateTvOsdUi();
+      });
+    } else {
+      mainVideo.pause();
+      showTvCenterFeedback('⏸️', 'Пауза');
+      updateTvOsdUi();
+    }
+  }
+
+  function seekTvRelative(deltaSec) {
+    if (!state.room || !state.room.media) return;
+    wakeTvOsd();
+    const baseTime = (mainVideo.src || state.hls)
+      ? (mainVideo.currentTime || 0)
+      : (state.room?.playback?.currentTime || 0);
+    const dur = (mainVideo.duration && isFinite(mainVideo.duration)) ? mainVideo.duration : 999999;
+    const nextTime = Math.max(0, Math.min(dur, baseTime + deltaSec));
+    if (mainVideo.src || state.hls) {
+      try { mainVideo.currentTime = nextTime; } catch {}
+    }
+    const sign = deltaSec > 0 ? '+' : '';
+    showTvCenterFeedback(deltaSec > 0 ? '⏩' : '⏪', `${sign}${deltaSec} сек (${formatTvTime(nextTime)})`);
+    updateTvOsdUi();
+    emitPlayerSync('seek', { currentTime: nextTime, playing: !mainVideo.paused });
+  }
+
+  function adjustTvVolume(delta) {
+    wakeTvOsd();
+    const nextVol = Math.max(0, Math.min(1, Math.round(((mainVideo.volume ?? 1) + delta) * 10) / 10));
+    mainVideo.muted = nextVol === 0;
+    mainVideo.volume = nextVol;
+    if (!mainVideo.muted) $('unmuteSyncBtn').classList.add('hidden');
+    showTvCenterFeedback(nextVol === 0 ? '🔇' : '🔊', `Громкость ${Math.round(nextVol * 100)}%`);
+    updateTvOsdUi();
+    emitPlayerSync('remote', { remoteCmd: 'volume', volume: nextVol, muted: mainVideo.muted });
+  }
+
+  function toggleTvMute() {
+    wakeTvOsd();
+    mainVideo.muted = !mainVideo.muted;
+    if (!mainVideo.muted && mainVideo.volume === 0) mainVideo.volume = 0.8;
+    if (!mainVideo.muted) $('unmuteSyncBtn').classList.add('hidden');
+    showTvCenterFeedback(mainVideo.muted ? '🔇' : '🔊', mainVideo.muted ? 'Без звука' : `Звук ${Math.round(mainVideo.volume * 100)}%`);
+    updateTvOsdUi();
+    emitPlayerSync('remote', { remoteCmd: 'mute', volume: mainVideo.volume, muted: mainVideo.muted });
+  }
+
+  function switchTvEpisode(deltaIdx) {
+    const videos = state.z01?.videos || [];
+    if (videos.length <= 1) {
+      showTvCenterFeedback('🎬', 'Одна серия / фильм');
+      return;
+    }
+    const nextIdx = (state.z01.activeVideoIdx || 0) + deltaIdx;
+    if (nextIdx < 0 || nextIdx >= videos.length) {
+      showTvCenterFeedback('🎬', deltaIdx > 0 ? 'Это последняя серия' : 'Это первая серия');
+      return;
+    }
+    const item = videos[nextIdx];
+    const epNum = item.episode || (nextIdx + 1);
+    showTvCenterFeedback(deltaIdx > 0 ? '⏭' : '⏮', `${epNum} серия`);
+    selectZ01VideoItem(nextIdx, true);
+  }
+
+  function toggleTvFullscreen() {
+    const wrapper = $('playerWrapper');
+    if (!wrapper) return;
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    } else if (wrapper.requestFullscreen) {
+      wrapper.requestFullscreen().catch(() => {
+        if (mainVideo.webkitEnterFullscreen) mainVideo.webkitEnterFullscreen();
+      });
+    } else if (wrapper.webkitRequestFullscreen) {
+      wrapper.webkitRequestFullscreen();
+    } else if (mainVideo.webkitEnterFullscreen) {
+      mainVideo.webkitEnterFullscreen();
+    }
+  }
+
+  function toggleTvCinemaMode() {
+    state.tvCinemaMode = !state.tvCinemaMode;
+    document.body.classList.toggle('tv-cinema-mode', state.tvCinemaMode);
+    showTvCenterFeedback('📺', state.tvCinemaMode ? 'Режим ТВ: Широкий экран' : 'Обычный режим');
+  }
+
+  function setSmartTvMode(enabled) {
+    state.tvMode = !!enabled;
+    document.body.classList.toggle('tv-mode', state.tvMode);
+    if ($('tvModeToggleBtn')) {
+      $('tvModeToggleBtn').textContent = state.tvMode
+        ? '✅ Режим Smart TV включён (крупные кнопки + пульт)'
+        : '🖥️ Режим Smart TV (крупные кнопки для пульта)';
+    }
+  }
+  if (state.tvMode) setSmartTvMode(true);
+
+  // Bind TV OSD Buttons
+  $('tvPlayPauseBtn')?.addEventListener('click', (e) => { e.stopPropagation(); toggleTvPlayPause(); });
+  $('tvRewindBtn')?.addEventListener('click', (e) => { e.stopPropagation(); seekTvRelative(-10); });
+  $('tvForwardBtn')?.addEventListener('click', (e) => { e.stopPropagation(); seekTvRelative(10); });
+  $('tvPrevEpBtn')?.addEventListener('click', (e) => { e.stopPropagation(); switchTvEpisode(-1); });
+  $('tvNextEpBtn')?.addEventListener('click', (e) => { e.stopPropagation(); switchTvEpisode(1); });
+  $('tvMuteBtn')?.addEventListener('click', (e) => { e.stopPropagation(); toggleTvMute(); });
+  $('tvCinemaBtn')?.addEventListener('click', (e) => { e.stopPropagation(); toggleTvCinemaMode(); });
+  $('tvFullscreenBtn')?.addEventListener('click', (e) => { e.stopPropagation(); toggleTvFullscreen(); });
+  $('tvSourceBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setMobileRoomTab('z01');
+    const panel = $('z01Panel');
+    if (panel) {
+      panel.classList.remove('hidden');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const firstBtn = panel.querySelector('button');
+      if (firstBtn) firstBtn.focus();
+    }
+  });
+
+  // Timeline click/scrub
+  $('tvTimelineBar')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const bar = $('tvTimelineBar');
+    const dur = mainVideo.duration;
+    if (!bar || !dur || !isFinite(dur)) return;
+    const rect = bar.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const target = ratio * dur;
+    try { mainVideo.currentTime = target; } catch {}
+    showTvCenterFeedback('⏩', formatTvTime(target));
+    updateTvOsdUi();
+    emitPlayerSync('seek', { currentTime: target, playing: !mainVideo.paused });
+  });
+
+  // Wake OSD on mouse/pointer movement inside playerWrapper
+  $('playerWrapper')?.addEventListener('mousemove', () => wakeTvOsd(false));
+  $('playerWrapper')?.addEventListener('touchstart', () => wakeTvOsd(false), { passive: true });
+  $('toggleTvOsdBtn')?.addEventListener('click', () => {
+    setSmartTvMode(true);
+    wakeTvOsd(true);
+    showToast('Управление пультом ТВ активно (стрелки ◀ ▶ и OK)');
+  });
+
+  // Open TV Remote Control Modal Deck
+  $('openTvRemoteBtn')?.addEventListener('click', () => {
+    if ($('tvRemoteMovieTitle')) {
+      $('tvRemoteMovieTitle').textContent = state.room?.media?.title || state.room?.name || 'Управление видео на ТВ';
+    }
+    updateTvOsdUi();
+    openModal('tvRemoteModal');
+  });
+
+  document.querySelectorAll('[data-tv-cmd]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cmd = btn.dataset.tvCmd;
+      if (cmd === 'toggle_play') toggleTvPlayPause();
+      else if (cmd === 'seek_-10') seekTvRelative(-10);
+      else if (cmd === 'seek_+10') seekTvRelative(10);
+      else if (cmd === 'seek_-30') seekTvRelative(-30);
+      else if (cmd === 'seek_+30') seekTvRelative(30);
+      else if (cmd === 'vol_up') adjustTvVolume(0.1);
+      else if (cmd === 'vol_down') adjustTvVolume(-0.1);
+      else if (cmd === 'toggle_mute') toggleTvMute();
+      else if (cmd === 'prev_ep') switchTvEpisode(-1);
+      else if (cmd === 'next_ep') switchTvEpisode(1);
+      else if (cmd === 'toggle_tv_mode') {
+        setSmartTvMode(!state.tvMode);
+        showToast(state.tvMode ? 'Режим Smart TV включён' : 'Режим Smart TV выключен');
+      } else if (cmd === 'open_z01') {
+        closeModal('tvRemoteModal');
+        setMobileRoomTab('z01');
+        const panel = $('z01Panel');
+        if (panel) {
+          panel.classList.remove('hidden');
+          panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    });
+  });
+
+  // Global Smart TV Remote (D-Pad / Media Keys / WebOS / Tizen / Android TV) Key Handler
+  window.addEventListener('keydown', (e) => {
+    const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
+    const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target?.isContentEditable;
+    if (isInput) return;
+
+    const key = e.key || '';
+    const kc = e.keyCode || e.which || 0;
+
+    // 1. Hardware Media Keys on Smart TV Remotes (Tizen, webOS, Android TV, Hisense, Philips)
+    if (key === 'MediaPlayPause' || kc === 179) {
+      e.preventDefault();
+      toggleTvPlayPause();
+      return;
+    }
+    if (key === 'MediaPlay' || kc === 415) {
+      e.preventDefault();
+      if (mainVideo.paused) toggleTvPlayPause();
+      return;
+    }
+    if (key === 'MediaPause' || key === 'MediaStop' || kc === 19 || kc === 413) {
+      e.preventDefault();
+      if (!mainVideo.paused) toggleTvPlayPause();
+      return;
+    }
+    if (key === 'MediaRewind' || kc === 412) {
+      e.preventDefault();
+      seekTvRelative(-10);
+      return;
+    }
+    if (key === 'MediaFastForward' || kc === 417) {
+      e.preventDefault();
+      seekTvRelative(10);
+      return;
+    }
+    if (key === 'MediaTrackNext' || kc === 176 || kc === 425) {
+      e.preventDefault();
+      switchTvEpisode(1);
+      return;
+    }
+    if (key === 'MediaTrackPrevious' || kc === 177 || kc === 424) {
+      e.preventDefault();
+      switchTvEpisode(-1);
+      return;
+    }
+
+    // Back button on Tizen (10009) / webOS (461) / Escape
+    if (key === 'Escape' || key === 'GoBack' || kc === 10009 || kc === 461) {
+      const openModals = document.querySelectorAll('.modal-backdrop:not(.hidden)');
+      if (openModals.length > 0) {
+        e.preventDefault();
+        openModals.forEach(m => m.classList.add('hidden'));
+        return;
+      }
+      if (state.tvCinemaMode) {
+        e.preventDefault();
+        toggleTvCinemaMode();
+        return;
+      }
+    }
+
+    // 2. Room Video Player Keyboard & D-Pad Shortcuts when in Room view
+    const anyModalOpen = document.querySelectorAll('.modal-backdrop:not(.hidden)').length > 0;
+    if (state.currentView === 'room' && state.room && !anyModalOpen) {
+      const osd = $('tvPlayerOsd');
+      const controlsRow = $('tvControlsRow');
+      const activeInControls = controlsRow && controlsRow.contains(document.activeElement);
+      const isTimelineFocused = document.activeElement === $('tvTimelineBar');
+
+      // Space or K: Play/Pause anytime in room (unless a specific button is focused and Enter was pressed)
+      if (key === ' ' || key === 'Spacebar' || key.toLowerCase() === 'k') {
+        if (!activeInControls) {
+          e.preventDefault();
+          toggleTvPlayPause();
+          return;
+        }
+      }
+
+      // Enter / OK on TV remote: if no specific button is focused (or body/video is focused), toggle Play/Pause & wake OSD!
+      if (key === 'Enter' || kc === 13) {
+        const focusedTag = document.activeElement ? document.activeElement.tagName.toUpperCase() : '';
+        if (!focusedTag || focusedTag === 'BODY' || focusedTag === 'VIDEO' || document.activeElement === $('playerWrapper')) {
+          e.preventDefault();
+          toggleTvPlayPause();
+          return;
+        }
+      }
+
+      // Left / Right Arrows:
+      // - If focused inside TV control buttons row, move focus Left/Right between buttons!
+      // - Otherwise (or if focused on timeline/video/body), seek -10s / +10s!
+      if (key === 'ArrowLeft' || kc === 37) {
+        if (activeInControls && !isTimelineFocused) {
+          e.preventDefault();
+          const btns = Array.from(controlsRow.querySelectorAll('.tv-ctrl-btn'));
+          const idx = btns.indexOf(document.activeElement);
+          if (idx > 0) btns[idx - 1].focus();
+          wakeTvOsd();
+          return;
+        }
+        e.preventDefault();
+        seekTvRelative(-10);
+        return;
+      }
+
+      if (key === 'ArrowRight' || kc === 39) {
+        if (activeInControls && !isTimelineFocused) {
+          e.preventDefault();
+          const btns = Array.from(controlsRow.querySelectorAll('.tv-ctrl-btn'));
+          const idx = btns.indexOf(document.activeElement);
+          if (idx >= 0 && idx < btns.length - 1) btns[idx + 1].focus();
+          wakeTvOsd();
+          return;
+        }
+        e.preventDefault();
+        seekTvRelative(10);
+        return;
+      }
+
+      // Up / Down Arrows in Room:
+      // - ArrowDown wakes OSD and focuses the Play/Pause button (or moves from timeline to buttons)
+      // - ArrowUp adjusts volume +10% (or moves from buttons to timeline)
+      if (key === 'ArrowDown' || kc === 40) {
+        if (osd && osd.classList.contains('hidden')) {
+          e.preventDefault();
+          wakeTvOsd(true);
+          return;
+        }
+        if (isTimelineFocused) {
+          e.preventDefault();
+          $('tvPlayPauseBtn')?.focus();
+          wakeTvOsd();
+          return;
+        }
+        if (!activeInControls) {
+          e.preventDefault();
+          adjustTvVolume(-0.1);
+          return;
+        }
+      }
+
+      if (key === 'ArrowUp' || kc === 38) {
+        if (activeInControls) {
+          e.preventDefault();
+          $('tvTimelineBar')?.focus();
+          wakeTvOsd();
+          return;
+        }
+        e.preventDefault();
+        adjustTvVolume(0.1);
+        return;
+      }
+
+      // Quick keys: F (Fullscreen), M (Mute), N (Next ep), P (Prev ep)
+      if (key.toLowerCase() === 'f') {
+        e.preventDefault();
+        toggleTvFullscreen();
+        return;
+      }
+      if (key.toLowerCase() === 'm') {
+        e.preventDefault();
+        toggleTvMute();
+        return;
+      }
+      if (key.toLowerCase() === 'n') {
+        e.preventDefault();
+        switchTvEpisode(1);
+        return;
+      }
+      if (key.toLowerCase() === 'p') {
+        e.preventDefault();
+        switchTvEpisode(-1);
+        return;
+      }
+    }
+  });
 
   // ================= SOCKET.IO & ROOM EVENTS =================
   socket.on('rooms:public_list', (list) => {
