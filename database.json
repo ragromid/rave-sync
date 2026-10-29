@@ -124,12 +124,13 @@
         "watchSeconds": 0,
         "moviesWatched": 0,
         "episodesWatched": 0,
-        "roomsCreated": 0,
+        "roomsCreated": 1,
         "messagesSent": 0,
         "reactionsSent": 0
       },
       "createdAt": 1793276129645,
-      "updatedAt": 1793276129645
+      "updatedAt": 1793276129645,
+      "lastSeenAt": 1793276131787
     }
   ],
   "friendships": [
@@ -3562,6 +3563,64 @@
           "updatedAt": 1793047360045
         }
       ],
+      "viewOnceStore": {}
+    },
+    "SQETSK": {
+      "code": "SQETSK",
+      "name": "Тайный дневник Верити",
+      "isPublic": true,
+      "hostId": "u_28618b931ced",
+      "hostOnlyControl": false,
+      "createdAt": 1793276130013,
+      "participants": [
+        {
+          "socketId": "http_u_28618b931ced",
+          "id": "u_28618b931ced",
+          "username": "guest_5f2c0e",
+          "displayName": "Гость #2942",
+          "avatar": "🦊",
+          "color": "#7c5cff",
+          "inVoice": false,
+          "muted": false
+        }
+      ],
+      "media": {
+        "type": "z01",
+        "title": "Тайный дневник Верити",
+        "poster": "https://imagetmdb.com/t/p/w500/lkcSRoS5FXzzNi13ug6kenL2vi2.jpg",
+        "backdrop": "https://imagetmdb.com/t/p/w1280/cKetrF2dAnQ0AMV5i4BMOs41I5P.jpg",
+        "movie": {
+          "id": 1283515,
+          "tmdb_id": 1283515,
+          "imdb_id": "",
+          "kinopoisk_id": "",
+          "type": "movie",
+          "serial": 0,
+          "title": "Тайный дневник Верити",
+          "original_title": "Verity",
+          "original_language": "en",
+          "overview": "Нуждающаяся в работе писательница Лоуэн Эшли получает предложение от Джереми Кроуфорда — ей нужно дописать романы его жены. Жена Джереми — автор популярной серии романов Верити Кроуфорд, и из-за загадочного несчастного случая она не может закончить произведения. Работа принимает неожиданный оборот, когда Лоуэн находит тревожные личные записки Верити. Сталкиваясь с семейными тайнами, Лоуэн пытается отделить вымысел от реальности, в то время как границы в её отношениях с Джереми размываются.",
+          "release_date": "2026-09-30",
+          "year": "2026",
+          "vote_average": 6.3,
+          "poster": "https://imagetmdb.com/t/p/w500/lkcSRoS5FXzzNi13ug6kenL2vi2.jpg",
+          "backdrop": "https://imagetmdb.com/t/p/w1280/cKetrF2dAnQ0AMV5i4BMOs41I5P.jpg",
+          "poster_path": "/lkcSRoS5FXzzNi13ug6kenL2vi2.jpg",
+          "backdrop_path": "/cKetrF2dAnQ0AMV5i4BMOs41I5P.jpg",
+          "number_of_seasons": 0,
+          "runtime": 0,
+          "genres": []
+        },
+        "streamUrl": "",
+        "streamType": "hls"
+      },
+      "playback": {
+        "playing": false,
+        "currentTime": 0,
+        "rate": 1,
+        "updatedAt": 1793276130013
+      },
+      "messages": [],
       "viewOnceStore": {}
     }
   }
