@@ -520,6 +520,16 @@
   $('brandLogo').addEventListener('click', () => switchView('explore'));
   $('returnToRoomBtn').addEventListener('click', () => switchView('room'));
 
+  // Modal open/close helpers
+  function openModal(id) {
+    const el = $(id);
+    if (el) el.classList.remove('hidden');
+  }
+  function closeModal(id) {
+    const el = $(id);
+    if (el) el.classList.add('hidden');
+  }
+
   // Modal close handlers
   document.querySelectorAll('[data-close]').forEach(btn => {
     btn.addEventListener('click', () => $(btn.dataset.close).classList.add('hidden'));
@@ -793,9 +803,16 @@
 
   async function ensureAuthenticated() {
     if (state.user) return true;
-    openAuthModal();
-    showToast('Войдите или зарегистрируйтесь за пару секунд');
-    return false;
+    try {
+      // Auto-create guest session so Smart TV and mobile viewers can watch immediately without manual signup
+      const data = await api('/api/auth/guest', { method: 'POST' });
+      applyServerUserData(data);
+      return true;
+    } catch {
+      openAuthModal();
+      showToast('Войдите или зарегистрируйтесь');
+      return false;
+    }
   }
 
   // ================= CATALOG (LAMPA x TMDB) =================
@@ -821,6 +838,15 @@
         }
       }
       renderPosterCards(items, $('catalogGrid'), false);
+      state.catalogItems = items;
+      if (reset && items.length > 0 && state.tvMode) {
+        setTimeout(() => {
+          const firstCard = $('catalogGrid').querySelector('.poster-card');
+          if (firstCard && (!document.activeElement || document.activeElement === document.body)) {
+            firstCard.focus();
+          }
+        }, 120);
+      }
       $('loadMoreCatalogBtn').classList.toggle('hidden', state.page >= (data.total_pages || 1) || items.length === 0);
     } catch (e) {
       if (reset) {
@@ -854,11 +880,13 @@
     }
 
     for (const item of items) {
-      const card = document.createElement('div');
+      const card = document.createElement('button');
+      card.type = 'button';
       card.className = 'poster-card tv-focusable';
       card.tabIndex = 0;
       card.setAttribute('role', 'button');
       card.setAttribute('aria-label', item.title || 'Фильм');
+      card.dataset.movieId = String(item.id);
       const posterUrl = item.poster || item.backdrop || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300"><rect width="200" height="300" fill="%23171a29"/></svg>';
       card.innerHTML = `
         <div class="poster-art">
@@ -874,7 +902,10 @@
         <div class="poster-title">${esc(item.title)}</div>
         <div class="poster-sub">${esc(item.year || '')}</div>
       `;
-      card.addEventListener('click', () => openMovieModal(item));
+      card.addEventListener('click', (e) => {
+        e.preventDefault();
+        openMovieModal(item);
+      });
       card.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ' || e.keyCode === 13) {
           e.preventDefault();
@@ -1080,7 +1111,8 @@
   }
 
   function createRoomCardEl(r) {
-    const el = document.createElement('div');
+    const el = document.createElement('button');
+    el.type = 'button';
     el.className = 'room-card tv-focusable';
     el.tabIndex = 0;
     el.setAttribute('role', 'button');
@@ -2483,8 +2515,11 @@
         return;
       }
       if (key === 'Enter' || kc === 13) {
-        const active = document.activeElement;
-        if (active && active !== document.body && active.tagName !== 'BUTTON' && active.tagName !== 'A') {
+        let active = document.activeElement;
+        if (!active || active === document.body) {
+          active = document.querySelector('.modal-backdrop:not(.hidden) button, #catalogGrid .poster-card, #heroWatchPartyBtn');
+        }
+        if (active && active !== document.body) {
           e.preventDefault();
           active.click();
           return;

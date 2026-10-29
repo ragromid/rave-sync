@@ -338,6 +338,32 @@ app.post('/api/auth/login', (req, res) => {
   }
 });
 
+// Fast 1-click Guest login (for Smart TV & immediate watch party)
+app.post('/api/auth/guest', (req, res) => {
+  try {
+    hydrateRoomsFromDb();
+    const guestNum = Math.floor(1000 + Math.random() * 9000);
+    const guestUser = 'guest_' + crypto.randomBytes(3).toString('hex');
+    const guestPass = crypto.randomBytes(8).toString('hex');
+    const result = db.registerUser({
+      username: guestUser,
+      password: guestPass,
+      displayName: `Гость #${guestNum}`,
+      avatar: '🦊',
+      color: '#7c5cff'
+    });
+    setAuthCookie(res, result.token);
+    res.json({
+      ...result,
+      bookmarks: [],
+      history: [],
+      progress: {}
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Ошибка гостевого входа' });
+  }
+});
+
 app.post('/api/auth/logout', (req, res) => {
   clearAuthCookie(res);
   res.json({ ok: true });
