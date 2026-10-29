@@ -108,6 +108,28 @@
       "isAdmin": false,
       "pushSubscriptions": [],
       "lastSeenAt": 1793047406403
+    },
+    {
+      "id": "u_28618b931ced",
+      "username": "guest_5f2c0e",
+      "displayName": "Гость #2942",
+      "passwordHash": "883084ff6b5c131a7bd99785b5a5f9b8:0844056eed305ac3161a708e98ddaabc4f502b78391646bed8b72e6d06f91253d44ec70946cef1373e8c0a6985c15139678c018e5aff9d06e570d6e844a8720a",
+      "avatar": "🦊",
+      "color": "#7c5cff",
+      "bio": "",
+      "settings": {
+        "proxyMode": "auto"
+      },
+      "stats": {
+        "watchSeconds": 0,
+        "moviesWatched": 0,
+        "episodesWatched": 0,
+        "roomsCreated": 0,
+        "messagesSent": 0,
+        "reactionsSent": 0
+      },
+      "createdAt": 1793276129645,
+      "updatedAt": 1793276129645
     }
   ],
   "friendships": [
