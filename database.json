@@ -130,7 +130,7 @@
       },
       "createdAt": 1793276129645,
       "updatedAt": 1793276129645,
-      "lastSeenAt": 1793276136559
+      "lastSeenAt": 1793276157701
     }
   ],
   "friendships": [
@@ -3616,18 +3616,7 @@
       "hostId": "u_28618b931ced",
       "hostOnlyControl": false,
       "createdAt": 1793276130013,
-      "participants": [
-        {
-          "socketId": "http_u_28618b931ced",
-          "id": "u_28618b931ced",
-          "username": "guest_5f2c0e",
-          "displayName": "Гость #2942",
-          "avatar": "🦊",
-          "color": "#7c5cff",
-          "inVoice": false,
-          "muted": false
-        }
-      ],
+      "participants": [],
       "media": {
         "type": "z01",
         "title": "Тайный дневник Верити",
@@ -3659,10 +3648,10 @@
         "streamType": "hls"
       },
       "playback": {
-        "playing": false,
+        "playing": true,
         "currentTime": 0,
         "rate": 1,
-        "updatedAt": 1793276130013
+        "updatedAt": 1793276157456
       },
       "messages": [],
       "viewOnceStore": {}
