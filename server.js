@@ -34,7 +34,14 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders(res, filePath) {
+    // Always revalidate HTML/JS/CSS so phones & TVs never run a stale app version
+    if (/\.(html|js|css)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+    }
+  }
+}));
 
 // Active rooms in memory (also persisted to DB for Vercel Serverless compatibility)
 // roomCode -> roomObject
