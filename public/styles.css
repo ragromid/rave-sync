@@ -620,6 +620,13 @@ button {
 .poster-card:active {
   transform: scale(0.97);
 }
+.poster-card > * {
+  pointer-events: none;
+}
+.poster-card .poster-play-hover,
+.poster-card .poster-play-circle {
+  pointer-events: auto;
+}
 .poster-card:focus-visible .poster-art {
   border-color: var(--accent-cyan);
   box-shadow: 0 0 0 3px var(--accent-cyan), 0 8px 28px rgba(0, 229, 255, 0.55);
@@ -2186,13 +2193,13 @@ button {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(4, 5, 10, 0.8);
+  background: rgba(4, 5, 10, 0.82);
   backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
-  z-index: 100;
+  z-index: 1000;
 }
 .modal-card {
   position: relative;
@@ -2202,6 +2209,7 @@ button {
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65);
+  z-index: 1001;
 }
 .movie-modal-card {
   max-width: 520px;

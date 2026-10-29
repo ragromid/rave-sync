@@ -530,6 +530,29 @@
     if (el) el.classList.add('hidden');
   }
 
+  // Universal Smart TV & Keyboard Select / OK key detector
+  // Handles Samsung Tizen (13, 29443), LG webOS (13, 10182), Android TV / Fire TV (23, 66), and desktop
+  function isTvSelectKey(e) {
+    if (!e) return false;
+    const k = e.key;
+    const c = e.keyCode || e.which;
+    return (
+      k === 'Enter' ||
+      k === ' ' ||
+      k === 'Spacebar' ||
+      k === 'Select' ||
+      k === 'OK' ||
+      k === 'Accept' ||
+      c === 13 ||       // Enter
+      c === 32 ||       // Space
+      c === 23 ||       // Android TV KEYCODE_DPAD_CENTER
+      c === 66 ||       // Android KEYCODE_ENTER
+      c === 29443 ||    // Samsung Tizen Enter / OK
+      c === 10182 ||    // LG webOS Select
+      c === 10252       // Smart TV OK
+    );
+  }
+
   // Modal close handlers
   document.querySelectorAll('[data-close]').forEach(btn => {
     btn.addEventListener('click', () => $(btn.dataset.close).classList.add('hidden'));
@@ -838,7 +861,7 @@
         }
       }
       renderPosterCards(items, $('catalogGrid'), false);
-      state.catalogItems = items;
+      state.catalogItems = reset ? items : [...(state.catalogItems || []), ...items];
       if (reset && items.length > 0 && state.tvMode) {
         setTimeout(() => {
           const firstCard = $('catalogGrid').querySelector('.poster-card');
@@ -872,12 +895,39 @@
     if (state.heroMovie) openMovieModal(state.heroMovie);
   });
 
+  // Event delegation helper for movie grids so clicking is guaranteed to work
+  function setupGridDelegation(gridEl) {
+    if (!gridEl || gridEl._delegatedBound) return;
+    gridEl._delegatedBound = true;
+    gridEl.addEventListener('click', (e) => {
+      const card = e.target.closest('.poster-card');
+      if (!card) return;
+      const movieId = card.dataset.movieId;
+      const item = (state.catalogItems || []).find(x => String(x.id) === String(movieId)) ||
+                   (state.bookmarks || []).find(x => String(x.id) === String(movieId)) ||
+                   (state.history || []).map(h => h.movie).find(x => String(x?.id) === String(movieId));
+      if (!item) return;
+
+      const isPlayClick = !!e.target.closest('.poster-play-hover, .poster-play-circle');
+      if (isPlayClick) {
+        e.preventDefault();
+        e.stopPropagation();
+        startRoomWithMovie(item, true);
+      } else {
+        openMovieModal(item);
+      }
+    });
+  }
+
   function renderPosterCards(items, container, clear = true) {
     if (clear) container.innerHTML = '';
     if (!items.length && clear) {
       container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Пока пусто</div>';
       return;
     }
+
+    // Ensure delegated clicks are active on container
+    setupGridDelegation(container);
 
     for (const item of items) {
       const card = document.createElement('button');
@@ -893,7 +943,7 @@
           <img src="${esc(posterUrl)}" loading="lazy" alt="${esc(item.title)}" />
           ${item.vote_average ? `<span class="poster-rating">★ ${esc(item.vote_average)}</span>` : ''}
           <span class="poster-type">${item.type === 'tv' ? 'Сериал' : 'Фильм'}</span>
-          <div class="poster-play-hover">
+          <div class="poster-play-hover" data-action="play" title="Смотреть фильм сразу">
             <div class="poster-play-circle">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
             </div>
@@ -903,11 +953,17 @@
         <div class="poster-sub">${esc(item.year || '')}</div>
       `;
       card.addEventListener('click', (e) => {
-        e.preventDefault();
+        const isPlayHover = !!e.target.closest('.poster-play-hover, .poster-play-circle');
+        if (isPlayHover) {
+          e.preventDefault();
+          e.stopPropagation();
+          startRoomWithMovie(item, true);
+          return;
+        }
         openMovieModal(item);
       });
       card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ' || e.keyCode === 13) {
+        if (isTvSelectKey(e)) {
           e.preventDefault();
           e.stopPropagation();
           openMovieModal(item);
@@ -988,38 +1044,55 @@
 
   // ================= MOVIE MODAL =================
   async function openMovieModal(movie) {
+    if (!movie) return;
     state.selectedMovie = movie;
-    $('modalBackdrop').style.backgroundImage = `url('${movie.backdrop || movie.poster || ''}')`;
-    $('modalPoster').src = movie.poster || movie.backdrop || '';
-    $('modalType').textContent = movie.type === 'tv' ? 'Сериал' : 'Фильм';
-    $('modalRating').textContent = movie.vote_average ? `★ ${movie.vote_average}` : '★ —';
-    $('modalYear').textContent = movie.year || '';
-    $('modalTitle').textContent = movie.title;
-    $('modalOrigTitle').textContent = movie.original_title && movie.original_title !== movie.title ? movie.original_title : '';
-    $('modalOverview').textContent = movie.overview || 'Описание скоро появится.';
-
-    const isBookmarked = state.bookmarks.some(m => String(m.id) === String(movie.id));
-    $('modalBookmarkBtn').textContent = isBookmarked ? '✅ В закладках' : '🔖 В закладки';
-
-    $('modalPlayInCurrentRoomBtn').classList.toggle('hidden', !state.room);
-    $('movieModal').classList.remove('hidden');
-
-    // Auto-focus primary Watch button so Smart TV remote OK/Enter immediately starts watching
-    setTimeout(() => {
-      const primaryBtn = state.room ? $('modalPlayInCurrentRoomBtn') : $('modalStartPublicRoomBtn');
-      if (primaryBtn && !primaryBtn.classList.contains('hidden')) {
-        primaryBtn.focus();
-      }
-    }, 60);
-
-    // Enrich details in background (imdb_id, kinopoisk_id)
     try {
-      const det = await api(`/api/catalog/details?id=${encodeURIComponent(movie.id)}&type=${encodeURIComponent(movie.type || 'movie')}`);
-      if (det.movie && state.selectedMovie && String(state.selectedMovie.id) === String(movie.id)) {
-        state.selectedMovie = det.movie;
-        if (det.movie.overview) $('modalOverview').textContent = det.movie.overview;
+      if ($('modalBackdrop')) {
+        $('modalBackdrop').style.backgroundImage = `url('${movie.backdrop || movie.poster || ''}')`;
       }
-    } catch {}
+      if ($('modalPoster')) {
+        $('modalPoster').src = movie.poster || movie.backdrop || '';
+        $('modalPoster').alt = movie.title || '';
+      }
+      if ($('modalType')) $('modalType').textContent = movie.type === 'tv' ? 'Сериал' : 'Фильм';
+      if ($('modalRating')) $('modalRating').textContent = movie.vote_average ? `★ ${movie.vote_average}` : '★ —';
+      if ($('modalYear')) $('modalYear').textContent = movie.year || '';
+      if ($('modalTitle')) $('modalTitle').textContent = movie.title || '';
+      if ($('modalOrigTitle')) {
+        $('modalOrigTitle').textContent = movie.original_title && movie.original_title !== movie.title ? movie.original_title : '';
+      }
+      if ($('modalOverview')) $('modalOverview').textContent = movie.overview || 'Описание скоро появится.';
+
+      const isBookmarked = Array.isArray(state.bookmarks) && state.bookmarks.some(m => String(m.id) === String(movie.id));
+      if ($('modalBookmarkBtn')) {
+        $('modalBookmarkBtn').textContent = isBookmarked ? '✅ В закладках' : '🔖 В закладки';
+      }
+
+      if ($('modalPlayInCurrentRoomBtn')) {
+        $('modalPlayInCurrentRoomBtn').classList.toggle('hidden', !state.room);
+      }
+      $('movieModal').classList.remove('hidden');
+
+      // Auto-focus primary Watch button so Smart TV remote OK/Enter immediately starts watching
+      setTimeout(() => {
+        const primaryBtn = state.room ? $('modalPlayInCurrentRoomBtn') : $('modalStartPublicRoomBtn');
+        if (primaryBtn && !primaryBtn.classList.contains('hidden')) {
+          primaryBtn.focus();
+        }
+      }, 50);
+
+      // Enrich details in background (imdb_id, kinopoisk_id)
+      try {
+        const det = await api(`/api/catalog/details?id=${encodeURIComponent(movie.id)}&type=${encodeURIComponent(movie.type || 'movie')}`);
+        if (det.movie && state.selectedMovie && String(state.selectedMovie.id) === String(movie.id)) {
+          state.selectedMovie = det.movie;
+          if (det.movie.overview && $('modalOverview')) $('modalOverview').textContent = det.movie.overview;
+        }
+      } catch {}
+    } catch (err) {
+      console.error('openMovieModal error, launching movie directly:', err);
+      startRoomWithMovie(movie, true);
+    }
   }
 
   $('modalStartPublicRoomBtn').addEventListener('click', () => {
@@ -1136,7 +1209,7 @@
     `;
     el.addEventListener('click', () => joinRoomByCode(r.code));
     el.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ' || e.keyCode === 13) {
+      if (isTvSelectKey(e)) {
         e.preventDefault();
         e.stopPropagation();
         joinRoomByCode(r.code);
@@ -1146,6 +1219,8 @@
   }
 
   async function startRoomWithMovie(movie, isPublic = true) {
+    if (!movie) return;
+    showToast(`Запуск фильма «${movie.title || 'Фильм'}»...`);
     if (!(await ensureAuthenticated())) return;
     try {
       const initialMedia = {
@@ -2514,7 +2589,7 @@
         moveSpatialDpadFocus(dpadDir);
         return;
       }
-      if (key === 'Enter' || kc === 13) {
+      if (isTvSelectKey(e)) {
         let active = document.activeElement;
         if (!active || active === document.body) {
           active = document.querySelector('.modal-backdrop:not(.hidden) button, #catalogGrid .poster-card, #heroWatchPartyBtn');
@@ -2545,7 +2620,7 @@
       }
 
       // Enter / OK on TV remote: if no specific button is focused (or body/video is focused), toggle Play/Pause & wake OSD!
-      if (key === 'Enter' || kc === 13) {
+      if (isTvSelectKey(e)) {
         const focusedTag = document.activeElement ? document.activeElement.tagName.toUpperCase() : '';
         if (!focusedTag || focusedTag === 'BODY' || focusedTag === 'VIDEO' || document.activeElement === $('playerWrapper') || isTimelineFocused) {
           e.preventDefault();

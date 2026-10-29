@@ -2,11 +2,7 @@
   "version": 2,
   "headers": [
     {
-      "source": "/(.*)\\.(js|css|html)",
-      "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }]
-    },
-    {
-      "source": "/",
+      "source": "/(.*)",
       "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }]
     }
   ],
