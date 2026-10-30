@@ -108,58 +108,6 @@
       "isAdmin": false,
       "pushSubscriptions": [],
       "lastSeenAt": 1793047406403
-    },
-    {
-      "id": "u_62e60670de0c",
-      "username": "guest_413afc",
-      "displayName": "Гость #1235",
-      "passwordHash": "11e6215ddd0cbe4ec403763171b1a500:6bda0d38906b62edc7c222adb0520a9cc98d2f25ddfa50717a18e92de0fbc7205e8dbf4dc7f16aa16141315e9361c8bda3db68dc6ee5fbd002ec35d9e27c2e90",
-      "avatar": "🦊",
-      "color": "#7c5cff",
-      "bio": "",
-      "settings": {
-        "proxyMode": "auto"
-      },
-      "stats": {
-        "watchSeconds": 0,
-        "moviesWatched": 0,
-        "episodesWatched": 1,
-        "roomsCreated": 1,
-        "messagesSent": 0,
-        "reactionsSent": 0
-      },
-      "createdAt": 1793343501403,
-      "updatedAt": 1793343501403,
-      "lastSeenAt": 1793345596346,
-      "avatarUrl": "",
-      "isAdmin": false,
-      "pushSubscriptions": []
-    },
-    {
-      "id": "u_cbc2a03a14d7",
-      "username": "guest_fa6610",
-      "displayName": "Гость #7049",
-      "passwordHash": "0cdd8cfa30be1f22493bfcbd592db02c:dd41d010d6bd545bcac4142a3403da8265932e996147b9f6825de5ccc7171a440d17ffca017c99b1892feb9f8ad8a10db531b407a1f9b578729fd80a2972fbf4",
-      "avatar": "🦊",
-      "color": "#7c5cff",
-      "bio": "",
-      "settings": {
-        "proxyMode": "auto"
-      },
-      "stats": {
-        "watchSeconds": 0,
-        "moviesWatched": 1,
-        "episodesWatched": 0,
-        "roomsCreated": 1,
-        "messagesSent": 1,
-        "reactionsSent": 0
-      },
-      "createdAt": 1793343722183,
-      "updatedAt": 1793343722183,
-      "lastSeenAt": 1793344284454,
-      "avatarUrl": "",
-      "isAdmin": false,
-      "pushSubscriptions": []
     }
   ],
   "friendships": [
@@ -252,70 +200,6 @@
         "voiceName": "Force Media",
         "updatedAt": 1793046112108
       }
-    ],
-    "u_62e60670de0c": [
-      {
-        "movie": {
-          "id": 791523,
-          "tmdb_id": 791523,
-          "imdb_id": "tt2056785",
-          "kinopoisk_id": "",
-          "type": "movie",
-          "serial": 0,
-          "title": "Ведьмин лес",
-          "original_title": "Wildwood",
-          "original_language": "en",
-          "overview": "Девочка Прю живёт в городе Портленд, пока однажды стая загадочных воронов не похищает её младшего брата Мака и не уносит его в запретный лес, скрывающийся за пределами города. Не желая оставлять брата в опасности, Прю вместе со своим лучшим другом Кёртисом отправляется в таинственную Пустошь - волшебный мир, населённый говорящими животными, необычными существами и могущественными силами. Пробираясь через неизведанные земли, друзья сталкиваются с опасными противниками и раскрывают секреты, скрытые в глубине леса. Чтобы спасти Мака, Прю предстоит проявить смелость, преодолеть собственные страхи и противостоять загадочной Александре, стоящей за похищением. Но вскоре девочка понимает, что от её путешествия зависит не только судьба семьи, но и будущее всего волшебного мира.",
-          "release_date": "2026-10-19",
-          "year": "2026",
-          "vote_average": 8.6,
-          "poster": "https://imagetmdb.com/t/p/w500/67SHha1PONyP33eCkjnjQXxWIKP.jpg",
-          "backdrop": "https://imagetmdb.com/t/p/w1280/sl5NJ1vtyhP9Vr88bB4blULsJYp.jpg",
-          "poster_path": "/67SHha1PONyP33eCkjnjQXxWIKP.jpg",
-          "backdrop_path": "/sl5NJ1vtyhP9Vr88bB4blULsJYp.jpg",
-          "number_of_seasons": 0,
-          "runtime": 0,
-          "genres": []
-        },
-        "balancerKey": "filmix",
-        "balancer": "Filmix",
-        "season": 1,
-        "episode": 1,
-        "voiceName": "Ultradox",
-        "updatedAt": 1793343505666
-      }
-    ],
-    "u_cbc2a03a14d7": [
-      {
-        "movie": {
-          "id": 260514,
-          "tmdb_id": 260514,
-          "imdb_id": "tt3606752",
-          "kinopoisk_id": "839646",
-          "type": "movie",
-          "serial": 0,
-          "title": "Тачки 3",
-          "original_title": "Cars 3",
-          "original_language": "en",
-          "overview": "После череды побед Молния МакКуин сталкивается с новым поколением сверхбыстрых гоночных машин. Во главе с амбициозным Джексоном Штормом они используют современные технологии и методики подготовки, которые делают ветеранов трассы устаревшими. Во время одной из гонок МакКуин терпит тяжёлую аварию, и его карьера оказывается под угрозой. Чтобы вернуться в большой спорт, Молния начинает тренировки с молодой и энергичной Крус Рамирес. Вместе они ищут нестандартный подход к скорости, уверенности и вере в себя. МакКуину предстоит не просто выиграть очередную гонку, а понять, что значит быть настоящим чемпионом — и какую роль он готов сыграть в будущем мира гонок.",
-          "release_date": "2017-06-15",
-          "year": "2017",
-          "vote_average": 6.9,
-          "poster": "https://imagetmdb.com/t/p/w500/st2lgtUpbZThfy1sgtAvFPvkWeO.jpg",
-          "backdrop": "https://imagetmdb.com/t/p/w1280/4mlS1MitcOqdPLhxEFyk9Qwf5rr.jpg",
-          "poster_path": "/st2lgtUpbZThfy1sgtAvFPvkWeO.jpg",
-          "backdrop_path": "/4mlS1MitcOqdPLhxEFyk9Qwf5rr.jpg",
-          "number_of_seasons": 0,
-          "runtime": 0,
-          "genres": []
-        },
-        "balancerKey": "filmix",
-        "balancer": "Filmix",
-        "season": 0,
-        "episode": 0,
-        "voiceName": "Дубляж (1080, Rus)",
-        "updatedAt": 1793344260109
-      }
     ]
   },
   "progress": {
@@ -363,30 +247,6 @@
         "currentTime": 4509,
         "duration": 5999,
         "updatedAt": 1793046123929
-      }
-    },
-    "u_62e60670de0c": {
-      "791523": {
-        "balancerKey": "filmix",
-        "balancerName": "Filmix",
-        "season": 1,
-        "episode": 1,
-        "voiceName": "Ultradox",
-        "currentTime": 0,
-        "duration": 0,
-        "updatedAt": 1793343505673
-      }
-    },
-    "u_cbc2a03a14d7": {
-      "260514": {
-        "balancerKey": "filmix",
-        "balancerName": "Filmix",
-        "season": 0,
-        "episode": 0,
-        "voiceName": "Дубляж (1080, Rus)",
-        "currentTime": 10,
-        "duration": 6145,
-        "updatedAt": 1793344274266
       }
     }
   },
@@ -740,7 +600,9 @@
   },
   "deletedUsers": {
     "u_226eb830d92e": 1792993976756,
-    "u_28618b931ced": 1793364347708
+    "u_28618b931ced": 1793364347708,
+    "u_62e60670de0c": 1793364349395,
+    "u_cbc2a03a14d7": 1793364351129
   },
   "deletedMessages": {
     "ntf_c0b9c501": 1792999871201,
