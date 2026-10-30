@@ -156,7 +156,7 @@
       },
       "createdAt": 1793343501403,
       "updatedAt": 1793343501403,
-      "lastSeenAt": 1793344262608,
+      "lastSeenAt": 1793344264110,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -182,7 +182,7 @@
       },
       "createdAt": 1793343722183,
       "updatedAt": 1793343722183,
-      "lastSeenAt": 1793344261881,
+      "lastSeenAt": 1793344263386,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -3870,9 +3870,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 753.000984,
+        "currentTime": 755.500583,
         "rate": 1,
-        "updatedAt": 1793344259100
+        "updatedAt": 1793344261711
       },
       "messages": [
         {
@@ -3973,7 +3973,16 @@
         "playing": true,
         "currentTime": 0,
         "rate": 1,
-        "updatedAt": 1793344260061
+        "updatedAt": 1793344263148,
+        "lastAction": "play",
+        "lastActionId": "act_1793344263148_93zi",
+        "lastActionAt": 1793344263148,
+        "actorClientId": "dev_dfqea163_mvumij8c",
+        "actor": {
+          "id": "u_cbc2a03a14d7",
+          "displayName": "Гость #7049",
+          "avatar": "🦊"
+        }
       },
       "messages": [
         {
