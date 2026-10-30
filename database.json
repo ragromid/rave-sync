@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793343785273,
+      "lastSeenAt": 1793343832308,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -36,7 +36,7 @@
             "p256dh": "BGBSyGpzc3yvwpqpodI-0WSI--smntccRP6Qe0F5rIlOeKPvsKDsSmWLMV6WeAhtKYrTmLh2WCGKBCEO1ceAGbA",
             "auth": "LsQqD48zlHcMsQb22mz5Mg"
           },
-          "updatedAt": 1793040136049
+          "updatedAt": 1793343768000
         }
       ]
     },
@@ -71,7 +71,7 @@
             "p256dh": "BHbYcKKobMNL7JMDbQmePksQd45rHVPOPMQueD-eSL4dhuZmPWiDRL0Cyr1Olqzsx_JEEPBzPsZFwDtYOdVznGA",
             "auth": "AdDiynCGUaGFtqlVq4-D6A"
           },
-          "updatedAt": 1793182825529
+          "updatedAt": 1793343081494
         },
         {
           "endpoint": "https://web.push.apple.com/QMGL0t5u0KwcBg0hh6kFw3U0jq0KiuWEe6VP0DwhDwZ7DKg-lRFYT058AGWd8QFAs1UooVYHGFS1Ynvi5x8D87k3rr_ufODBimmI-NqtuTnEY0-vGX5s3bLzxwo8qx_XvpHW9x9uuyxngJWLI29WSWoiLeX0AsQ5uyiFttzdg7A",
@@ -235,11 +235,12 @@
             "фэнтези"
           ]
         },
+        "balancerKey": "filmix",
         "balancer": "Filmix",
         "season": 0,
         "episode": 0,
         "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1792965688026
+        "updatedAt": 1793040416330
       }
     ],
     "u_1333f556dd06": [
@@ -388,6 +389,16 @@
         "duration": 1450,
         "updatedAt": 1793001267614
       },
+      "260514": {
+        "balancerKey": "zagonka",
+        "balancerName": "Zagonka",
+        "season": 0,
+        "episode": 0,
+        "voiceName": "Невафильм + SUB",
+        "currentTime": 30,
+        "duration": 6145,
+        "updatedAt": 1793343823197
+      },
       "1218925": {
         "balancerKey": "kodik",
         "balancerName": "Kodik",
@@ -409,6 +420,16 @@
         "currentTime": 9751,
         "duration": 0,
         "updatedAt": 1793010496477
+      },
+      "1218925": {
+        "balancerKey": "kodik",
+        "balancerName": "Kodik",
+        "season": 0,
+        "episode": 0,
+        "voiceName": "Force Media",
+        "currentTime": 244323,
+        "duration": 0,
+        "updatedAt": 1793285958363
       }
     },
     "u_1333f556dd06": {
@@ -454,9 +475,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Невафильм + SUB",
-        "currentTime": 25,
+        "currentTime": 24,
         "duration": 6145,
-        "updatedAt": 1793343826581
+        "updatedAt": 1793343750160
       }
     }
   },
@@ -3917,6 +3938,16 @@
           "color": "#7c5cff",
           "inVoice": false,
           "muted": false
+        },
+        {
+          "socketId": "http_u_805b52bfc220",
+          "id": "u_805b52bfc220",
+          "username": "rashid",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊",
+          "color": "#1de9b6",
+          "inVoice": false,
+          "muted": false
         }
       ],
       "media": {
@@ -3960,17 +3991,17 @@
         "subtitles": []
       },
       "playback": {
-        "playing": false,
-        "currentTime": 25.274616458,
+        "playing": true,
+        "currentTime": 28.7099845,
         "rate": 1,
-        "updatedAt": 1793343826568,
-        "lastAction": "pause",
-        "lastActionId": "act_1793343826568_z4v1",
-        "lastActionAt": 1793343826568,
-        "actorClientId": "dev_dfqea163_mvumij8c",
+        "updatedAt": 1793343831150,
+        "lastAction": "seek",
+        "lastActionId": "act_1793343831150_9seu",
+        "lastActionAt": 1793343831150,
+        "actorClientId": "dev_zp144eh7_mvumkqnn",
         "actor": {
-          "id": "u_cbc2a03a14d7",
-          "displayName": "Гость #7049",
+          "id": "u_805b52bfc220",
+          "displayName": "Rashid Sultanov",
           "avatar": "🦊"
         },
         "volume": 1,
@@ -4016,7 +4047,9 @@
           "viewed": false,
           "replyTo": null,
           "reactions": {},
-          "createdAt": 1793343783883
+          "createdAt": 1793343783883,
+          "read": false,
+          "updatedAt": 1793343783883
         },
         {
           "id": "m_a887accd23",
