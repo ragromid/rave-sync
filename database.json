@@ -156,7 +156,7 @@
       },
       "createdAt": 1793343501403,
       "updatedAt": 1793343501403,
-      "lastSeenAt": 1793344272636,
+      "lastSeenAt": 1793344274608,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -182,7 +182,7 @@
       },
       "createdAt": 1793343722183,
       "updatedAt": 1793343722183,
-      "lastSeenAt": 1793344272749,
+      "lastSeenAt": 1793344275432,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -454,9 +454,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Дубляж (1080, Rus)",
-        "currentTime": 9,
+        "currentTime": 10,
         "duration": 6145,
-        "updatedAt": 1793344272749
+        "updatedAt": 1793344274266
       }
     }
   },
@@ -3870,9 +3870,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 765.500582,
+        "currentTime": 768.000576,
         "rate": 1,
-        "updatedAt": 1793344271610
+        "updatedAt": 1793344274098
       },
       "messages": [
         {
@@ -3971,12 +3971,12 @@
       },
       "playback": {
         "playing": false,
-        "currentTime": 9.040298211040717,
+        "currentTime": 10.3086987579792,
         "rate": 1,
-        "updatedAt": 1793344272738,
+        "updatedAt": 1793344274256,
         "lastAction": "pause",
-        "lastActionId": "act_1793344272738_j083",
-        "lastActionAt": 1793344272738,
+        "lastActionId": "act_1793344274256_agrg",
+        "lastActionAt": 1793344274256,
         "actorClientId": "dev_dfqea163_mvumij8c",
         "actor": {
           "id": "u_cbc2a03a14d7",
