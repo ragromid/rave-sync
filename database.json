@@ -36,7 +36,7 @@
             "p256dh": "BGBSyGpzc3yvwpqpodI-0WSI--smntccRP6Qe0F5rIlOeKPvsKDsSmWLMV6WeAhtKYrTmLh2WCGKBCEO1ceAGbA",
             "auth": "LsQqD48zlHcMsQb22mz5Mg"
           },
-          "updatedAt": 1793343298666
+          "updatedAt": 1793040136049
         }
       ]
     },
@@ -71,7 +71,7 @@
             "p256dh": "BHbYcKKobMNL7JMDbQmePksQd45rHVPOPMQueD-eSL4dhuZmPWiDRL0Cyr1Olqzsx_JEEPBzPsZFwDtYOdVznGA",
             "auth": "AdDiynCGUaGFtqlVq4-D6A"
           },
-          "updatedAt": 1793285939906
+          "updatedAt": 1793182825529
         },
         {
           "endpoint": "https://web.push.apple.com/QMGL0t5u0KwcBg0hh6kFw3U0jq0KiuWEe6VP0DwhDwZ7DKg-lRFYT058AGWd8QFAs1UooVYHGFS1Ynvi5x8D87k3rr_ufODBimmI-NqtuTnEY0-vGX5s3bLzxwo8qx_XvpHW9x9uuyxngJWLI29WSWoiLeX0AsQ5uyiFttzdg7A",
@@ -156,7 +156,7 @@
       },
       "createdAt": 1793343501403,
       "updatedAt": 1793343501403,
-      "lastSeenAt": 1793343899615,
+      "lastSeenAt": 1793343929651,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -182,7 +182,7 @@
       },
       "createdAt": 1793343722183,
       "updatedAt": 1793343722183,
-      "lastSeenAt": 1793343898826,
+      "lastSeenAt": 1793343930406,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -235,12 +235,11 @@
             "фэнтези"
           ]
         },
-        "balancerKey": "filmix",
         "balancer": "Filmix",
         "season": 0,
         "episode": 0,
         "voiceName": "Дубляж (1080+, ru, Force Media)",
-        "updatedAt": 1793040416330
+        "updatedAt": 1792965688026
       }
     ],
     "u_1333f556dd06": [
@@ -389,16 +388,6 @@
         "duration": 1450,
         "updatedAt": 1793001267614
       },
-      "260514": {
-        "balancerKey": "zagonka",
-        "balancerName": "Zagonka",
-        "season": 0,
-        "episode": 0,
-        "voiceName": "Невафильм + SUB",
-        "currentTime": 47,
-        "duration": 6145,
-        "updatedAt": 1793343853182
-      },
       "1218925": {
         "balancerKey": "kodik",
         "balancerName": "Kodik",
@@ -420,16 +409,6 @@
         "currentTime": 9751,
         "duration": 0,
         "updatedAt": 1793010496477
-      },
-      "1218925": {
-        "balancerKey": "kodik",
-        "balancerName": "Kodik",
-        "season": 0,
-        "episode": 0,
-        "voiceName": "Force Media",
-        "currentTime": 244323,
-        "duration": 0,
-        "updatedAt": 1793285958363
       }
     },
     "u_1333f556dd06": {
@@ -475,9 +454,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Невафильм + SUB",
-        "currentTime": 24,
+        "currentTime": 96,
         "duration": 6145,
-        "updatedAt": 1793343750160
+        "updatedAt": 1793343926302
       }
     }
   },
@@ -3891,9 +3870,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 345.49994,
+        "currentTime": 418.000562,
         "rate": 1,
-        "updatedAt": 1793343851635
+        "updatedAt": 1793343924111
       },
       "messages": [
         {
@@ -3936,6 +3915,16 @@
           "displayName": "Гость #7049",
           "avatar": "🦊",
           "color": "#7c5cff",
+          "inVoice": false,
+          "muted": false
+        },
+        {
+          "socketId": "http_u_805b52bfc220",
+          "id": "u_805b52bfc220",
+          "username": "rashid",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊",
+          "color": "#1de9b6",
           "inVoice": false,
           "muted": false
         }
@@ -3982,16 +3971,16 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 92.758835806,
+        "currentTime": 96.1,
         "rate": 1,
-        "updatedAt": 1793343918491,
+        "updatedAt": 1793343926224,
         "lastAction": "seek",
-        "lastActionId": "act_1793343918491_nnps",
-        "lastActionAt": 1793343918491,
-        "actorClientId": "dev_zp144eh7_mvumkqnn",
+        "lastActionId": "act_1793343926224_1zcu",
+        "lastActionAt": 1793343926224,
+        "actorClientId": "dev_dfqea163_mvumij8c",
         "actor": {
-          "id": "u_805b52bfc220",
-          "displayName": "Rashid Sultanov",
+          "id": "u_cbc2a03a14d7",
+          "displayName": "Гость #7049",
           "avatar": "🦊"
         },
         "volume": 1,
