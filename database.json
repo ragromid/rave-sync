@@ -156,7 +156,30 @@
       },
       "createdAt": 1793343501403,
       "updatedAt": 1793343501403,
-      "lastSeenAt": 1793343506915
+      "lastSeenAt": 1793343721115
+    },
+    {
+      "id": "u_cbc2a03a14d7",
+      "username": "guest_fa6610",
+      "displayName": "Гость #7049",
+      "passwordHash": "0cdd8cfa30be1f22493bfcbd592db02c:dd41d010d6bd545bcac4142a3403da8265932e996147b9f6825de5ccc7171a440d17ffca017c99b1892feb9f8ad8a10db531b407a1f9b578729fd80a2972fbf4",
+      "avatar": "🦊",
+      "color": "#7c5cff",
+      "bio": "",
+      "settings": {
+        "proxyMode": "auto"
+      },
+      "stats": {
+        "watchSeconds": 0,
+        "moviesWatched": 0,
+        "episodesWatched": 0,
+        "roomsCreated": 1,
+        "messagesSent": 0,
+        "reactionsSent": 0
+      },
+      "createdAt": 1793343722183,
+      "updatedAt": 1793343722183,
+      "lastSeenAt": 1793343722328
     }
   ],
   "friendships": [
@@ -3797,9 +3820,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 0,
+        "currentTime": 215.500408,
         "rate": 1,
-        "updatedAt": 1793343505748
+        "updatedAt": 1793343721601
       },
       "messages": [
         {
@@ -3813,6 +3836,71 @@
           "system": true,
           "text": "🎬 Гость #1235 включил(а): Ведьмин лес (S1E1) · Ultradox",
           "createdAt": 1793343505760
+        }
+      ],
+      "viewOnceStore": {}
+    },
+    "N7W7T2": {
+      "code": "N7W7T2",
+      "name": "Тачки 3",
+      "isPublic": true,
+      "hostId": "u_cbc2a03a14d7",
+      "hostOnlyControl": false,
+      "createdAt": 1793343722328,
+      "participants": [
+        {
+          "socketId": "e_TaOhxczR8PsMEYAAAB",
+          "id": "u_cbc2a03a14d7",
+          "username": "guest_fa6610",
+          "displayName": "Гость #7049",
+          "avatar": "🦊",
+          "color": "#7c5cff",
+          "inVoice": false,
+          "muted": false
+        }
+      ],
+      "media": {
+        "type": "z01",
+        "title": "Тачки 3",
+        "poster": "https://imagetmdb.com/t/p/w500/st2lgtUpbZThfy1sgtAvFPvkWeO.jpg",
+        "backdrop": "https://imagetmdb.com/t/p/w1280/4mlS1MitcOqdPLhxEFyk9Qwf5rr.jpg",
+        "movie": {
+          "id": 260514,
+          "tmdb_id": 260514,
+          "imdb_id": "",
+          "kinopoisk_id": "",
+          "type": "movie",
+          "serial": 0,
+          "title": "Тачки 3",
+          "original_title": "Cars 3",
+          "original_language": "en",
+          "overview": "После череды побед Молния МакКуин сталкивается с новым поколением сверхбыстрых гоночных машин. Во главе с амбициозным Джексоном Штормом они используют современные технологии и методики подготовки, которые делают ветеранов трассы устаревшими. Во время одной из гонок МакКуин терпит тяжёлую аварию, и его карьера оказывается под угрозой. Чтобы вернуться в большой спорт, Молния начинает тренировки с молодой и энергичной Крус Рамирес. Вместе они ищут нестандартный подход к скорости, уверенности и вере в себя. МакКуину предстоит не просто выиграть очередную гонку, а понять, что значит быть настоящим чемпионом — и какую роль он готов сыграть в будущем мира гонок.",
+          "release_date": "2017-06-15",
+          "year": "2017",
+          "vote_average": 6.9,
+          "poster": "https://imagetmdb.com/t/p/w500/st2lgtUpbZThfy1sgtAvFPvkWeO.jpg",
+          "backdrop": "https://imagetmdb.com/t/p/w1280/4mlS1MitcOqdPLhxEFyk9Qwf5rr.jpg",
+          "poster_path": "/st2lgtUpbZThfy1sgtAvFPvkWeO.jpg",
+          "backdrop_path": "/4mlS1MitcOqdPLhxEFyk9Qwf5rr.jpg",
+          "number_of_seasons": 0,
+          "runtime": 0,
+          "genres": []
+        },
+        "streamUrl": "",
+        "streamType": "hls"
+      },
+      "playback": {
+        "playing": false,
+        "currentTime": 0,
+        "rate": 1,
+        "updatedAt": 1793343722328
+      },
+      "messages": [
+        {
+          "id": "m_d8763b98",
+          "system": true,
+          "text": "🦊 Гость #7049 в комнате",
+          "createdAt": 1793343722495
         }
       ],
       "viewOnceStore": {}
