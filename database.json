@@ -16,11 +16,11 @@
         "moviesWatched": 0,
         "episodesWatched": 2,
         "roomsCreated": 3,
-        "messagesSent": 115,
+        "messagesSent": 116,
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793364232215,
+      "lastSeenAt": 1793364250787,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -36,7 +36,7 @@
             "p256dh": "BGBSyGpzc3yvwpqpodI-0WSI--smntccRP6Qe0F5rIlOeKPvsKDsSmWLMV6WeAhtKYrTmLh2WCGKBCEO1ceAGbA",
             "auth": "LsQqD48zlHcMsQb22mz5Mg"
           },
-          "updatedAt": 1793040136049
+          "updatedAt": 1793364218849
         }
       ]
     },
@@ -818,6 +818,21 @@
         "replyTo": null,
         "reactions": {},
         "createdAt": 1793364230930,
+        "read": false,
+        "updatedAt": 1793364230930
+      },
+      {
+        "id": "dm_b5f6aa5587cd",
+        "fromId": "u_805b52bfc220",
+        "toId": "u_80ab0d1134f5",
+        "text": "шлюха",
+        "imageUrl": "",
+        "hasImage": false,
+        "viewOnce": false,
+        "viewed": false,
+        "replyTo": null,
+        "reactions": {},
+        "createdAt": 1793364250787,
         "read": false
       }
     ]
@@ -846,6 +861,22 @@
         },
         "title": "Rashid Sultanov",
         "body": "а по ебал не хочешь?"
+      },
+      {
+        "id": "ntf_243d4642",
+        "createdAt": 1793364250804,
+        "type": "dm_message",
+        "msgId": "dm_b5f6aa5587cd",
+        "fromId": "u_805b52bfc220",
+        "from": {
+          "id": "u_805b52bfc220",
+          "username": "rashid",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊",
+          "color": "#1de9b6"
+        },
+        "title": "Rashid Sultanov",
+        "body": "шлюха"
       }
     ]
   },
