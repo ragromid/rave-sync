@@ -156,7 +156,7 @@
       },
       "createdAt": 1793343501403,
       "updatedAt": 1793343501403,
-      "lastSeenAt": 1793343806640,
+      "lastSeenAt": 1793343816629,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -177,12 +177,12 @@
         "moviesWatched": 1,
         "episodesWatched": 0,
         "roomsCreated": 1,
-        "messagesSent": 0,
+        "messagesSent": 1,
         "reactionsSent": 0
       },
       "createdAt": 1793343722183,
       "updatedAt": 1793343722183,
-      "lastSeenAt": 1793343807055,
+      "lastSeenAt": 1793343816371,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -3870,9 +3870,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 297.999798,
+        "currentTime": 307.999852,
         "rate": 1,
-        "updatedAt": 1793343804470
+        "updatedAt": 1793343814103
       },
       "messages": [
         {
@@ -4017,6 +4017,25 @@
           "replyTo": null,
           "reactions": {},
           "createdAt": 1793343783883
+        },
+        {
+          "id": "m_a887accd23",
+          "system": false,
+          "user": {
+            "id": "u_cbc2a03a14d7",
+            "displayName": "Гость #7049",
+            "avatar": "🦊",
+            "avatarUrl": "",
+            "color": "#7c5cff"
+          },
+          "text": "Секс",
+          "imageUrl": "",
+          "hasPhoto": false,
+          "viewOnce": false,
+          "viewed": false,
+          "replyTo": null,
+          "reactions": {},
+          "createdAt": 1793343816371
         }
       ],
       "viewOnceStore": {}
