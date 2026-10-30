@@ -156,7 +156,7 @@
       },
       "createdAt": 1793343501403,
       "updatedAt": 1793343501403,
-      "lastSeenAt": 1793344249125,
+      "lastSeenAt": 1793344259619,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -182,7 +182,7 @@
       },
       "createdAt": 1793343722183,
       "updatedAt": 1793343722183,
-      "lastSeenAt": 1793344249846,
+      "lastSeenAt": 1793344260370,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -367,12 +367,12 @@
           "runtime": 0,
           "genres": []
         },
-        "balancerKey": "zagonka",
-        "balancer": "Zagonka",
+        "balancerKey": "filmix",
+        "balancer": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Невафильм + SUB",
-        "updatedAt": 1793343724922
+        "voiceName": "Дубляж (1080, Rus)",
+        "updatedAt": 1793344260109
       }
     ]
   },
@@ -449,14 +449,14 @@
     },
     "u_cbc2a03a14d7": {
       "260514": {
-        "balancerKey": "zagonka",
-        "balancerName": "Zagonka",
+        "balancerKey": "filmix",
+        "balancerName": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Невафильм + SUB",
+        "voiceName": "Дубляж (1080, Rus)",
         "currentTime": 299,
         "duration": 6145,
-        "updatedAt": 1793344248604
+        "updatedAt": 1793344260109
       }
     }
   },
@@ -3870,9 +3870,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 740.501555,
+        "currentTime": 753.000984,
         "rate": 1,
-        "updatedAt": 1793344246602
+        "updatedAt": 1793344259100
       },
       "messages": [
         {
@@ -3956,35 +3956,24 @@
           "runtime": 0,
           "genres": []
         },
-        "balancerKey": "zagonka",
-        "balancerName": "Zagonka",
+        "balancerKey": "filmix",
+        "balancerName": "Filmix",
         "season": 0,
         "episode": 0,
-        "voiceName": "Невафильм + SUB",
-        "quality": "1080p",
-        "rawUrl": "https://z01.online/proxy/+Xy+OLgTAYyW8mX0zKyrdwdgzCMI75lUpBqmdJS4HSU64mW3cnJ3XsqFhmnFom+TdCvSG/MKjtZJQhJVltODHnlKvscR3YrYwX3laV5b6O4nmPnFUnaVYg88PYPWR9CRkCf1SKY+kqUb/MrLRga8CZPUQS1nw3WRzinW38QpM3VxeVxtnc2jCBqnt8OTlETzsBKLk+TwzmWWmXkx8QRyKLrgiYThpqXIgKdBXgMU5chVMYU7aNSBT16RQcumvJRrAFAL17/TZ9SlQ3XQwFoh5OQE4xjcndgLD8mnaqi30nNdN/DDlxHobnl4MKauEgPjyq0FummuhFFRO1YJyrIzmg==.m3u8",
-        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fz01.online%2Fproxy%2F%2BXy%2BOLgTAYyW8mX0zKyrdwdgzCMI75lUpBqmdJS4HSU64mW3cnJ3XsqFhmnFom%2BTdCvSG%2FMKjtZJQhJVltODHnlKvscR3YrYwX3laV5b6O4nmPnFUnaVYg88PYPWR9CRkCf1SKY%2BkqUb%2FMrLRga8CZPUQS1nw3WRzinW38QpM3VxeVxtnc2jCBqnt8OTlETzsBKLk%2BTwzmWWmXkx8QRyKLrgiYThpqXIgKdBXgMU5chVMYU7aNSBT16RQcumvJRrAFAL17%2FTZ9SlQ3XQwFoh5OQE4xjcndgLD8mnaqi30nNdN%2FDDlxHobnl4MKauEgPjyq0FummuhFFRO1YJyrIzmg%3D%3D.m3u8",
-        "recommendedUrl": "https://z01.online/proxy/+Xy+OLgTAYyW8mX0zKyrdwdgzCMI75lUpBqmdJS4HSU64mW3cnJ3XsqFhmnFom+TdCvSG/MKjtZJQhJVltODHnlKvscR3YrYwX3laV5b6O4nmPnFUnaVYg88PYPWR9CRkCf1SKY+kqUb/MrLRga8CZPUQS1nw3WRzinW38QpM3VxeVxtnc2jCBqnt8OTlETzsBKLk+TwzmWWmXkx8QRyKLrgiYThpqXIgKdBXgMU5chVMYU7aNSBT16RQcumvJRrAFAL17/TZ9SlQ3XQwFoh5OQE4xjcndgLD8mnaqi30nNdN/DDlxHobnl4MKauEgPjyq0FummuhFFRO1YJyrIzmg==.m3u8",
-        "streamUrl": "https://z01.online/proxy/+Xy+OLgTAYyW8mX0zKyrdwdgzCMI75lUpBqmdJS4HSU64mW3cnJ3XsqFhmnFom+TdCvSG/MKjtZJQhJVltODHnlKvscR3YrYwX3laV5b6O4nmPnFUnaVYg88PYPWR9CRkCf1SKY+kqUb/MrLRga8CZPUQS1nw3WRzinW38QpM3VxeVxtnc2jCBqnt8OTlETzsBKLk+TwzmWWmXkx8QRyKLrgiYThpqXIgKdBXgMU5chVMYU7aNSBT16RQcumvJRrAFAL17/TZ9SlQ3XQwFoh5OQE4xjcndgLD8mnaqi30nNdN/DDlxHobnl4MKauEgPjyq0FummuhFFRO1YJyrIzmg==.m3u8",
-        "streamType": "hls",
+        "voiceName": "Дубляж (1080, Rus)",
+        "quality": "720p",
+        "rawUrl": "https://nl03.werkecdn.me/s/FHTcboB67viFYOV2nl_jvhjkFBQUFBQXhnT1VFUjFVSWpCU0EvUDArUUlsVkFObFhLUnc9PQ.82Km86vGe1uN-c6TRhxUdI7MW-Ufk9NJEnvl2w/hd-nf19/Cars.3.2017.BDRip.1080p_720.mp4?vs3-origin",
+        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fnl03.werkecdn.me%2Fs%2FFHTcboB67viFYOV2nl_jvhjkFBQUFBQXhnT1VFUjFVSWpCU0EvUDArUUlsVkFObFhLUnc9PQ.82Km86vGe1uN-c6TRhxUdI7MW-Ufk9NJEnvl2w%2Fhd-nf19%2FCars.3.2017.BDRip.1080p_720.mp4%3Fvs3-origin",
+        "recommendedUrl": "/api/stream-proxy?url=https%3A%2F%2Fnl03.werkecdn.me%2Fs%2FFHTcboB67viFYOV2nl_jvhjkFBQUFBQXhnT1VFUjFVSWpCU0EvUDArUUlsVkFObFhLUnc9PQ.82Km86vGe1uN-c6TRhxUdI7MW-Ufk9NJEnvl2w%2Fhd-nf19%2FCars.3.2017.BDRip.1080p_720.mp4%3Fvs3-origin",
+        "streamUrl": "/api/stream-proxy?url=https%3A%2F%2Fnl03.werkecdn.me%2Fs%2FFHTcboB67viFYOV2nl_jvhjkFBQUFBQXhnT1VFUjFVSWpCU0EvUDArUUlsVkFObFhLUnc9PQ.82Km86vGe1uN-c6TRhxUdI7MW-Ufk9NJEnvl2w%2Fhd-nf19%2FCars.3.2017.BDRip.1080p_720.mp4%3Fvs3-origin",
+        "streamType": "mp4",
         "subtitles": []
       },
       "playback": {
-        "playing": false,
-        "currentTime": 299.250812082,
+        "playing": true,
+        "currentTime": 0,
         "rate": 1,
-        "updatedAt": 1793344248421,
-        "lastAction": "pause",
-        "lastActionId": "act_1793344248421_g2wf",
-        "lastActionAt": 1793344248421,
-        "actorClientId": "dev_dfqea163_mvumij8c",
-        "actor": {
-          "id": "u_cbc2a03a14d7",
-          "displayName": "Гость #7049",
-          "avatar": "🦊"
-        },
-        "volume": 1,
-        "muted": false
+        "updatedAt": 1793344260061
       },
       "messages": [
         {
@@ -4050,6 +4039,12 @@
           "createdAt": 1793343816371,
           "read": false,
           "updatedAt": 1793343816371
+        },
+        {
+          "id": "m_bd53ff0d",
+          "system": true,
+          "text": "🎬 Гость #7049 включил(а): Тачки 3 · Дубляж (1080, Rus)",
+          "createdAt": 1793344260070
         }
       ],
       "viewOnceStore": {}
