@@ -16,11 +16,11 @@
         "moviesWatched": 0,
         "episodesWatched": 2,
         "roomsCreated": 3,
-        "messagesSent": 114,
+        "messagesSent": 115,
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793364218849,
+      "lastSeenAt": 1793364230929,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -36,7 +36,7 @@
             "p256dh": "BGBSyGpzc3yvwpqpodI-0WSI--smntccRP6Qe0F5rIlOeKPvsKDsSmWLMV6WeAhtKYrTmLh2WCGKBCEO1ceAGbA",
             "auth": "LsQqD48zlHcMsQb22mz5Mg"
           },
-          "updatedAt": 1793364218849
+          "updatedAt": 1793040136049
         }
       ]
     },
@@ -805,6 +805,20 @@
         "createdAt": 1793025683256,
         "read": false,
         "updatedAt": 1793025683256
+      },
+      {
+        "id": "dm_3173fc503e31",
+        "fromId": "u_805b52bfc220",
+        "toId": "u_80ab0d1134f5",
+        "text": "а по ебал не хочешь?",
+        "imageUrl": "",
+        "hasImage": false,
+        "viewOnce": false,
+        "viewed": false,
+        "replyTo": null,
+        "reactions": {},
+        "createdAt": 1793364230930,
+        "read": false
       }
     ]
   },
@@ -815,7 +829,26 @@
     "ntf_c0b9c501": 1792999871201,
     "ntf_b80933e5": 1792999871201
   },
-  "notifications": {},
+  "notifications": {
+    "u_80ab0d1134f5": [
+      {
+        "id": "ntf_55a3b5f7",
+        "createdAt": 1793364230946,
+        "type": "dm_message",
+        "msgId": "dm_3173fc503e31",
+        "fromId": "u_805b52bfc220",
+        "from": {
+          "id": "u_805b52bfc220",
+          "username": "rashid",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊",
+          "color": "#1de9b6"
+        },
+        "title": "Rashid Sultanov",
+        "body": "а по ебал не хочешь?"
+      }
+    ]
+  },
   "savedRooms": {
     "393HNX": {
       "code": "393HNX",
@@ -4043,13 +4076,23 @@
           "id": "m_bd53ff0d",
           "system": true,
           "text": "🎬 Гость #7049 включил(а): Тачки 3 · Дубляж (1080, Rus)",
-          "createdAt": 1793344260070
+          "createdAt": 1793344260070,
+          "read": false,
+          "viewed": false,
+          "imageUrl": "",
+          "reactions": {},
+          "updatedAt": 1793344260070
         },
         {
           "id": "m_4c809b79",
           "system": true,
           "text": "Rashid Sultanov теперь хост комнаты",
-          "createdAt": 1793344292906
+          "createdAt": 1793344292906,
+          "read": false,
+          "viewed": false,
+          "imageUrl": "",
+          "reactions": {},
+          "updatedAt": 1793344292906
         }
       ],
       "viewOnceStore": {}
