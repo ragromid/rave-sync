@@ -156,7 +156,7 @@
       },
       "createdAt": 1793343501403,
       "updatedAt": 1793343501403,
-      "lastSeenAt": 1793344072296,
+      "lastSeenAt": 1793344074637,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -182,7 +182,7 @@
       },
       "createdAt": 1793343722183,
       "updatedAt": 1793343722183,
-      "lastSeenAt": 1793344072888,
+      "lastSeenAt": 1793344075106,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -454,9 +454,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Невафильм + SUB",
-        "currentTime": 178,
+        "currentTime": 180,
         "duration": 6145,
-        "updatedAt": 1793344072888
+        "updatedAt": 1793344075106
       }
     }
   },
@@ -3870,9 +3870,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 565.50079,
+        "currentTime": 567.999977,
         "rate": 1,
-        "updatedAt": 1793344071610
+        "updatedAt": 1793344074111
       },
       "messages": [
         {
@@ -3970,13 +3970,13 @@
         "subtitles": []
       },
       "playback": {
-        "playing": true,
-        "currentTime": 178.423686957,
+        "playing": false,
+        "currentTime": 180.627879374,
         "rate": 1,
-        "updatedAt": 1793344072879,
-        "lastAction": "play",
-        "lastActionId": "act_1793344072879_zqpf",
-        "lastActionAt": 1793344072879,
+        "updatedAt": 1793344075096,
+        "lastAction": "pause",
+        "lastActionId": "act_1793344075096_97ji",
+        "lastActionAt": 1793344075096,
         "actorClientId": "dev_dfqea163_mvumij8c",
         "actor": {
           "id": "u_cbc2a03a14d7",
