@@ -156,7 +156,7 @@
       },
       "createdAt": 1793343501403,
       "updatedAt": 1793343501403,
-      "lastSeenAt": 1793344274608,
+      "lastSeenAt": 1793344292609,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -182,7 +182,7 @@
       },
       "createdAt": 1793343722183,
       "updatedAt": 1793343722183,
-      "lastSeenAt": 1793344275432,
+      "lastSeenAt": 1793344284454,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -3870,9 +3870,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 768.000576,
+        "currentTime": 785.500497,
         "rate": 1,
-        "updatedAt": 1793344274098
+        "updatedAt": 1793344291690
       },
       "messages": [
         {
@@ -3904,20 +3904,10 @@
       "code": "N7W7T2",
       "name": "Тачки 3",
       "isPublic": true,
-      "hostId": "u_cbc2a03a14d7",
+      "hostId": "u_805b52bfc220",
       "hostOnlyControl": false,
       "createdAt": 1793343722328,
       "participants": [
-        {
-          "socketId": "e_TaOhxczR8PsMEYAAAB",
-          "id": "u_cbc2a03a14d7",
-          "username": "guest_fa6610",
-          "displayName": "Гость #7049",
-          "avatar": "🦊",
-          "color": "#7c5cff",
-          "inVoice": false,
-          "muted": false
-        },
         {
           "socketId": "http_u_805b52bfc220",
           "id": "u_805b52bfc220",
@@ -4054,6 +4044,12 @@
           "system": true,
           "text": "🎬 Гость #7049 включил(а): Тачки 3 · Дубляж (1080, Rus)",
           "createdAt": 1793344260070
+        },
+        {
+          "id": "m_4c809b79",
+          "system": true,
+          "text": "Rashid Sultanov теперь хост комнаты",
+          "createdAt": 1793344292906
         }
       ],
       "viewOnceStore": {}
