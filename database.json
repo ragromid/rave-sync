@@ -156,7 +156,7 @@
       },
       "createdAt": 1793343501403,
       "updatedAt": 1793343501403,
-      "lastSeenAt": 1793344666672,
+      "lastSeenAt": 1793344711605,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -3870,9 +3870,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 1160.501149,
+        "currentTime": 1205.500822,
         "rate": 1,
-        "updatedAt": 1793344666672
+        "updatedAt": 1793344711605
       },
       "messages": [
         {
