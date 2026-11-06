@@ -4,7 +4,7 @@
       "id": "u_805b52bfc220",
       "username": "rashid",
       "displayName": "Rashid Sultanov",
-      "passwordHash": "172976c6027b79c49733971a942c9236:a0c481e2c07089fcf2ebaf7df8984b974da11da172f2e3e739868e5f91e73c7d273433cf0bbdddea3a711cb40a79c39a032419f1ec08afd1facbff5cb50dcd96",
+      "passwordHash": "1d7ae8e9909b79263088c2ecc1816c44:421c739bbe3d1f7ff716e3c6eb0143f496407ee7e82947e72ad70dc3d79c275fc4fd10eefe9939bd92e2d5e6d63f7281bc242da33af262fa7dd8c0c2e795dada",
       "avatar": "🦊",
       "color": "#1de9b6",
       "bio": "порно",
@@ -18,7 +18,7 @@
         "messagesSent": 113,
         "reactionsSent": 0
       },
-      "updatedAt": 1793991574835,
+      "updatedAt": 1793997680419,
       "lastSeenAt": 1793991746699,
       "pushSubscriptions": [
         {
@@ -91,7 +91,8 @@
           },
           "updatedAt": 1793010472508
         }
-      ]
+      ],
+      "avatarUrl": ""
     },
     {
       "id": "u_1333f556dd06",
