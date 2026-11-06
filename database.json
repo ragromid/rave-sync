@@ -36,7 +36,7 @@
             "p256dh": "BGBSyGpzc3yvwpqpodI-0WSI--smntccRP6Qe0F5rIlOeKPvsKDsSmWLMV6WeAhtKYrTmLh2WCGKBCEO1ceAGbA",
             "auth": "LsQqD48zlHcMsQb22mz5Mg"
           },
-          "updatedAt": 1793988412990
+          "updatedAt": 1793988259544
         }
       ]
     },
@@ -71,7 +71,7 @@
             "p256dh": "BHbYcKKobMNL7JMDbQmePksQd45rHVPOPMQueD-eSL4dhuZmPWiDRL0Cyr1Olqzsx_JEEPBzPsZFwDtYOdVznGA",
             "auth": "AdDiynCGUaGFtqlVq4-D6A"
           },
-          "updatedAt": 1793988547669
+          "updatedAt": 1793589462527
         },
         {
           "endpoint": "https://web.push.apple.com/QMGL0t5u0KwcBg0hh6kFw3U0jq0KiuWEe6VP0DwhDwZ7DKg-lRFYT058AGWd8QFAs1UooVYHGFS1Ynvi5x8D87k3rr_ufODBimmI-NqtuTnEY0-vGX5s3bLzxwo8qx_XvpHW9x9uuyxngJWLI29WSWoiLeX0AsQ5uyiFttzdg7A",
@@ -130,7 +130,7 @@
       },
       "createdAt": 1793987941725,
       "updatedAt": 1793987941725,
-      "lastSeenAt": 1793988699272,
+      "lastSeenAt": 1793988704278,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -157,7 +157,7 @@
       "createdAt": 1793988693548,
       "updatedAt": 1793988693548,
       "avatarUrl": "",
-      "lastSeenAt": 1793988700185,
+      "lastSeenAt": 1793988704245,
       "isAdmin": false,
       "pushSubscriptions": []
     }
@@ -188,6 +188,36 @@
   "bookmarks": {},
   "history": {
     "u_805b52bfc220": [
+      {
+        "movie": {
+          "id": 1214931,
+          "tmdb_id": 1214931,
+          "imdb_id": "tt29567915",
+          "kinopoisk_id": "5427688",
+          "type": "movie",
+          "serial": 0,
+          "title": "Нюрнберг",
+          "original_title": "Nuremberg",
+          "original_language": "en",
+          "overview": "История о психологическом противостоянии талантливого психиатра Дугласа Келли и рейхсмаршала нацистской Германии Германа Геринга, от результатов которого зависит исход Нюрнбергского процесса.",
+          "release_date": "2025-11-06",
+          "year": "2025",
+          "vote_average": 7.6,
+          "poster": "https://imagetmdb.com/t/p/w500/5lR20dRAPjzmms7YqYs3ERdDEiz.jpg",
+          "backdrop": "https://imagetmdb.com/t/p/w1280/mxKVTRDApGP2vtsruji4cNGXioD.jpg",
+          "poster_path": "/5lR20dRAPjzmms7YqYs3ERdDEiz.jpg",
+          "backdrop_path": "/mxKVTRDApGP2vtsruji4cNGXioD.jpg",
+          "number_of_seasons": 0,
+          "runtime": 0,
+          "genres": []
+        },
+        "balancerKey": "rutubemovie",
+        "balancer": "Rutube",
+        "season": 0,
+        "episode": 0,
+        "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
+        "updatedAt": 1793988513466
+      },
       {
         "movie": {
           "id": 1218925,
@@ -284,12 +314,12 @@
           "runtime": 0,
           "genres": []
         },
-        "balancerKey": "rutubemovie",
-        "balancer": "Rutube",
+        "balancerKey": "zagonka",
+        "balancer": "Zagonka",
         "season": 0,
         "episode": 0,
-        "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
-        "updatedAt": 1793988027156
+        "voiceName": "Даблин + SUB",
+        "updatedAt": 1793988449035
       }
     ]
   },
@@ -306,14 +336,14 @@
         "updatedAt": 1793001267614
       },
       "1214931": {
-        "balancerKey": "rutubemovie",
-        "balancerName": "Rutube",
+        "balancerKey": "veoveo",
+        "balancerName": "VeoVeo",
         "season": 0,
         "episode": 0,
-        "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
-        "currentTime": 191,
-        "duration": 0,
-        "updatedAt": 1793988490263
+        "voiceName": "1080p",
+        "currentTime": 9,
+        "duration": 8920,
+        "updatedAt": 1793988538503
       },
       "1218925": {
         "balancerKey": "kodik",
@@ -345,7 +375,7 @@
         "voiceName": "1080p",
         "currentTime": 16,
         "duration": 8920,
-        "updatedAt": 1793988649148
+        "updatedAt": 1793988654016
       }
     },
     "u_1333f556dd06": {
@@ -367,9 +397,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
-        "currentTime": 354,
+        "currentTime": 353,
         "duration": 0,
-        "updatedAt": 1793988672375
+        "updatedAt": 1793988704152
       },
       "1218925": {
         "balancerKey": "kodik",
@@ -379,7 +409,19 @@
         "voiceName": "Force Media",
         "currentTime": 244337,
         "duration": 0,
-        "updatedAt": 1793988273854
+        "updatedAt": 1793988393659
+      }
+    },
+    "u_6a2df5aa5f31": {
+      "1214931": {
+        "balancerKey": "rutubemovie",
+        "balancerName": "Rutube",
+        "season": 0,
+        "episode": 0,
+        "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
+        "currentTime": 351,
+        "duration": 0,
+        "updatedAt": 1793988700328
       }
     }
   },
@@ -1842,6 +1884,16 @@
           "displayName": "Murad",
           "avatar": "🔥",
           "color": "#7c5cff",
+          "inVoice": false,
+          "muted": false
+        },
+        {
+          "socketId": "http_u_e1c30d7da3c0",
+          "id": "u_e1c30d7da3c0",
+          "username": "nmnm",
+          "displayName": "nara",
+          "avatar": "🦁",
+          "color": "#ff6d00",
           "inVoice": false,
           "muted": false
         }
@@ -4001,22 +4053,22 @@
       "createdAt": 1793988020303,
       "participants": [
         {
-          "socketId": "http_u_e1c30d7da3c0",
-          "id": "u_e1c30d7da3c0",
-          "username": "nmnm",
-          "displayName": "nara",
-          "avatar": "🦁",
-          "color": "#ff6d00",
-          "inVoice": false,
-          "muted": false
-        },
-        {
           "socketId": "http_u_80ab0d1134f5",
           "id": "u_80ab0d1134f5",
           "username": "muraadzz_",
           "displayName": "Murad",
           "avatar": "🔥",
           "color": "#7c5cff",
+          "inVoice": false,
+          "muted": false
+        },
+        {
+          "socketId": "http_u_e1c30d7da3c0",
+          "id": "u_e1c30d7da3c0",
+          "username": "nmnm",
+          "displayName": "nara",
+          "avatar": "🦁",
+          "color": "#ff6d00",
           "inVoice": false,
           "muted": false
         },
@@ -4082,18 +4134,18 @@
         "subtitles": []
       },
       "playback": {
-        "playing": true,
-        "currentTime": 351.60200000000003,
+        "playing": false,
+        "currentTime": 353.708,
         "rate": 1,
-        "updatedAt": 1793988700186,
-        "lastAction": "play",
-        "lastActionId": "act_1793988700186_ar33",
-        "lastActionAt": 1793988700186,
-        "actorClientId": "dev_o4uhsewd_mw5admwt",
+        "updatedAt": 1793988704167,
+        "lastAction": "pause",
+        "lastActionId": "act_1793988704167_zlyr",
+        "lastActionAt": 1793988704167,
+        "actorClientId": "dev_a4kzppc6_mw5a1u2o",
         "actor": {
-          "id": "u_6a2df5aa5f31",
-          "displayName": "Гость #9256",
-          "avatar": "🦊"
+          "id": "u_e1c30d7da3c0",
+          "displayName": "nara",
+          "avatar": "🦁"
         },
         "volume": 1,
         "muted": false
@@ -4110,22 +4162,22 @@
       "createdAt": 1793988507843,
       "participants": [
         {
-          "socketId": "http_u_80ab0d1134f5",
-          "id": "u_80ab0d1134f5",
-          "username": "muraadzz_",
-          "displayName": "Murad",
-          "avatar": "🔥",
-          "color": "#7c5cff",
-          "inVoice": false,
-          "muted": false
-        },
-        {
           "socketId": "http_u_805b52bfc220",
           "id": "u_805b52bfc220",
           "username": "rashid",
           "displayName": "Rashid Sultanov",
           "avatar": "🦊",
           "color": "#1de9b6",
+          "inVoice": false,
+          "muted": false
+        },
+        {
+          "socketId": "http_u_80ab0d1134f5",
+          "id": "u_80ab0d1134f5",
+          "username": "muraadzz_",
+          "displayName": "Murad",
+          "avatar": "🔥",
+          "color": "#7c5cff",
           "inVoice": false,
           "muted": false
         }
