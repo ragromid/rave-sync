@@ -13,14 +13,14 @@
       "isAdmin": false,
       "stats": {
         "watchSeconds": 0,
-        "moviesWatched": 1,
+        "moviesWatched": 2,
         "episodesWatched": 2,
         "roomsCreated": 4,
         "messagesSent": 114,
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793988523023,
+      "lastSeenAt": 1793988531231,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -36,7 +36,7 @@
             "p256dh": "BGBSyGpzc3yvwpqpodI-0WSI--smntccRP6Qe0F5rIlOeKPvsKDsSmWLMV6WeAhtKYrTmLh2WCGKBCEO1ceAGbA",
             "auth": "LsQqD48zlHcMsQb22mz5Mg"
           },
-          "updatedAt": 1793988259544
+          "updatedAt": 1793364218849
         }
       ]
     },
@@ -130,7 +130,7 @@
       },
       "createdAt": 1793987941725,
       "updatedAt": 1793987941725,
-      "lastSeenAt": 1793988508450,
+      "lastSeenAt": 1793988522427,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -185,12 +185,12 @@
           "runtime": 0,
           "genres": []
         },
-        "balancerKey": "rutubemovie",
-        "balancer": "Rutube",
+        "balancerKey": "veoveo",
+        "balancer": "VeoVeo",
         "season": 0,
         "episode": 0,
-        "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
-        "updatedAt": 1793988513466
+        "voiceName": "1080p",
+        "updatedAt": 1793988523043
       },
       {
         "movie": {
@@ -288,12 +288,12 @@
           "runtime": 0,
           "genres": []
         },
-        "balancerKey": "zagonka",
-        "balancer": "Zagonka",
+        "balancerKey": "rutubemovie",
+        "balancer": "Rutube",
         "season": 0,
         "episode": 0,
-        "voiceName": "Даблин + SUB",
-        "updatedAt": 1793988449035
+        "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
+        "updatedAt": 1793988027156
       }
     ]
   },
@@ -310,14 +310,14 @@
         "updatedAt": 1793001267614
       },
       "1214931": {
-        "balancerKey": "rutubemovie",
-        "balancerName": "Rutube",
+        "balancerKey": "veoveo",
+        "balancerName": "VeoVeo",
         "season": 0,
         "episode": 0,
-        "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
-        "currentTime": 186,
+        "voiceName": "1080p",
+        "currentTime": 0,
         "duration": 0,
-        "updatedAt": 1793988513472
+        "updatedAt": 1793988523051
       },
       "1218925": {
         "balancerKey": "kodik",
@@ -347,9 +347,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
-        "currentTime": 171,
+        "currentTime": 168,
         "duration": 0,
-        "updatedAt": 1793988455172
+        "updatedAt": 1793988449467
       }
     },
     "u_1333f556dd06": {
@@ -371,19 +371,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
-        "currentTime": 65,
+        "currentTime": 58,
         "duration": 0,
-        "updatedAt": 1793988214108
-      },
-      "1218925": {
-        "balancerKey": "kodik",
-        "balancerName": "Kodik",
-        "season": 0,
-        "episode": 0,
-        "voiceName": "Force Media",
-        "currentTime": 244337,
-        "duration": 0,
-        "updatedAt": 1793988393659
+        "updatedAt": 1793988194276
       }
     }
   },
@@ -4015,22 +4005,22 @@
       "createdAt": 1793988020303,
       "participants": [
         {
-          "socketId": "http_u_80ab0d1134f5",
-          "id": "u_80ab0d1134f5",
-          "username": "muraadzz_",
-          "displayName": "Murad",
-          "avatar": "🔥",
-          "color": "#7c5cff",
-          "inVoice": false,
-          "muted": false
-        },
-        {
           "socketId": "http_u_e1c30d7da3c0",
           "id": "u_e1c30d7da3c0",
           "username": "nmnm",
           "displayName": "nara",
           "avatar": "🦁",
           "color": "#ff6d00",
+          "inVoice": false,
+          "muted": false
+        },
+        {
+          "socketId": "http_u_80ab0d1134f5",
+          "id": "u_80ab0d1134f5",
+          "username": "muraadzz_",
+          "displayName": "Murad",
+          "avatar": "🔥",
+          "color": "#7c5cff",
           "inVoice": false,
           "muted": false
         },
@@ -4166,13 +4156,13 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 0,
+        "currentTime": 1.809,
         "rate": 1,
-        "updatedAt": 1793988523023,
-        "lastAction": "media_changed",
-        "lastActionId": "act_1793988523023_6ncl",
-        "lastActionAt": 1793988523023,
-        "actorClientId": "",
+        "updatedAt": 1793988531159,
+        "lastAction": "seek",
+        "lastActionId": "act_1793988531159_akop",
+        "lastActionAt": 1793988531159,
+        "actorClientId": "dev_p86clxhi_mw5adpyu",
         "actor": {
           "id": "u_805b52bfc220",
           "displayName": "Rashid Sultanov",
