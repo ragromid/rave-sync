@@ -836,13 +836,52 @@ app.delete('/api/admin/users/:id', adminMiddleware, (req, res) => {
 });
 
 app.delete('/api/admin/rooms/:code', adminMiddleware, (req, res) => {
-  const code = String(req.params.code || '').toUpperCase();
-  if (rooms.has(code)) {
+  const code = String(req.params.code || '').replace(/^#/, '').trim().toUpperCase();
+  hydrateRoomsFromDb();
+  const room = rooms.get(code);
+  if (room) {
+    if (room._cleanupTimer) clearTimeout(room._cleanupTimer);
+    if (room._hostTransferTimer) clearTimeout(room._hostTransferTimer);
+    io.to(code).emit('room:closed', { reason: 'Комната закрыта администратором' });
     io.to(code).emit('toast', { text: 'Комната закрыта администратором' });
+    const sids = io.sockets.adapter.rooms.get(code);
+    if (sids) {
+      for (const sid of Array.from(sids)) {
+        const s = io.sockets.sockets.get(sid);
+        if (s) {
+          s.leave(code);
+          socketMeta.delete(sid);
+        }
+      }
+    }
     rooms.delete(code);
-    broadcastPublicRooms();
   }
-  res.json({ ok: true });
+  db.deleteSavedRoom(code);
+  persistRoomsToDb(true);
+  broadcastPublicRooms();
+  res.json({ ok: true, code });
+});
+
+app.delete('/api/admin/rooms', adminMiddleware, (req, res) => {
+  hydrateRoomsFromDb();
+  for (const [code, room] of Array.from(rooms.entries())) {
+    if (room._cleanupTimer) clearTimeout(room._cleanupTimer);
+    if (room._hostTransferTimer) clearTimeout(room._hostTransferTimer);
+    io.to(code).emit('room:closed', { reason: 'Все комнаты закрыты администратором' });
+    io.to(code).emit('toast', { text: 'Все комнаты закрыты администратором' });
+    const sids = io.sockets.adapter.rooms.get(code);
+    if (sids) {
+      for (const sid of Array.from(sids)) {
+        const s = io.sockets.sockets.get(sid);
+        if (s) s.leave(code);
+      }
+    }
+    rooms.delete(code);
+    db.deleteSavedRoom(code);
+  }
+  persistRoomsToDb(true);
+  broadcastPublicRooms();
+  res.json({ ok: true, message: 'Все комнаты закрыты' });
 });
 
 // ================= CATALOG & Z01 STREAMING ROUTES =================

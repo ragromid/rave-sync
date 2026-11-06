@@ -2086,7 +2086,13 @@
             }
           }
         }
-      } catch {}
+      } catch (err) {
+        if (err && err.message && (err.message.includes('найдена') || err.message.includes('закрыта') || err.message.includes('404'))) {
+          showToast('Комната была закрыта');
+          leaveRoom();
+          switchView('explore');
+        }
+      }
       return;
     }
 
@@ -2842,6 +2848,12 @@
 
   socket.on('room:error', ({ error }) => {
     showToast(error || 'Ошибка комнаты');
+  });
+
+  socket.on('room:closed', (data) => {
+    showToast(data?.reason || data?.message || 'Комната была закрыта администратором');
+    leaveRoom();
+    switchView('explore');
   });
 
   async function handleRoomJoined(room) {

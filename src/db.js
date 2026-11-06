@@ -1215,6 +1215,15 @@ function getSavedRoomsSnapshot() {
   return db.savedRooms || {};
 }
 
+function deleteSavedRoom(code) {
+  if (!code) return;
+  const c = String(code).replace(/^#/, '').trim().toUpperCase();
+  if (db.savedRooms && db.savedRooms[c]) {
+    delete db.savedRooms[c];
+    saveDb(true);
+  }
+}
+
 function pushUserNotification(toUserId, notif) {
   if (!toUserId || !notif) return;
   if (!db.notifications) db.notifications = {};
@@ -1301,6 +1310,7 @@ module.exports = {
   flushCloudDb,
   saveRoomsSnapshot,
   getSavedRoomsSnapshot,
+  deleteSavedRoom,
   pushUserNotification,
   popUserNotifications,
   saveUserPushSubscription,

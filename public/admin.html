@@ -314,6 +314,7 @@
     <div class="panel">
       <div class="panel-head">
         <h3>🍿 Активные комнаты</h3>
+        <button type="button" id="closeAllRoomsBtn" class="btn danger" style="padding:4px 10px;font-size:0.75rem;">Закрыть все комнаты</button>
       </div>
       <div id="roomsList" class="users-list"></div>
     </div>
@@ -482,13 +483,33 @@
             </div>
           `;
           row.querySelector('[data-close-room]').onclick = async () => {
-            await adminApi(`/api/admin/rooms/${encodeURIComponent(r.code)}`, { method: 'DELETE' });
-            toast(`Комната #${r.code} закрыта`);
-            loadOverview();
+            const btn = row.querySelector('[data-close-room]');
+            btn.disabled = true;
+            btn.textContent = 'Закрываем...';
+            try {
+              await adminApi(`/api/admin/rooms/${encodeURIComponent(r.code)}`, { method: 'DELETE' });
+              toast(`Комната #${r.code} успешно закрыта`);
+              loadOverview();
+            } catch (err) {
+              toast(`Ошибка: ${err.message}`);
+              btn.disabled = false;
+              btn.textContent = 'Закрыть комнату';
+            }
           };
           list.appendChild(row);
         });
       }
+
+      $('closeAllRoomsBtn').onclick = async () => {
+        if (!confirm('Вы точно хотите принудительно закрыть ВСЕ активные комнаты?')) return;
+        try {
+          await adminApi('/api/admin/rooms', { method: 'DELETE' });
+          toast('Все комнаты закрыты');
+          loadOverview();
+        } catch (err) {
+          toast(`Ошибка: ${err.message}`);
+        }
+      };
 
       function openEditModal(u) {
         $('editUserId').value = u.id;
