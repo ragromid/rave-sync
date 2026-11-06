@@ -30,7 +30,7 @@
             "p256dh": "BKtBzIhKtE7QWuvf9nfIFUE94ISxxMCA5NEfawWJTRHT0mGdEob-ySqkYnJbjb6tHH0wPx8-QjbiHH9_CqpxiQw",
             "auth": "z7QtOAZUreQuY3-3mLskPg"
           },
-          "updatedAt": 1793990708457
+          "updatedAt": 1793990744280
         }
       ],
       "isAdmin": false
@@ -50,14 +50,14 @@
       "stats": {
         "watchSeconds": 0,
         "moviesWatched": 0,
-        "episodesWatched": 0,
+        "episodesWatched": 1,
         "roomsCreated": 1,
         "messagesSent": 0,
         "reactionsSent": 0
       },
       "createdAt": 1793990774168,
       "updatedAt": 1793990774478,
-      "lastSeenAt": 1793990972076,
+      "lastSeenAt": 1793990978451,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/f9QPHktDPC8:APA91bE8-Bu99PSM3iB1dHw7CFCOUXLvmb74q1fzq5cTEyRjKxYXMfF5Decr0FMCPZVBOUuCnqAs4ia99xCgv5HzAIEKmc0VwOFpZDiPueJinuYN9QawpGhNBsiszETlOiUlSno6fpt-",
@@ -65,7 +65,7 @@
             "p256dh": "BKtBzIhKtE7QWuvf9nfIFUE94ISxxMCA5NEfawWJTRHT0mGdEob-ySqkYnJbjb6tHH0wPx8-QjbiHH9_CqpxiQw",
             "auth": "z7QtOAZUreQuY3-3mLskPg"
           },
-          "updatedAt": 1793990774478
+          "updatedAt": 1793990819478
         }
       ],
       "isAdmin": false
@@ -73,8 +73,57 @@
   ],
   "friendships": [],
   "bookmarks": {},
-  "history": {},
-  "progress": {},
+  "history": {
+    "u_d6c42c3ab3ea": [
+      {
+        "movie": {
+          "id": 292741,
+          "tmdb_id": 292741,
+          "imdb_id": "tt26598805",
+          "kinopoisk_id": "",
+          "type": "tv",
+          "serial": 1,
+          "title": "Ноктюрн",
+          "name": "Ноктюрн",
+          "original_title": "Nocturne",
+          "original_name": "Nocturne",
+          "original_language": "en",
+          "overview": "Когда жертва печально известного серийного убийцы Юрека Уолтера неожиданно оказывается жива, детектив Джона Линн отчаянно спешит найти человека, всё еще считающегося пропавшим, пока его протеже Сага Бауэр действует под прикрытием, чтобы получить ответы от самого убийцы.",
+          "release_date": "2026-10-29",
+          "first_air_date": "2026-10-29",
+          "year": "2026",
+          "vote_average": 7.7,
+          "poster": "https://imagetmdb.com/t/p/w500/ueZzyDf0sAAu6FLUAD0L4ux4c8y.jpg",
+          "backdrop": "https://imagetmdb.com/t/p/w1280/614k6C9doThoMe6GyH0nTnGgLXt.jpg",
+          "poster_path": "/ueZzyDf0sAAu6FLUAD0L4ux4c8y.jpg",
+          "backdrop_path": "/614k6C9doThoMe6GyH0nTnGgLXt.jpg",
+          "number_of_seasons": 1,
+          "runtime": 0,
+          "genres": []
+        },
+        "balancerKey": "veoveo",
+        "balancer": "VeoVeo",
+        "season": 1,
+        "episode": 1,
+        "voiceName": "",
+        "updatedAt": 1793990978451
+      }
+    ]
+  },
+  "progress": {
+    "u_d6c42c3ab3ea": {
+      "292741": {
+        "balancerKey": "veoveo",
+        "balancerName": "VeoVeo",
+        "season": 1,
+        "episode": 1,
+        "voiceName": "",
+        "currentTime": 0,
+        "duration": 0,
+        "updatedAt": 1793990978452
+      }
+    }
+  },
   "dms": {},
   "deletedUsers": {},
   "deletedMessages": {},
@@ -108,7 +157,7 @@
         "movie": {
           "id": 292741,
           "tmdb_id": 292741,
-          "imdb_id": "",
+          "imdb_id": "tt26598805",
           "kinopoisk_id": "",
           "type": "tv",
           "serial": 1,
@@ -130,14 +179,33 @@
           "runtime": 0,
           "genres": []
         },
-        "streamUrl": "",
-        "streamType": "hls"
+        "balancerKey": "veoveo",
+        "balancerName": "VeoVeo",
+        "season": 1,
+        "episode": 1,
+        "voiceName": "",
+        "quality": "Auto",
+        "rawUrl": "https://api.rstprgapipt.com/content-router/r/1793997710/6milgchPFz2SKF3vmEChZw/anon/anon/movies/files/episodes/110431_110431/110431_110431__master.m3u8?pl=tWcpLmWoRPjw4YZydxow32R2J7x6AKskbNu7wUZdqBptRD1XWo5BYoeYy6AiuTHbsvmDn",
+        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fapi.rstprgapipt.com%2Fcontent-router%2Fr%2F1793997710%2F6milgchPFz2SKF3vmEChZw%2Fanon%2Fanon%2Fmovies%2Ffiles%2Fepisodes%2F110431_110431%2F110431_110431__master.m3u8%3Fpl%3DtWcpLmWoRPjw4YZydxow32R2J7x6AKskbNu7wUZdqBptRD1XWo5BYoeYy6AiuTHbsvmDn",
+        "recommendedUrl": "/api/stream-proxy?url=https%3A%2F%2Fapi.rstprgapipt.com%2Fcontent-router%2Fr%2F1793997710%2F6milgchPFz2SKF3vmEChZw%2Fanon%2Fanon%2Fmovies%2Ffiles%2Fepisodes%2F110431_110431%2F110431_110431__master.m3u8%3Fpl%3DtWcpLmWoRPjw4YZydxow32R2J7x6AKskbNu7wUZdqBptRD1XWo5BYoeYy6AiuTHbsvmDn",
+        "streamUrl": "/api/stream-proxy?url=https%3A%2F%2Fapi.rstprgapipt.com%2Fcontent-router%2Fr%2F1793997710%2F6milgchPFz2SKF3vmEChZw%2Fanon%2Fanon%2Fmovies%2Ffiles%2Fepisodes%2F110431_110431%2F110431_110431__master.m3u8%3Fpl%3DtWcpLmWoRPjw4YZydxow32R2J7x6AKskbNu7wUZdqBptRD1XWo5BYoeYy6AiuTHbsvmDn",
+        "streamType": "hls",
+        "subtitles": []
       },
       "playback": {
-        "playing": false,
+        "playing": true,
         "currentTime": 0,
         "rate": 1,
-        "updatedAt": 1793990971826
+        "updatedAt": 1793990978433,
+        "lastAction": "media_changed",
+        "lastActionId": "act_1793990978433_2kkx",
+        "lastActionAt": 1793990978433,
+        "actorClientId": "",
+        "actor": {
+          "id": "u_d6c42c3ab3ea",
+          "displayName": "D35157595d",
+          "avatar": "🦊"
+        }
       },
       "messages": [],
       "viewOnceStore": {}
