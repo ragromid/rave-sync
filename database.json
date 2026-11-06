@@ -71,7 +71,7 @@
             "p256dh": "BHbYcKKobMNL7JMDbQmePksQd45rHVPOPMQueD-eSL4dhuZmPWiDRL0Cyr1Olqzsx_JEEPBzPsZFwDtYOdVznGA",
             "auth": "AdDiynCGUaGFtqlVq4-D6A"
           },
-          "updatedAt": 1793987869582
+          "updatedAt": 1793589462527
         },
         {
           "endpoint": "https://web.push.apple.com/QMGL0t5u0KwcBg0hh6kFw3U0jq0KiuWEe6VP0DwhDwZ7DKg-lRFYT058AGWd8QFAs1UooVYHGFS1Ynvi5x8D87k3rr_ufODBimmI-NqtuTnEY0-vGX5s3bLzxwo8qx_XvpHW9x9uuyxngJWLI29WSWoiLeX0AsQ5uyiFttzdg7A",
@@ -130,7 +130,7 @@
       },
       "createdAt": 1793987941725,
       "updatedAt": 1793987941725,
-      "lastSeenAt": 1793988094311,
+      "lastSeenAt": 1793988099578,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -307,9 +307,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
-        "currentTime": 23,
+        "currentTime": 15,
         "duration": 0,
-        "updatedAt": 1793988093876
+        "updatedAt": 1793988076364
       }
     },
     "u_1333f556dd06": {
@@ -331,9 +331,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
-        "currentTime": 23,
+        "currentTime": 14,
         "duration": 0,
-        "updatedAt": 1793988092054
+        "updatedAt": 1793988069634
       }
     }
   },
@@ -707,6 +707,27 @@
       {
         "id": "ntf_3aa44583",
         "createdAt": 1793988031900,
+        "type": "room_invite",
+        "title": "🍿 Приглашение в комнату!",
+        "body": "🔥 Murad зовёт смотреть «Нюрнберг»",
+        "roomCode": "BDYQ9H",
+        "invitePayload": {
+          "from": {
+            "id": "u_80ab0d1134f5",
+            "displayName": "Murad",
+            "avatar": "🔥"
+          },
+          "room": {
+            "code": "BDYQ9H",
+            "name": "Нюрнберг",
+            "mediaTitle": "Нюрнберг",
+            "poster": "https://imagetmdb.com/t/p/w500/5lR20dRAPjzmms7YqYs3ERdDEiz.jpg"
+          }
+        }
+      },
+      {
+        "id": "ntf_9a955fb3",
+        "createdAt": 1793988033300,
         "type": "room_invite",
         "title": "🍿 Приглашение в комнату!",
         "body": "🔥 Murad зовёт смотреть «Нюрнберг»",
@@ -4055,17 +4076,17 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 24.979,
+        "currentTime": 26.112999999999996,
         "rate": 1,
-        "updatedAt": 1793988096367,
+        "updatedAt": 1793988099578,
         "lastAction": "play",
-        "lastActionId": "act_1793988096367_2ikp",
-        "lastActionAt": 1793988096367,
-        "actorClientId": "dev_c2t0pt35_mw5a22p2",
+        "lastActionId": "act_1793988099578_dqmg",
+        "lastActionAt": 1793988099578,
+        "actorClientId": "dev_a4kzppc6_mw5a1u2o",
         "actor": {
-          "id": "u_80ab0d1134f5",
-          "displayName": "Murad",
-          "avatar": "🔥"
+          "id": "u_e1c30d7da3c0",
+          "displayName": "nara",
+          "avatar": "🦁"
         },
         "volume": 1,
         "muted": false
