@@ -19,7 +19,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793997680419,
-      "lastSeenAt": 1793998411395,
+      "lastSeenAt": 1793998441385,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -798,6 +798,16 @@
           "color": "#ff6d00",
           "inVoice": false,
           "muted": false
+        },
+        {
+          "socketId": "EJZgTloLR6f-yNd-AAAF",
+          "id": "u_805b52bfc220",
+          "username": "rashid",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊",
+          "color": "#1de9b6",
+          "inVoice": false,
+          "muted": false
         }
       ],
       "media": {
@@ -887,6 +897,16 @@
           "hasPhoto": false,
           "imageUrl": "",
           "createdAt": 1793998161955,
+          "reactions": {}
+        },
+        {
+          "id": "m_d3b82f3d",
+          "system": true,
+          "user": null,
+          "text": "🦊 Rashid Sultanov в комнате",
+          "hasPhoto": false,
+          "imageUrl": "",
+          "createdAt": 1793998413871,
           "reactions": {}
         }
       ],
