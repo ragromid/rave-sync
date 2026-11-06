@@ -2849,27 +2849,66 @@
     renderPublicRooms(list || []);
   });
 
-  socket.on('room:error', ({ error }) => {
-    showToast(error || 'Ошибка комнаты');
+  function forceEvictToHomeScreen(reason = 'Комната закрыта администратором') {
+    // 1. Immediately exit full-screen mode if video was fullscreen
+    try {
+      if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement) {
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    } catch {}
+
+    // 2. Tear down players, audio streams and WebRTC
+    try { stopVoiceChat(); } catch {}
+    try { destroyPlayers(); } catch {}
+
+    // 3. Clear stored room tokens and state
     try { sessionStorage.removeItem('active_room_code'); } catch {}
     try { localStorage.removeItem('active_room_code'); } catch {}
-    const url = new URL(window.location.href);
-    url.searchParams.delete('room');
-    window.history.replaceState({}, '', url.toString());
-    leaveRoom();
-    switchView('explore');
-  });
+    state.room = null;
+
+    // 4. Save eviction notice to show toast on home screen
+    try {
+      sessionStorage.setItem('eviction_notice', reason);
+    } catch {}
+
+    // 5. Force instant navigation to main screen (/)
+    window.location.replace('/');
+  }
 
   function handleRoomClosedEviction(data) {
-    if (!state.room) return;
-    if (data?.code && state.room.code !== data.code) return;
-    showToast(data?.reason || data?.message || 'Комната была закрыта администратором');
-    leaveRoom();
-    switchView('explore');
+    const targetCode = data?.code ? String(data.code).replace(/^#/, '').trim().toUpperCase() : null;
+    const currentCode = state.room?.code ? String(state.room.code).replace(/^#/, '').trim().toUpperCase() : null;
+    const urlCode = new URLSearchParams(window.location.search).get('room')?.replace(/^#/, '').trim().toUpperCase();
+    let storedCode = '';
+    try { storedCode = (sessionStorage.getItem('active_room_code') || '').replace(/^#/, '').trim().toUpperCase(); } catch {}
+
+    // If specific room code given, check if this client is part of it
+    if (targetCode) {
+      const match = (currentCode && currentCode === targetCode) ||
+                    (urlCode && urlCode === targetCode) ||
+                    (storedCode && storedCode === targetCode);
+      if (!match && state.currentView !== 'room') {
+        return; // Client not in this room
+      }
+    }
+
+    forceEvictToHomeScreen(data?.reason || data?.message || 'Комната закрыта администратором');
   }
 
   socket.on('room:closed', handleRoomClosedEviction);
   socket.on('room:kicked', handleRoomClosedEviction);
+  socket.on('room:evicted', handleRoomClosedEviction);
+
+  socket.on('room:error', ({ error }) => {
+    try { sessionStorage.removeItem('active_room_code'); } catch {}
+    try { localStorage.removeItem('active_room_code'); } catch {}
+    if (state.currentView === 'room' || window.location.search.includes('room=')) {
+      forceEvictToHomeScreen(error || 'Комната недоступна');
+    } else {
+      showToast(error || 'Ошибка комнаты');
+    }
+  });
 
   async function handleRoomJoined(room) {
     const isRejoin = state.room && state.room.code === room.code;
@@ -2980,7 +3019,13 @@
   });
 
   socket.on('toast', ({ text }) => {
-    if (text) showToast(text);
+    if (!text) return;
+    const lower = text.toLowerCase();
+    if (lower.includes('закрыта администратором') || lower.includes('закрыты администратором') || lower.includes('выселен')) {
+      forceEvictToHomeScreen(text);
+      return;
+    }
+    showToast(text);
   });
 
   // ================= TELEGRAM-STYLE CHAT ENGINE (PHOTOS, VIEW-ONCE, REPLIES, REACTIONS, EDIT, DELETE) =================
@@ -4727,6 +4772,14 @@
 
   // ================= INITIALIZATION =================
   async function boot() {
+    try {
+      const notice = sessionStorage.getItem('eviction_notice');
+      if (notice) {
+        sessionStorage.removeItem('eviction_notice');
+        setTimeout(() => showToast(notice), 300);
+      }
+    } catch {}
+
     updateNotificationBellUi();
     loadCatalog(true);
     loadPublicRooms();
