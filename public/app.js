@@ -502,6 +502,7 @@
   // ================= VIEW NAVIGATION =================
   function switchView(viewName) {
     state.currentView = viewName;
+    document.body.classList.toggle('in-room-view', viewName === 'room');
     document.querySelectorAll('.view-page').forEach(p => p.classList.remove('active'));
     const target = $(`view-${viewName}`);
     if (target) target.classList.add('active');
@@ -603,8 +604,11 @@
     if (state.user?.settings?.proxyMode) {
       state.proxyMode = state.user.settings.proxyMode;
       const labels = { auto: '⚡ Прокси: Авто', always: '🛡️ Прокси: Вкл', off: '🌐 Прокси: Выкл' };
-      const btnSpan = $('toggleProxyStreamBtn')?.querySelector('span');
-      if (btnSpan && labels[state.proxyMode]) btnSpan.textContent = labels[state.proxyMode];
+      document.querySelectorAll('.btn-toggle-proxy, #toggleProxyStreamBtn').forEach(btn => {
+        const btnSpan = btn.querySelector('span');
+        if (btnSpan && labels[state.proxyMode]) btnSpan.textContent = labels[state.proxyMode];
+        else if (labels[state.proxyMode]) btn.textContent = labels[state.proxyMode];
+      });
     }
     updateHeaderUser();
     updateNotificationBellUi();
@@ -1772,12 +1776,17 @@
   }
 
   // Proxy Mode Toggle button
-  $('toggleProxyStreamBtn').addEventListener('click', () => {
+  function toggleProxyStreamMode() {
     const modes = ['auto', 'always', 'off'];
     const labels = { auto: '⚡ Прокси: Авто', always: '🛡️ Прокси: Вкл', off: '🌐 Прокси: Выкл' };
     const nextIdx = (modes.indexOf(state.proxyMode) + 1) % modes.length;
     state.proxyMode = modes[nextIdx];
-    $('toggleProxyStreamBtn').querySelector('span').textContent = labels[state.proxyMode];
+
+    document.querySelectorAll('.btn-toggle-proxy, #toggleProxyStreamBtn').forEach(btn => {
+      const span = btn.querySelector('span');
+      if (span) span.textContent = labels[state.proxyMode];
+      else btn.textContent = labels[state.proxyMode];
+    });
 
     // Persist proxyMode preference on the server
     if (state.user) {
@@ -1793,8 +1802,12 @@
       const wasPlaying = !video.paused;
       state.room.media.streamUrl = pickStreamUrl(state.room.media);
       loadMediaIntoPlayer(state.room.media, { playing: wasPlaying, currentTime: curTime });
-      showToast(`Режим потока: ${labels[state.proxyMode]}`);
     }
+    showToast(`Режим потока: ${labels[state.proxyMode]}`);
+  }
+
+  document.querySelectorAll('.btn-toggle-proxy, #toggleProxyStreamBtn').forEach(btn => {
+    btn.addEventListener('click', toggleProxyStreamMode);
   });
 
   // ================= VIDEO & YOUTUBE PLAYER + SYNC =================
@@ -2109,7 +2122,7 @@
   }
   setInterval(pollActiveDmChat, 1200);
 
-  $('resyncPlayerBtn').addEventListener('click', async () => {
+  async function triggerPlayerResync() {
     if (socket.connected) {
       socket.emit('player:request_sync');
     } else if (state.room) {
@@ -2119,6 +2132,10 @@
       } catch {}
     }
     showToast('Синхронизировано с комнатой');
+  }
+
+  document.querySelectorAll('.btn-resync-player, #resyncPlayerBtn').forEach(btn => {
+    btn.addEventListener('click', triggerPlayerResync);
   });
 
   function applyRemoteSync(data, isHeartbeat = false) {
@@ -2450,20 +2467,39 @@
   // Wake OSD on mouse/pointer movement inside playerWrapper
   $('playerWrapper')?.addEventListener('mousemove', () => wakeTvOsd(false));
   $('playerWrapper')?.addEventListener('touchstart', () => wakeTvOsd(false), { passive: true });
-  $('toggleTvOsdBtn')?.addEventListener('click', () => {
-    setSmartTvMode(true);
-    wakeTvOsd(true);
-    showToast('Управление пультом ТВ активно (стрелки ◀ ▶ и OK)');
+  function toggleSmartTvOsd() {
+    const isTv = !document.body.classList.contains('tv-mode');
+    setSmartTvMode(isTv);
+    if (isTv) {
+      wakeTvOsd(true);
+      showToast('Управление пультом ТВ активно (стрелки ◀ ▶ и OK)');
+    } else {
+      $('tvPlayerOsd')?.classList.add('hidden');
+      showToast('Кнопки ТВ скрыты');
+    }
+  }
+
+  document.querySelectorAll('.btn-toggle-tv-osd, #toggleTvOsdBtn').forEach(btn => {
+    btn.addEventListener('click', toggleSmartTvOsd);
   });
 
   // Open TV Remote Control Modal Deck
-  $('openTvRemoteBtn')?.addEventListener('click', () => {
+  function openTvRemoteModalDeck() {
     if ($('tvRemoteMovieTitle')) {
       $('tvRemoteMovieTitle').textContent = state.room?.media?.title || state.room?.name || 'Управление видео на ТВ';
     }
     updateTvOsdUi();
     openModal('tvRemoteModal');
+  }
+
+  document.querySelectorAll('.btn-open-tv-remote, #openTvRemoteBtn').forEach(btn => {
+    btn.addEventListener('click', openTvRemoteModalDeck);
   });
+
+  // Room Options Deck helper buttons
+  $('optionsInviteBtn')?.addEventListener('click', () => $('inviteFriendsModalBtn')?.click());
+  $('optionsCopyLinkBtn')?.addEventListener('click', () => $('copyRoomCodeBtn')?.click());
+  $('optionsLeaveRoomBtn')?.addEventListener('click', leaveRoom);
 
   document.querySelectorAll('[data-tv-cmd]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -3643,6 +3679,7 @@
     $('roomTitleText').textContent = room.name;
     $('roomPrivacyBadge').textContent = room.isPublic ? 'Публичная' : 'Приватная';
     $('roomCodeLabel').textContent = `#${room.code}`;
+    if ($('roomCodeOptionsDisplay')) $('roomCodeOptionsDisplay').textContent = `#${room.code}`;
     const isHost = state.user && room.hostId === state.user.id;
     $('roomSettingsBtn').classList.toggle('hidden', !isHost);
   }
@@ -3797,7 +3834,7 @@
     }
   });
 
-  // Mobile Room Quick Switcher (💬 Комната | 💌 Друзья | 🎞️ Озвучка | 👥 Зрители)
+  // Mobile Room Quick Switcher (💬 Чат | 🎬 Серии | 👥 Зрители | 💌 Друзья | ⚙️ Опции)
   function setMobileRoomTab(tabName) {
     state.mobileRoomTab = tabName;
     const layout = document.querySelector('.room-layout');
@@ -3806,10 +3843,11 @@
     });
     if (tabName === 'z01') {
       layout?.classList.add('mobile-tab-z01');
-      $('z01Panel').classList.remove('hidden');
+      $('z01Panel')?.classList.remove('hidden');
     } else {
       layout?.classList.remove('mobile-tab-z01');
-      const rtab = tabName === 'users' ? 'users' : (tabName === 'dms' ? 'dms' : 'chat');
+      const validTabs = ['chat', 'users', 'dms', 'options'];
+      const rtab = validTabs.includes(tabName) ? tabName : 'chat';
       document.querySelectorAll('.side-tab').forEach(t => t.classList.toggle('active', t.dataset.rtab === rtab));
       document.querySelectorAll('.rtab-content').forEach(c => c.classList.remove('active'));
       $(`rtab-${rtab}`)?.classList.add('active');
@@ -3820,6 +3858,10 @@
         if (box) box.scrollTop = box.scrollHeight;
       } else if (rtab === 'dms') {
         renderRoomDmFriendsList();
+      } else if (rtab === 'options') {
+        if ($('roomCodeOptionsDisplay') && state.room) {
+          $('roomCodeOptionsDisplay').textContent = `#${state.room.code}`;
+        }
       }
     }
   }
@@ -3828,14 +3870,24 @@
     btn.addEventListener('click', () => setMobileRoomTab(btn.dataset.mrtab));
   });
 
-  // Desktop Sidebar tabs (Chat / Friends DM / Participants)
+  // Desktop Sidebar tabs (💬 Чат | 👥 Зрители | 💌 Друзья | ⚙️ Опции)
   document.querySelectorAll('.side-tab').forEach(tab => {
     tab.addEventListener('click', () => {
+      const rtab = tab.dataset.rtab;
       document.querySelectorAll('.side-tab').forEach(t => t.classList.toggle('active', t === tab));
       document.querySelectorAll('.rtab-content').forEach(c => c.classList.remove('active'));
-      $(`rtab-${tab.dataset.rtab}`).classList.add('active');
-      if (tab.dataset.rtab === 'dms') {
+      $(`rtab-${rtab}`)?.classList.add('active');
+      if (rtab === 'chat') {
+        state.unreadChatCount = 0;
+        $('chatUnreadBadge')?.classList.add('hidden');
+        const box = $('chatMessages');
+        if (box) box.scrollTop = box.scrollHeight;
+      } else if (rtab === 'dms') {
         renderRoomDmFriendsList();
+      } else if (rtab === 'options') {
+        if ($('roomCodeOptionsDisplay') && state.room) {
+          $('roomCodeOptionsDisplay').textContent = `#${state.room.code}`;
+        }
       }
     });
   });

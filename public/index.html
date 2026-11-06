@@ -376,49 +376,38 @@
                 </div>
               </div>
 
-              <!-- Quick Emoji Reaction Strip + Sync Resync Button -->
-              <div class="reaction-strip">
-                <div class="reaction-buttons">
-                  <button class="emoji-btn" data-emoji="🔥">🔥</button>
-                  <button class="emoji-btn" data-emoji="😂">😂</button>
-                  <button class="emoji-btn" data-emoji="❤️">❤️</button>
-                  <button class="emoji-btn" data-emoji="😱">😱</button>
-                  <button class="emoji-btn" data-emoji="🍿">🍿</button>
-                  <button class="emoji-btn" data-emoji="👏">👏</button>
-                  <button class="emoji-btn" data-emoji="😢">😢</button>
-                  <button class="emoji-btn" data-emoji="🤯">🤯</button>
-                </div>
-                <div class="player-quick-tools">
-                  <button id="toggleTvOsdBtn" class="pill-btn tiny ghost" title="Показать кнопки управления для пульта ТВ">
-                    <span>📺 Кнопки ТВ</span>
-                  </button>
-                  <button id="toggleProxyStreamBtn" class="pill-btn tiny ghost" title="Переключить прокси потока (если видео не грузится)">
-                    <span>⚡ Прокси: Авто</span>
-                  </button>
-                  <button id="resyncPlayerBtn" class="pill-btn tiny ghost" title="Синхронизировать таймкод с комнатой">
-                    <span>🔄 Синхр.</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Mobile Room Quick Switcher (Chat first & easily accessible right under player) -->
+              <!-- Mobile Room Quick Switcher (Clean tabs right under player) -->
               <div class="mobile-room-tabs" id="mobileRoomTabs">
                 <button type="button" class="m-rtab active" data-mrtab="chat">
-                  💬 Комната <span id="chatUnreadBadge" class="nav-badge inline-badge hidden">0</span>
+                  💬 Чат <span id="chatUnreadBadge" class="nav-badge inline-badge hidden">0</span>
+                </button>
+                <button type="button" class="m-rtab" data-mrtab="z01">
+                  🎬 Серии
+                </button>
+                <button type="button" class="m-rtab" data-mrtab="users">
+                  👥 Зрители (<span id="roomUserCountMobile">1</span>)
                 </button>
                 <button type="button" class="m-rtab" data-mrtab="dms">
                   💌 Друзья <span id="roomDmBadgeMobile" class="nav-badge inline-badge hidden">0</span>
                 </button>
-                <button type="button" class="m-rtab" data-mrtab="z01">
-                  🎞️ Озвучка
-                </button>
-                <button type="button" class="m-rtab" data-mrtab="users">
-                  👥 (<span id="roomUserCountMobile">1</span>)
+                <button type="button" class="m-rtab" data-mrtab="options">
+                  ⚙️ Опции
                 </button>
               </div>
 
               <!-- Z01 Online Selector Panel (Balancers, Seasons, Voices, Episodes, Qualities) -->
               <div id="z01Panel" class="z01-panel hidden">
+                <div class="z01-top-tools">
+                  <div class="z01-top-tools-title">🎞️ Источник и поток</div>
+                  <div class="z01-top-tools-actions">
+                    <button type="button" id="toggleProxyStreamBtn" class="pill-btn tiny ghost btn-toggle-proxy" title="Переключить прокси потока (если видео не грузится)">
+                      <span>⚡ Прокси: Авто</span>
+                    </button>
+                    <button type="button" id="resyncPlayerBtn" class="pill-btn tiny ghost btn-resync-player" title="Синхронизировать таймкод с комнатой">
+                      <span>🔄 Синхр.</span>
+                    </button>
+                  </div>
+                </div>
                 <div class="z01-segments" id="z01Segments">
                   <!-- Populated dynamically: Source, Season, Voice, Quality -->
                 </div>
@@ -429,18 +418,29 @@
               </div>
             </div>
 
-            <!-- Right / Bottom: Rave Chat, Friends Chat & Participants Sidebar -->
+            <!-- Right / Bottom: Rave Chat, Friends Chat, Participants & Room Options Sidebar -->
             <aside class="room-sidebar" id="roomSidebar">
               <div class="sidebar-tabs">
-                <button class="side-tab active" data-rtab="chat">💬 Комната</button>
+                <button class="side-tab active" data-rtab="chat">💬 Чат</button>
+                <button class="side-tab" data-rtab="users">👥 Зрители (<span id="roomUserCount">1</span>)</button>
                 <button class="side-tab" data-rtab="dms">💌 Друзья <span id="roomDmBadge" class="nav-badge inline-badge hidden">0</span></button>
-                <button class="side-tab" data-rtab="users">👥 (<span id="roomUserCount">1</span>)</button>
+                <button class="side-tab" data-rtab="options">⚙️ Опции</button>
               </div>
 
               <!-- Tab 1: Live Room Chat -->
               <div id="rtab-chat" class="rtab-content active">
                 <div id="chatMessages" class="chat-messages"></div>
                 <div id="chatComposerBar" class="composer-bar hidden"></div>
+                <div class="chat-reactions-strip">
+                  <button type="button" class="emoji-btn" data-emoji="🔥">🔥</button>
+                  <button type="button" class="emoji-btn" data-emoji="😂">😂</button>
+                  <button type="button" class="emoji-btn" data-emoji="❤️">❤️</button>
+                  <button type="button" class="emoji-btn" data-emoji="😱">😱</button>
+                  <button type="button" class="emoji-btn" data-emoji="🍿">🍿</button>
+                  <button type="button" class="emoji-btn" data-emoji="👏">👏</button>
+                  <button type="button" class="emoji-btn" data-emoji="😢">😢</button>
+                  <button type="button" class="emoji-btn" data-emoji="🤯">🤯</button>
+                </div>
                 <form id="chatForm" class="chat-input-row">
                   <button type="button" class="attach-photo-btn" data-chat-target="room" title="Прикрепить фото (обычное или одноразовое)">📷</button>
                   <input type="text" id="chatInput" placeholder="Написать в комнату..." autocomplete="off" />
@@ -479,6 +479,67 @@
               <!-- Tab 3: Participants List -->
               <div id="rtab-users" class="rtab-content">
                 <div id="roomParticipantsList" class="participants-list"></div>
+              </div>
+
+              <!-- Tab 4: Room, Stream & TV Control Deck -->
+              <div id="rtab-options" class="rtab-content">
+                <div class="room-options-deck">
+                  <!-- Section 1: Player Resync -->
+                  <div class="options-section">
+                    <div class="options-section-title">⏱️ Синхронизация</div>
+                    <div class="options-card">
+                      <div class="options-card-desc">Если воспроизведение отстает от друзей или зависло:</div>
+                      <button type="button" class="btn primary full-w btn-resync-player" id="optionsResyncBtn">
+                        🔄 Синхронизировать с комнатой
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Section 2: Stream Proxy -->
+                  <div class="options-section">
+                    <div class="options-section-title">⚡ Поток и Прокси</div>
+                    <div class="options-card">
+                      <div class="options-card-desc">Помогает обойти блокировки провайдера и ускорить буферизацию:</div>
+                      <button type="button" class="btn secondary full-w btn-toggle-proxy" id="optionsProxyBtn">
+                        <span>⚡ Прокси: Авто</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Section 3: Smart TV & Remote -->
+                  <div class="options-section">
+                    <div class="options-section-title">📺 Управление на Телевизоре</div>
+                    <div class="options-card">
+                      <button type="button" class="btn glass full-w btn-open-tv-remote" id="optionsTvRemoteBtn" style="margin-bottom:8px;">
+                        📱 Открыть пульт ТВ на телефоне
+                      </button>
+                      <button type="button" class="btn ghost full-w btn-toggle-tv-osd" id="optionsTvOsdBtn">
+                        📺 Экранные кнопки ТВ (для пульта LG/Android)
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Section 4: Share & Invite -->
+                  <div class="options-section">
+                    <div class="options-section-title">🔗 Пригласить в комнату</div>
+                    <div class="options-card">
+                      <div class="room-code-badge-large" id="roomCodeOptionsDisplay">#CODE</div>
+                      <button type="button" class="btn accent full-w" id="optionsInviteBtn" style="margin-top:8px;">
+                        💌 Пригласить друга
+                      </button>
+                      <button type="button" class="btn ghost full-w" id="optionsCopyLinkBtn" style="margin-top:6px;">
+                        📋 Скопировать ссылку
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Section 5: Leave Room -->
+                  <div class="options-section">
+                    <button type="button" class="btn danger full-w" id="optionsLeaveRoomBtn">
+                      🚪 Выйти из комнаты
+                    </button>
+                  </div>
+                </div>
               </div>
             </aside>
           </div>
