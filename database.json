@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793988422912,
+      "lastSeenAt": 1793988423186,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -36,7 +36,7 @@
             "p256dh": "BGBSyGpzc3yvwpqpodI-0WSI--smntccRP6Qe0F5rIlOeKPvsKDsSmWLMV6WeAhtKYrTmLh2WCGKBCEO1ceAGbA",
             "auth": "LsQqD48zlHcMsQb22mz5Mg"
           },
-          "updatedAt": 1793988412990
+          "updatedAt": 1793988259544
         }
       ]
     },
@@ -71,7 +71,7 @@
             "p256dh": "BHbYcKKobMNL7JMDbQmePksQd45rHVPOPMQueD-eSL4dhuZmPWiDRL0Cyr1Olqzsx_JEEPBzPsZFwDtYOdVznGA",
             "auth": "AdDiynCGUaGFtqlVq4-D6A"
           },
-          "updatedAt": 1793988406918
+          "updatedAt": 1793589462527
         },
         {
           "endpoint": "https://web.push.apple.com/QMGL0t5u0KwcBg0hh6kFw3U0jq0KiuWEe6VP0DwhDwZ7DKg-lRFYT058AGWd8QFAs1UooVYHGFS1Ynvi5x8D87k3rr_ufODBimmI-NqtuTnEY0-vGX5s3bLzxwo8qx_XvpHW9x9uuyxngJWLI29WSWoiLeX0AsQ5uyiFttzdg7A",
@@ -130,7 +130,7 @@
       },
       "createdAt": 1793987941725,
       "updatedAt": 1793987941725,
-      "lastSeenAt": 1793988422858,
+      "lastSeenAt": 1793988424359,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -279,6 +279,16 @@
         "duration": 1450,
         "updatedAt": 1793001267614
       },
+      "1214931": {
+        "balancerKey": "rutubemovie",
+        "balancerName": "Rutube",
+        "season": 0,
+        "episode": 0,
+        "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
+        "currentTime": 155,
+        "duration": 0,
+        "updatedAt": 1793988420065
+      },
       "1218925": {
         "balancerKey": "kodik",
         "balancerName": "Kodik",
@@ -309,7 +319,7 @@
         "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
         "currentTime": 157,
         "duration": 0,
-        "updatedAt": 1793988419414
+        "updatedAt": 1793988421906
       }
     },
     "u_1333f556dd06": {
@@ -331,9 +341,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
-        "currentTime": 63,
+        "currentTime": 65,
         "duration": 0,
-        "updatedAt": 1793988209268
+        "updatedAt": 1793988214108
       },
       "1218925": {
         "balancerKey": "kodik",
@@ -343,7 +353,7 @@
         "voiceName": "Force Media",
         "currentTime": 244337,
         "duration": 0,
-        "updatedAt": 1793988273854
+        "updatedAt": 1793988393659
       }
     }
   },
@@ -4047,17 +4057,17 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 157.271,
+        "currentTime": 157.727,
         "rate": 1,
-        "updatedAt": 1793988421908,
+        "updatedAt": 1793988423186,
         "lastAction": "play",
-        "lastActionId": "act_1793988421908_021d",
-        "lastActionAt": 1793988421908,
-        "actorClientId": "dev_jcn9gkb3_mw5adlnq",
+        "lastActionId": "act_1793988423186_uuej",
+        "lastActionAt": 1793988423186,
+        "actorClientId": "dev_p86clxhi_mw5adpyu",
         "actor": {
-          "id": "u_80ab0d1134f5",
-          "displayName": "Murad",
-          "avatar": "🔥"
+          "id": "u_805b52bfc220",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊"
         },
         "volume": 1,
         "muted": false
