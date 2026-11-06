@@ -22,7 +22,7 @@
       },
       "createdAt": 1792997566919,
       "updatedAt": 1793991574835,
-      "lastSeenAt": 1793991574938,
+      "lastSeenAt": 1793991714457,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/f9QPHktDPC8:APA91bE8-Bu99PSM3iB1dHw7CFCOUXLvmb74q1fzq5cTEyRjKxYXMfF5Decr0FMCPZVBOUuCnqAs4ia99xCgv5HzAIEKmc0VwOFpZDiPueJinuYN9QawpGhNBsiszETlOiUlSno6fpt-",
@@ -112,6 +112,16 @@
           "displayName": "D35157595d",
           "avatar": "🦊",
           "color": "#ff6d00",
+          "inVoice": false,
+          "muted": false
+        },
+        {
+          "socketId": "http_u_805b52bfc220",
+          "id": "u_805b52bfc220",
+          "username": "rashid",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊",
+          "color": "#1de9b6",
           "inVoice": false,
           "muted": false
         }
