@@ -130,7 +130,7 @@
       },
       "createdAt": 1793987941725,
       "updatedAt": 1793987941725,
-      "lastSeenAt": 1793988722212,
+      "lastSeenAt": 1793988724945,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -4178,6 +4178,16 @@
           "displayName": "Murad",
           "avatar": "🔥",
           "color": "#7c5cff",
+          "inVoice": false,
+          "muted": false
+        },
+        {
+          "socketId": "http_u_e1c30d7da3c0",
+          "id": "u_e1c30d7da3c0",
+          "username": "nmnm",
+          "displayName": "nara",
+          "avatar": "🦁",
+          "color": "#ff6d00",
           "inVoice": false,
           "muted": false
         }
