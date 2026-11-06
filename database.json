@@ -119,6 +119,29 @@
       "isAdmin": false,
       "pushSubscriptions": [],
       "lastSeenAt": 1793047406403
+    },
+    {
+      "id": "u_09c2ee217349",
+      "username": "guest_d4363b",
+      "displayName": "Гость #9242",
+      "passwordHash": "765a5bf02a045ca085cd214c421c2128:6755f570e9670e5dcfb6ae975d68819396149036bc4cd2e8cc01b45d2288269c193e1b1296c1a710973382abafbe24a2443975c95f22131080102488a3a57715",
+      "avatar": "🦊",
+      "color": "#7c5cff",
+      "bio": "",
+      "settings": {
+        "proxyMode": "auto"
+      },
+      "stats": {
+        "watchSeconds": 0,
+        "moviesWatched": 0,
+        "episodesWatched": 0,
+        "roomsCreated": 1,
+        "messagesSent": 0,
+        "reactionsSent": 0
+      },
+      "createdAt": 1793997733634,
+      "updatedAt": 1793997733634,
+      "lastSeenAt": 1793997733865
     }
   ],
   "friendships": [
@@ -744,6 +767,65 @@
           "displayName": "Rashid Sultanov",
           "avatar": "🦊"
         }
+      },
+      "messages": [],
+      "viewOnceStore": {}
+    },
+    "6QCHSC": {
+      "code": "6QCHSC",
+      "name": "Годзилла: Минус ноль",
+      "isPublic": true,
+      "creatorId": "u_09c2ee217349",
+      "hostId": "u_09c2ee217349",
+      "hostOnlyControl": false,
+      "createdAt": 1793997733865,
+      "participants": [
+        {
+          "socketId": "http_u_09c2ee217349",
+          "id": "u_09c2ee217349",
+          "username": "guest_d4363b",
+          "displayName": "Гость #9242",
+          "avatar": "🦊",
+          "color": "#7c5cff",
+          "inVoice": false,
+          "muted": false
+        }
+      ],
+      "media": {
+        "type": "z01",
+        "title": "Годзилла: Минус ноль",
+        "poster": "https://imagetmdb.com/t/p/w500/hSuXLuBpR96TjX9KZcAi6dLbVla.jpg",
+        "backdrop": "https://imagetmdb.com/t/p/w1280/oqrYIDH4tvfEzPe1yqT4jzmAWHQ.jpg",
+        "movie": {
+          "id": 1381071,
+          "tmdb_id": 1381071,
+          "imdb_id": "",
+          "kinopoisk_id": "",
+          "type": "movie",
+          "serial": 0,
+          "title": "Годзилла: Минус ноль",
+          "original_title": "ゴジラ-0.0",
+          "original_language": "ja",
+          "overview": "Война отбросила Японию к нулевой отметке, а Годзилла загнал её в «минус». С тех пор прошло два года; страна с огромным трудом пытается восстановиться и вернуть себе привычную жизнь. Но едва человечеству удалось удержать с таким трудом добытый мир, как возникла новая угроза — и в одно мгновение уничтожила все надежды. Третьего шанса не будет. Здесь всё закончится.",
+          "release_date": "2026-11-03",
+          "year": "2026",
+          "vote_average": 8.1,
+          "poster": "https://imagetmdb.com/t/p/w500/hSuXLuBpR96TjX9KZcAi6dLbVla.jpg",
+          "backdrop": "https://imagetmdb.com/t/p/w1280/oqrYIDH4tvfEzPe1yqT4jzmAWHQ.jpg",
+          "poster_path": "/hSuXLuBpR96TjX9KZcAi6dLbVla.jpg",
+          "backdrop_path": "/oqrYIDH4tvfEzPe1yqT4jzmAWHQ.jpg",
+          "number_of_seasons": 0,
+          "runtime": 0,
+          "genres": []
+        },
+        "streamUrl": "",
+        "streamType": "hls"
+      },
+      "playback": {
+        "playing": false,
+        "currentTime": 0,
+        "rate": 1,
+        "updatedAt": 1793997733865
       },
       "messages": [],
       "viewOnceStore": {}
