@@ -142,29 +142,6 @@
       "createdAt": 1793997733634,
       "updatedAt": 1793997733634,
       "lastSeenAt": 1793998067009
-    },
-    {
-      "id": "u_a3080ed13f51",
-      "username": "guest_c9060a",
-      "displayName": "Гость #6120",
-      "passwordHash": "27f9cebdd3e3eb3c5fbf15ccf3e9f963:5368e1cde80c907510117dddcb35944a55195ad47f7de797cfc33061f3f04e887b36048a19950b0a4003368cfadc109667f5768b78b0808d006f37d1a1417f6d",
-      "avatar": "🦊",
-      "color": "#7c5cff",
-      "bio": "",
-      "settings": {
-        "proxyMode": "auto"
-      },
-      "stats": {
-        "watchSeconds": 0,
-        "moviesWatched": 0,
-        "episodesWatched": 1,
-        "roomsCreated": 1,
-        "messagesSent": 0,
-        "reactionsSent": 0
-      },
-      "createdAt": 1793997905639,
-      "updatedAt": 1793997905639,
-      "lastSeenAt": 1793998037730
     }
   ],
   "friendships": [
@@ -357,38 +334,6 @@
         "voiceName": "Дубляж (Звук с TS)",
         "updatedAt": 1793997782584
       }
-    ],
-    "u_a3080ed13f51": [
-      {
-        "movie": {
-          "id": 1294189,
-          "tmdb_id": 1294189,
-          "imdb_id": "tt13611778",
-          "kinopoisk_id": "",
-          "type": "movie",
-          "serial": 0,
-          "title": "Мангуст",
-          "original_title": "The Mongoose",
-          "original_language": "en",
-          "overview": "Обвинённый в преступлении, которого он не совершал, герой войны Райан «Клык» Флэнаган пускается в бега через полстраны. Полиция идёт по его следу, бывшие сослуживцы помогают скрыться, а миллионы зрителей следят за погоней в прямом эфире и болеют за его спасение.",
-          "release_date": "2026-10-29",
-          "year": "2026",
-          "vote_average": 5.9,
-          "poster": "https://imagetmdb.com/t/p/w500/awpG3pnvPuOcfce76mSpS69NQ3E.jpg",
-          "backdrop": "https://imagetmdb.com/t/p/w1280/byuwrUG1nkGv8a2lGkBmD7pULo6.jpg",
-          "poster_path": "/awpG3pnvPuOcfce76mSpS69NQ3E.jpg",
-          "backdrop_path": "/byuwrUG1nkGv8a2lGkBmD7pULo6.jpg",
-          "number_of_seasons": 0,
-          "runtime": 0,
-          "genres": []
-        },
-        "balancerKey": "veoveo",
-        "balancer": "VeoVeo",
-        "season": 1,
-        "episode": 1,
-        "voiceName": "",
-        "updatedAt": 1793997908226
-      }
     ]
   },
   "progress": {
@@ -470,18 +415,6 @@
         "currentTime": 0,
         "duration": 0,
         "updatedAt": 1793997782584
-      }
-    },
-    "u_a3080ed13f51": {
-      "1294189": {
-        "balancerKey": "veoveo",
-        "balancerName": "VeoVeo",
-        "season": 1,
-        "episode": 1,
-        "voiceName": "",
-        "currentTime": 7,
-        "duration": 3006,
-        "updatedAt": 1793997916176
       }
     }
   },
@@ -836,7 +769,8 @@
   "deletedUsers": {
     "u_d6c42c3ab3ea": 1793991236296,
     "u_226eb830d92e": 1792993976756,
-    "u_f1f96288bff3": 1793997638404
+    "u_f1f96288bff3": 1793997638404,
+    "u_a3080ed13f51": 1793998148303
   },
   "deletedMessages": {
     "ntf_c0b9c501": 1792999871201,
