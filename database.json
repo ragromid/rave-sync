@@ -15,11 +15,11 @@
         "moviesWatched": 0,
         "episodesWatched": 2,
         "roomsCreated": 3,
-        "messagesSent": 114,
+        "messagesSent": 115,
         "reactionsSent": 0
       },
       "updatedAt": 1793997680419,
-      "lastSeenAt": 1793998268888,
+      "lastSeenAt": 1793998321392,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -705,6 +705,20 @@
         "reactions": {},
         "createdAt": 1793998239084,
         "read": false
+      },
+      {
+        "id": "dm_3c536099dab6",
+        "fromId": "u_805b52bfc220",
+        "toId": "u_80ab0d1134f5",
+        "text": "мурадикк",
+        "imageUrl": "",
+        "hasImage": false,
+        "viewOnce": false,
+        "viewed": false,
+        "replyTo": null,
+        "reactions": {},
+        "createdAt": 1793998321232,
+        "read": false
       }
     ]
   },
@@ -736,6 +750,22 @@
         },
         "title": "Rashid Sultanov",
         "body": "привет"
+      },
+      {
+        "id": "ntf_52f6b41c",
+        "createdAt": 1793998321237,
+        "type": "dm_message",
+        "msgId": "dm_3c536099dab6",
+        "fromId": "u_805b52bfc220",
+        "from": {
+          "id": "u_805b52bfc220",
+          "username": "rashid",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊",
+          "color": "#1de9b6"
+        },
+        "title": "Rashid Sultanov",
+        "body": "мурадикк"
       }
     ]
   },
