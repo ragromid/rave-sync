@@ -141,7 +141,7 @@
       },
       "createdAt": 1793998161857,
       "updatedAt": 1793998161857,
-      "lastSeenAt": 1793998170243
+      "lastSeenAt": 1793998207388
     }
   ],
   "friendships": [
@@ -328,6 +328,18 @@
         "currentTime": 4509,
         "duration": 5999,
         "updatedAt": 1793046123929
+      }
+    },
+    "u_ac54daa0884a": {
+      "292741": {
+        "balancerKey": "veoveo",
+        "balancerName": "VeoVeo",
+        "season": 1,
+        "episode": 1,
+        "voiceName": "",
+        "currentTime": 7,
+        "duration": 3798,
+        "updatedAt": 1793998206904
       }
     }
   },
@@ -769,14 +781,14 @@
         "playing": false,
         "currentTime": 7.22379,
         "rate": 1,
-        "updatedAt": 1793998059605,
-        "lastAction": "pause",
-        "lastActionId": "act_1793998059605_6eg9",
-        "lastActionAt": 1793998059605,
-        "actorClientId": "dev_arbhyzqm_mw5g1uzq",
+        "updatedAt": 1793998206900,
+        "lastAction": "seek",
+        "lastActionId": "act_1793998206900_sq4e",
+        "lastActionAt": 1793998206900,
+        "actorClientId": "dev_5ry64rks_mw5g7mum",
         "actor": {
-          "id": "u_09c2ee217349",
-          "displayName": "Гость #9242",
+          "id": "u_ac54daa0884a",
+          "displayName": "Гость #3670",
           "avatar": "🦊"
         }
       },
