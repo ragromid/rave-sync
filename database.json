@@ -35,7 +35,7 @@
             "p256dh": "BGBSyGpzc3yvwpqpodI-0WSI--smntccRP6Qe0F5rIlOeKPvsKDsSmWLMV6WeAhtKYrTmLh2WCGKBCEO1ceAGbA",
             "auth": "LsQqD48zlHcMsQb22mz5Mg"
           },
-          "updatedAt": 1793040136049
+          "updatedAt": 1793998250032
         },
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/f9QPHktDPC8:APA91bE8-Bu99PSM3iB1dHw7CFCOUXLvmb74q1fzq5cTEyRjKxYXMfF5Decr0FMCPZVBOUuCnqAs4ia99xCgv5HzAIEKmc0VwOFpZDiPueJinuYN9QawpGhNBsiszETlOiUlSno6fpt-",
@@ -297,16 +297,6 @@
         "currentTime": 522,
         "duration": 1450,
         "updatedAt": 1793001267614
-      },
-      "292741": {
-        "balancerKey": "veoveo",
-        "balancerName": "VeoVeo",
-        "season": 1,
-        "episode": 1,
-        "voiceName": "",
-        "currentTime": 7,
-        "duration": 3798,
-        "updatedAt": 1793998374233
       },
       "1218925": {
         "balancerKey": "kodik",
@@ -877,7 +867,10 @@
           "hasPhoto": false,
           "imageUrl": "",
           "createdAt": 1793998048781,
-          "reactions": {}
+          "reactions": {},
+          "read": false,
+          "viewed": false,
+          "updatedAt": 1793998048781
         },
         {
           "id": "m_3b284a60",
@@ -887,7 +880,10 @@
           "hasPhoto": false,
           "imageUrl": "",
           "createdAt": 1793998051039,
-          "reactions": {}
+          "reactions": {},
+          "read": false,
+          "viewed": false,
+          "updatedAt": 1793998051039
         },
         {
           "id": "m_3991fe7b",
@@ -897,7 +893,10 @@
           "hasPhoto": false,
           "imageUrl": "",
           "createdAt": 1793998161955,
-          "reactions": {}
+          "reactions": {},
+          "read": false,
+          "viewed": false,
+          "updatedAt": 1793998161955
         },
         {
           "id": "m_d3b82f3d",
