@@ -265,8 +265,8 @@ async function ensureCloudLoaded() {
     await cloudInitPromise;
     return;
   }
-  // On Vercel Serverless, refresh from cloud if more than 800ms elapsed since last pull
-  if (process.env.VERCEL && Date.now() - lastCloudLoadAt > 800 && !cloudSyncInFlight) {
+  // On Vercel Serverless, refresh from cloud if more than 15s elapsed since last pull
+  if (process.env.VERCEL && Date.now() - lastCloudLoadAt > 15000 && !cloudSyncInFlight) {
     await initCloudDb();
   }
 }
@@ -334,11 +334,23 @@ async function initCloudDb() {
       const fileData = await fileRes.json();
       cloudFileSha = fileData.sha;
       if (commitSha) lastCloudCommitSha = commitSha;
-      const contentStr = Buffer.from(fileData.content || '', 'base64').toString('utf8');
-      const remoteDb = JSON.parse(contentStr);
-      // Merge remote DB with any local changes
-      db = mergeDb(remoteDb, db);
-      try { fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8'); } catch {}
+      let contentStr = '';
+      if (fileData.content) {
+        contentStr = Buffer.from(fileData.content, 'base64').toString('utf8');
+      } else if (fileData.download_url) {
+        // Fallback for files where GitHub omits content
+        const rawRes = await fetch(fileData.download_url, { signal: AbortSignal.timeout(6000) });
+        if (rawRes.ok) contentStr = await rawRes.text();
+      }
+      if (contentStr && contentStr.trim().startsWith('{')) {
+        try {
+          const remoteDb = JSON.parse(contentStr);
+          db = mergeDb(remoteDb, db);
+          try { fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8'); } catch {}
+        } catch (parseErr) {
+          console.error('[CloudDB] JSON parse warning:', parseErr.message);
+        }
+      }
       cloudInitialized = true;
       lastCloudLoadAt = Date.now();
     } else if (fileRes.status === 404) {
@@ -391,11 +403,20 @@ async function _doPushToCloudDb() {
           const j = await getRes.json();
           cloudFileSha = j.sha;
           if (remoteCommitSha) lastCloudCommitSha = remoteCommitSha;
-          try {
-            const remoteDb = JSON.parse(Buffer.from(j.content || '', 'base64').toString('utf8'));
-            db = mergeDb(remoteDb, db);
-            fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
-          } catch {}
+          let remoteContent = '';
+          if (j.content) {
+            remoteContent = Buffer.from(j.content, 'base64').toString('utf8');
+          } else if (j.download_url) {
+            const rawRes = await fetch(j.download_url, { signal: AbortSignal.timeout(6000) });
+            if (rawRes.ok) remoteContent = await rawRes.text();
+          }
+          if (remoteContent && remoteContent.trim().startsWith('{')) {
+            try {
+              const remoteDb = JSON.parse(remoteContent);
+              db = mergeDb(remoteDb, db);
+              fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
+            } catch {}
+          }
         }
       }
 

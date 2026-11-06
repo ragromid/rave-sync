@@ -968,18 +968,7 @@ button {
 }
 
 .unmute-sync-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 8px 14px;
-  border-radius: 99px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-pink));
-  color: #fff;
-  font-size: 0.82rem;
-  font-weight: 700;
-  z-index: 14;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-  animation: pulseGlow 1.8s infinite;
+  display: none !important;
 }
 
 /* On-Video Floating Chat Overlay */
@@ -2591,6 +2580,37 @@ button {
   .view-page.room-view {
     padding: 0 0 calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px));
     overflow: hidden;
+  }
+  /* Prevent Smart TV bottom D-Pad bar from popping up on mobile phone touch & overlapping video */
+  body:not(.tv-mode) .tv-player-osd {
+    display: none !important;
+  }
+  body:not(.tv-mode) .tv-center-feedback {
+    display: none !important;
+  }
+  #openTvRemoteBtn {
+    display: none !important;
+  }
+  .room-topbar {
+    padding: 6px 10px;
+    gap: 6px;
+    min-height: 48px;
+  }
+  .room-title-text {
+    font-size: 0.9rem;
+    max-width: 130px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .room-top-actions {
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .room-top-actions .pill-btn {
+    height: 28px;
+    padding: 0 8px;
+    font-size: 0.72rem;
   }
   .room-layout {
     flex-direction: column;

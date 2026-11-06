@@ -76,7 +76,21 @@ function persistRoomsToDb(immediate = true) {
       })),
       media: r.media,
       playback: r.playback,
-      messages: (r.messages || []).slice(-80),
+      messages: (r.messages || []).slice(-30).map(m => ({
+        id: m.id,
+        system: !!m.system,
+        user: m.user ? {
+          id: m.user.id,
+          displayName: m.user.displayName,
+          avatar: m.user.avatar,
+          color: m.user.color
+        } : null,
+        text: m.text,
+        hasPhoto: !!m.hasPhoto,
+        imageUrl: (m.imageUrl && !m.imageUrl.startsWith('data:')) ? m.imageUrl : '',
+        createdAt: m.createdAt,
+        reactions: m.reactions || {}
+      })),
       viewOnceStore: r.viewOnceStore || {}
     };
   }
@@ -1072,7 +1086,7 @@ function createRoomChatMessage(room, user, payload = {}) {
       id: user.id,
       displayName: user.displayName,
       avatar: user.avatar,
-      avatarUrl: user.avatarUrl || '',
+      avatarUrl: (user.avatarUrl && !user.avatarUrl.startsWith('data:')) ? user.avatarUrl : '',
       color: user.color
     },
     text,
@@ -1224,11 +1238,22 @@ app.post('/api/rooms/:code/leave', authMiddleware, (req, res) => {
   const room = rooms.get(code);
   if (room) {
     for (const [k, p] of room.participants.entries()) {
-      if (p.id === req.user.id && String(k).startsWith('http_')) {
+      if (p.id === req.user.id) {
         room.participants.delete(k);
       }
     }
+    const isCreatorOrHost = room.creatorId === req.user.id || room.hostId === req.user.id;
+    if (room.participants.size === 0 || isCreatorOrHost) {
+      if (room._cleanupTimer) clearTimeout(room._cleanupTimer);
+      if (room._hostTransferTimer) clearTimeout(room._hostTransferTimer);
+      rooms.delete(code);
+      persistRoomsToDb();
+      broadcastPublicRooms();
+      io.to(code).emit('room:closed', { message: 'Комната закрыта' });
+      return res.json({ ok: true, deleted: true });
+    }
     persistRoomsToDb();
+    broadcastPublicRooms();
   }
   res.json({ ok: true });
 });
@@ -1511,7 +1536,7 @@ io.on('connection', (socket) => {
     notifyFriendsPresence(user.id);
   });
 
-  function leaveCurrentRoom() {
+  function leaveCurrentRoom(isExplicitLeave = false) {
     const meta = socketMeta.get(socket.id);
     if (!meta || !meta.roomCode) return;
     const code = meta.roomCode;
@@ -1528,9 +1553,31 @@ io.on('connection', (socket) => {
       socket.to(code).emit('voice:peer_left', { socketId: socket.id });
     }
 
-    if (room.participants.size === 0) {
-      // Keep room for 30 minutes in case of page refresh, server restart or app updates, then clean up
+    // 1. If creator/host explicitly left -> delete room immediately
+    const isCreatorOrHost = currentUser && (room.creatorId === currentUser.id || room.hostId === currentUser.id);
+    if (isExplicitLeave && isCreatorOrHost) {
       if (room._cleanupTimer) clearTimeout(room._cleanupTimer);
+      if (room._hostTransferTimer) clearTimeout(room._hostTransferTimer);
+      rooms.delete(code);
+      persistRoomsToDb();
+      broadcastPublicRooms();
+      io.to(code).emit('room:closed', { message: 'Создатель закрыл комнату' });
+      if (currentUser) notifyFriendsPresence(currentUser.id);
+      return;
+    }
+
+    // 2. If room is now empty
+    if (room.participants.size === 0) {
+      if (room._cleanupTimer) clearTimeout(room._cleanupTimer);
+      if (isExplicitLeave) {
+        // Last person clicked exit -> delete room immediately
+        rooms.delete(code);
+        persistRoomsToDb();
+        broadcastPublicRooms();
+        if (currentUser) notifyFriendsPresence(currentUser.id);
+        return;
+      }
+      // Unexpected disconnect (refresh/network drop) -> wait 60s
       room._cleanupTimer = setTimeout(() => {
         const r = rooms.get(code);
         if (r && r.participants.size === 0) {
@@ -1538,22 +1585,29 @@ io.on('connection', (socket) => {
           persistRoomsToDb();
           broadcastPublicRooms();
         }
-      }, 30 * 60 * 1000);
+      }, 60000);
     } else {
-      // If host left, give 45s grace period before reassigning host to someone else (in case host is reloading)
+      // Room still has other viewers
       if (room.hostId === currentUser?.id) {
-        if (room._hostTransferTimer) clearTimeout(room._hostTransferTimer);
-        room._hostTransferTimer = setTimeout(() => {
-          const r = rooms.get(code);
-          if (!r) return;
-          const remaining = Array.from(r.participants.values());
-          if (remaining.length > 0 && !remaining.some(p => p.id === r.hostId)) {
-            r.hostId = remaining[0].id;
-            addSystemMessage(r, `${remaining[0].displayName} теперь хост комнаты`);
-            io.to(code).emit('room:state', serializeRoom(r, false));
-            persistRoomsToDb();
-          }
-        }, 45000);
+        if (isExplicitLeave) {
+          const remaining = Array.from(room.participants.values());
+          room.hostId = remaining[0].id;
+          addSystemMessage(room, `${remaining[0].displayName} теперь хост комнаты`);
+          io.to(code).emit('room:state', serializeRoom(room, false));
+        } else {
+          if (room._hostTransferTimer) clearTimeout(room._hostTransferTimer);
+          room._hostTransferTimer = setTimeout(() => {
+            const r = rooms.get(code);
+            if (!r) return;
+            const remaining = Array.from(r.participants.values());
+            if (remaining.length > 0 && !remaining.some(p => p.id === r.hostId)) {
+              r.hostId = remaining[0].id;
+              addSystemMessage(r, `${remaining[0].displayName} теперь хост комнаты`);
+              io.to(code).emit('room:state', serializeRoom(r, false));
+              persistRoomsToDb();
+            }
+          }, 45000);
+        }
       }
       io.to(code).emit('room:state', serializeRoom(room, false));
     }
@@ -1642,7 +1696,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('room:leave', () => {
-    leaveCurrentRoom();
+    leaveCurrentRoom(true);
   });
 
   // Synchronized playback (Play, Pause, Seek, Rate, Volume, Remote Commands)
