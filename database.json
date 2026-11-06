@@ -22,7 +22,7 @@
       },
       "createdAt": 1792997566919,
       "updatedAt": 1793991574835,
-      "lastSeenAt": 1793991714457,
+      "lastSeenAt": 1793991745434,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/f9QPHktDPC8:APA91bE8-Bu99PSM3iB1dHw7CFCOUXLvmb74q1fzq5cTEyRjKxYXMfF5Decr0FMCPZVBOUuCnqAs4ia99xCgv5HzAIEKmc0VwOFpZDiPueJinuYN9QawpGhNBsiszETlOiUlSno6fpt-",
@@ -161,16 +161,16 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 124.461517,
+        "currentTime": 658.644517,
         "rate": 1,
-        "updatedAt": 1793991203759,
-        "lastAction": "play",
-        "lastActionId": "act_1793991114926_7ph2",
-        "lastActionAt": 1793991114926,
-        "actorClientId": "dev_79sg226f_mw5btatj",
+        "updatedAt": 1793991739824,
+        "lastAction": "seek",
+        "lastActionId": "act_1793991739824_6xai",
+        "lastActionAt": 1793991739824,
+        "actorClientId": "dev_22mna9yw_mw5c7n5p",
         "actor": {
-          "id": "u_d6c42c3ab3ea",
-          "displayName": "D35157595d",
+          "id": "u_805b52bfc220",
+          "displayName": "Rashid Sultanov",
           "avatar": "🦊"
         }
       },
