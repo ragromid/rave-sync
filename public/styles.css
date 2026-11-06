@@ -2708,6 +2708,7 @@ button {
     height: 100% !important;
     max-height: 100% !important;
     min-height: 0;
+    flex: 1 1 0;
     overflow: hidden;
   }
   .room-stage {
@@ -2715,38 +2716,10 @@ button {
     overflow: visible;
   }
   .player-wrapper {
-    max-height: 28vh;
-    transition: max-height 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-
-  /* When on-screen virtual keyboard is active (typing on mobile) */
-  body.keyboard-open .player-wrapper {
-    max-height: 15vh !important;
-    min-height: 70px;
-  }
-  body.keyboard-open .player-overlay {
-    padding: 4px !important;
-  }
-  body.keyboard-open .player-empty-box {
-    gap: 4px !important;
-  }
-  body.keyboard-open .player-empty-box p,
-  body.keyboard-open .player-empty-actions {
-    display: none !important;
-  }
-  body.keyboard-open .mobile-room-tabs {
-    display: none !important;
-  }
-  body.keyboard-open .chat-reactions-strip {
-    display: none !important;
-  }
-  body.keyboard-open .chat-messages {
-    padding: 6px 10px !important;
-    gap: 6px !important;
-  }
-  body.keyboard-open .chat-input-row {
-    padding: 6px 8px !important;
-    background: var(--bg-surface) !important;
+    max-height: 25vh;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    flex-shrink: 0;
   }
 
   .reaction-strip {
@@ -2756,8 +2729,9 @@ button {
     display: none !important;
   }
   .chat-reactions-strip {
-    padding: 5px 8px;
+    padding: 4px 8px;
     gap: 4px;
+    flex-shrink: 0;
   }
   .chat-reactions-strip .emoji-btn,
   .emoji-btn {
@@ -2772,6 +2746,8 @@ button {
     background: var(--bg-surface);
     border-bottom: 1px solid var(--border-subtle);
     flex-shrink: 0;
+    height: 36px;
+    min-height: 36px;
   }
   .mobile-room-tabs::-webkit-scrollbar {
     display: none;

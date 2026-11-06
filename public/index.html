@@ -230,9 +230,9 @@
                 <div id="dmMessages" class="chat-messages dm-messages"></div>
 
                 <div id="dmComposerBar" class="composer-bar hidden"></div>
-                <form id="dmForm" class="chat-input-row">
+                <form id="dmForm" class="chat-input-row" action="javascript:void(0);" novalidate>
                   <button type="button" class="attach-photo-btn" data-chat-target="dm" title="Прикрепить фото (обычное или одноразовое)">📷</button>
-                  <input type="text" id="dmInput" placeholder="Написать другу..." autocomplete="off" />
+                  <input type="text" id="dmInput" placeholder="Написать другу..." enterkeyhint="send" inputmode="text" autocomplete="off" autocorrect="on" autocapitalize="sentences" spellcheck="true" />
                   <button type="submit" class="send-btn" title="Отправить">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                   </button>
@@ -441,9 +441,9 @@
                   <button type="button" class="emoji-btn" data-emoji="😢">😢</button>
                   <button type="button" class="emoji-btn" data-emoji="🤯">🤯</button>
                 </div>
-                <form id="chatForm" class="chat-input-row">
+                <form id="chatForm" class="chat-input-row" action="javascript:void(0);" novalidate>
                   <button type="button" class="attach-photo-btn" data-chat-target="room" title="Прикрепить фото (обычное или одноразовое)">📷</button>
-                  <input type="text" id="chatInput" placeholder="Написать в комнату..." autocomplete="off" />
+                  <input type="text" id="chatInput" placeholder="Написать в комнату..." enterkeyhint="send" inputmode="text" autocomplete="off" autocorrect="on" autocapitalize="sentences" spellcheck="true" />
                   <button type="submit" class="send-btn" title="Отправить">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                   </button>
@@ -466,9 +466,9 @@
                   </div>
                   <div id="roomDmMessages" class="chat-messages"></div>
                   <div id="roomDmComposerBar" class="composer-bar hidden"></div>
-                  <form id="roomDmForm" class="chat-input-row">
+                  <form id="roomDmForm" class="chat-input-row" action="javascript:void(0);" novalidate>
                     <button type="button" class="attach-photo-btn" data-chat-target="roomDm" title="Прикрепить фото (обычное или одноразовое)">📷</button>
-                    <input type="text" id="roomDmInput" placeholder="Личное сообщение другу..." autocomplete="off" />
+                    <input type="text" id="roomDmInput" placeholder="Личное сообщение другу..." enterkeyhint="send" inputmode="text" autocomplete="off" autocorrect="on" autocapitalize="sentences" spellcheck="true" />
                     <button type="submit" class="send-btn" title="Отправить">
                       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                     </button>
@@ -924,6 +924,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261107_keyboard_fix"></script>
+  <script src="/app.js?v=20261107_smooth_keyboard"></script>
 </body>
 </html>
