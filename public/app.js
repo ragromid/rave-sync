@@ -65,7 +65,13 @@
 
   const isVercelHost = /\.vercel\.app$/i.test(window.location.hostname);
   const socket = (!isVercelHost && typeof window.io === 'function')
-    ? window.io({ reconnectionAttempts: 5 })
+    ? window.io({
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        timeout: 20000
+      })
     : { connected: false, on() {}, emit() {} };
 
   // ================= HELPERS & API =================
@@ -169,6 +175,14 @@
   socket.on('connect', () => {
     if (state.token) {
       socket.emit('auth:identify', { token: state.token });
+    }
+    // Auto-rejoin active room if connection was interrupted (server restart, deploy, Wi-Fi blink)
+    let activeCode = state.room?.code;
+    if (!activeCode) {
+      try { activeCode = sessionStorage.getItem('active_room_code'); } catch {}
+    }
+    if (activeCode) {
+      socket.emit('room:join', { code: activeCode, token: state.token });
     }
   });
 
@@ -1282,6 +1296,7 @@
 
   function leaveRoom() {
     const prevCode = state.room?.code;
+    try { sessionStorage.removeItem('active_room_code'); } catch {}
     stopVoiceChat();
     destroyPlayers();
     socket.emit('room:leave');
@@ -1793,6 +1808,7 @@
   }
 
   function destroyPlayers() {
+    state.loadedStreamKey = '';
     if (state.hls) {
       state.hls.destroy();
       state.hls = null;
@@ -1808,6 +1824,7 @@
 
   function loadMediaIntoPlayer(media, playback = { playing: true, currentTime: 0 }) {
     destroyPlayers();
+    state.loadedStreamKey = media?.streamUrl || media?.youtubeId || '';
     $('unmuteSyncBtn').classList.add('hidden');
     if (!media || (!media.streamUrl && !media.youtubeId)) {
       setPlayerOverlay(true, false, 'Выберите фильм из каталога или источник Z01 ниже');
@@ -2742,7 +2759,9 @@
   });
 
   async function handleRoomJoined(room) {
+    const isRejoin = state.room && state.room.code === room.code;
     state.room = room;
+    try { sessionStorage.setItem('active_room_code', room.code); } catch {}
     switchView('room');
     setMobileRoomTab('chat');
 
@@ -2756,16 +2775,27 @@
     renderRoomMessages(room.messages || []);
 
     if (room.media) {
+      const streamKey = room.media.streamUrl || room.media.youtubeId || '';
+      const isAlreadyPlayingSameMedia = isRejoin && state.loadedStreamKey && state.loadedStreamKey === streamKey;
+
       if (room.media.type === 'z01' && room.media.movie) {
         if (room.media.streamUrl) {
-          loadMediaIntoPlayer(room.media, room.playback);
+          if (isAlreadyPlayingSameMedia) {
+            applyRemoteSync(room.playback, false);
+          } else {
+            loadMediaIntoPlayer(room.media, room.playback);
+          }
           loadZ01ForMovieInRoom(room.media.movie, false);
         } else {
           await loadZ01ForMovieInRoom(room.media.movie, true);
         }
       } else {
         $('z01Panel').classList.add('hidden');
-        loadMediaIntoPlayer(room.media, room.playback);
+        if (isAlreadyPlayingSameMedia) {
+          applyRemoteSync(room.playback, false);
+        } else {
+          loadMediaIntoPlayer(room.media, room.playback);
+        }
       }
     } else {
       $('z01Panel').classList.add('hidden');
@@ -4574,15 +4604,16 @@
     await initAuth();
     updateNotificationBellUi();
 
-    // Check URL for ?room=CODE
+    // Check URL or session for active room
     const params = new URLSearchParams(window.location.search);
-    const roomCode = params.get('room');
+    let roomCode = params.get('room');
+    if (!roomCode) {
+      try { roomCode = sessionStorage.getItem('active_room_code'); } catch {}
+    }
     if (roomCode) {
+      await ensureAuthenticated();
       if (state.user) {
         joinRoomByCode(roomCode);
-      } else {
-        openAuthModal();
-        showToast(`Войдите, чтобы подключиться к комнате #${roomCode.toUpperCase()}`);
       }
     }
   }

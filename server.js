@@ -60,6 +60,7 @@ function persistRoomsToDb(immediate = true) {
       code: r.code,
       name: r.name,
       isPublic: r.isPublic,
+      creatorId: r.creatorId || r.hostId,
       hostId: r.hostId,
       hostOnlyControl: !!r.hostOnlyControl,
       createdAt: r.createdAt,
@@ -97,6 +98,7 @@ function hydrateRoomsFromDb() {
         code: sr.code,
         name: sr.name || 'Комната',
         isPublic: sr.isPublic !== false,
+        creatorId: sr.creatorId || sr.hostId,
         hostId: sr.hostId,
         hostOnlyControl: !!sr.hostOnlyControl,
         createdAt: sr.createdAt || Date.now(),
@@ -1156,6 +1158,7 @@ app.post('/api/rooms', authMiddleware, (req, res) => {
     code,
     name: String(name || (media && media.title) || `Комната ${req.user.displayName}`).trim().slice(0, 60),
     isPublic: !!isPublic,
+    creatorId: req.user.id,
     hostId: req.user.id,
     hostOnlyControl: !!hostOnlyControl,
     createdAt: Date.now(),
@@ -1526,21 +1529,31 @@ io.on('connection', (socket) => {
     }
 
     if (room.participants.size === 0) {
-      // Keep room for 2 minutes in case of page refresh, then clean up
-      setTimeout(() => {
+      // Keep room for 30 minutes in case of page refresh, server restart or app updates, then clean up
+      if (room._cleanupTimer) clearTimeout(room._cleanupTimer);
+      room._cleanupTimer = setTimeout(() => {
         const r = rooms.get(code);
         if (r && r.participants.size === 0) {
           rooms.delete(code);
           persistRoomsToDb();
           broadcastPublicRooms();
         }
-      }, 120000);
+      }, 30 * 60 * 1000);
     } else {
-      // If host left, assign next participant as host
-      const remaining = Array.from(room.participants.values());
-      if (!remaining.some(p => p.id === room.hostId)) {
-        room.hostId = remaining[0].id;
-        addSystemMessage(room, `${remaining[0].displayName} теперь хост комнаты`);
+      // If host left, give 45s grace period before reassigning host to someone else (in case host is reloading)
+      if (room.hostId === currentUser?.id) {
+        if (room._hostTransferTimer) clearTimeout(room._hostTransferTimer);
+        room._hostTransferTimer = setTimeout(() => {
+          const r = rooms.get(code);
+          if (!r) return;
+          const remaining = Array.from(r.participants.values());
+          if (remaining.length > 0 && !remaining.some(p => p.id === r.hostId)) {
+            r.hostId = remaining[0].id;
+            addSystemMessage(r, `${remaining[0].displayName} теперь хост комнаты`);
+            io.to(code).emit('room:state', serializeRoom(r, false));
+            persistRoomsToDb();
+          }
+        }, 45000);
       }
       io.to(code).emit('room:state', serializeRoom(room, false));
     }
@@ -1579,6 +1592,23 @@ io.on('connection', (socket) => {
       return socket.emit('room:error', { error: 'Комната не найдена или уже закрыта' });
     }
 
+    // Cancel pending cleanup timer if any
+    if (room._cleanupTimer) {
+      clearTimeout(room._cleanupTimer);
+      room._cleanupTimer = null;
+    }
+
+    // If original creator / host returned, cancel transfer timer and restore host
+    if (room.creatorId === currentUser.id || room.hostId === currentUser.id) {
+      if (room._hostTransferTimer) {
+        clearTimeout(room._hostTransferTimer);
+        room._hostTransferTimer = null;
+      }
+      room.hostId = currentUser.id;
+    }
+
+    const wasAlreadyInRoom = Array.from(room.participants.values()).some(p => p.id === currentUser.id);
+
     leaveCurrentRoom();
 
     // Remove stale http_ placeholder for this user if upgrading to Socket.io
@@ -1603,7 +1633,9 @@ io.on('connection', (socket) => {
     persistRoomsToDb();
     socket.emit('room:joined', serializeRoom(room, false));
     io.to(cleanCode).emit('room:participants', Array.from(room.participants.values()));
-    addSystemMessage(room, `${currentUser.avatar} ${currentUser.displayName} в комнате`);
+    if (!wasAlreadyInRoom) {
+      addSystemMessage(room, `${currentUser.avatar} ${currentUser.displayName} в комнате`);
+    }
 
     broadcastPublicRooms();
     notifyFriendsPresence(currentUser.id);
@@ -2014,5 +2046,17 @@ if (!process.env.VERCEL) {
     });
   });
 }
+
+function gracefulShutdown(signal) {
+  console.log(`[Server] Received ${signal}, preserving active rooms to database...`);
+  try {
+    persistRoomsToDb(true);
+    db.flushCloudDb();
+  } catch (err) {
+    console.error('[Server] Error during graceful shutdown:', err);
+  }
+}
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 module.exports = app;
