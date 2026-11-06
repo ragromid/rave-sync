@@ -130,7 +130,7 @@
       },
       "createdAt": 1793987941725,
       "updatedAt": 1793987941725,
-      "lastSeenAt": 1793988221361,
+      "lastSeenAt": 1793988223056,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -1859,16 +1859,18 @@
         "playing": false,
         "currentTime": 244323.22959757602,
         "rate": 1,
-        "updatedAt": 1793285957071,
-        "lastAction": "pause",
-        "lastActionId": "act_1793285957071_1btd",
-        "lastActionAt": 1793285957071,
-        "actorClientId": "dev_zzijnxdu_mvto59mw",
+        "updatedAt": 1793988223056,
+        "lastAction": "mute",
+        "lastActionId": "act_1793988223056_aev8",
+        "lastActionAt": 1793988223056,
+        "actorClientId": "dev_a4kzppc6_mw5a1u2o",
         "actor": {
-          "id": "u_80ab0d1134f5",
-          "displayName": "Murad",
-          "avatar": "🔥"
-        }
+          "id": "u_e1c30d7da3c0",
+          "displayName": "nara",
+          "avatar": "🦁"
+        },
+        "volume": 1,
+        "muted": false
       },
       "messages": [
         {
