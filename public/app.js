@@ -1301,10 +1301,13 @@
   function leaveRoom() {
     const prevCode = state.room?.code;
     try { sessionStorage.removeItem('active_room_code'); } catch {}
+    try { localStorage.removeItem('active_room_code'); } catch {}
     stopVoiceChat();
     destroyPlayers();
-    socket.emit('room:leave');
-    if (prevCode && !socket.connected) {
+    if (socket && socket.connected) {
+      socket.emit('room:leave');
+    }
+    if (prevCode) {
       api(`/api/rooms/${encodeURIComponent(prevCode)}/leave`, { method: 'POST' }).catch(() => {});
     }
     state.room = null;
@@ -2848,13 +2851,25 @@
 
   socket.on('room:error', ({ error }) => {
     showToast(error || 'Ошибка комнаты');
-  });
-
-  socket.on('room:closed', (data) => {
-    showToast(data?.reason || data?.message || 'Комната была закрыта администратором');
+    try { sessionStorage.removeItem('active_room_code'); } catch {}
+    try { localStorage.removeItem('active_room_code'); } catch {}
+    const url = new URL(window.location.href);
+    url.searchParams.delete('room');
+    window.history.replaceState({}, '', url.toString());
     leaveRoom();
     switchView('explore');
   });
+
+  function handleRoomClosedEviction(data) {
+    if (!state.room) return;
+    if (data?.code && state.room.code !== data.code) return;
+    showToast(data?.reason || data?.message || 'Комната была закрыта администратором');
+    leaveRoom();
+    switchView('explore');
+  }
+
+  socket.on('room:closed', handleRoomClosedEviction);
+  socket.on('room:kicked', handleRoomClosedEviction);
 
   async function handleRoomJoined(room) {
     const isRejoin = state.room && state.room.code === room.code;

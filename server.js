@@ -839,17 +839,24 @@ app.delete('/api/admin/rooms/:code', adminMiddleware, (req, res) => {
   const code = String(req.params.code || '').replace(/^#/, '').trim().toUpperCase();
   hydrateRoomsFromDb();
   const room = rooms.get(code);
+
+  // Global broadcast ensures clients leave even if socket room mapping got desynced
+  io.emit('room:closed', { code, reason: 'Комната закрыта администратором' });
+  io.emit('room:kicked', { code, reason: 'Комната закрыта администратором' });
+
   if (room) {
     if (room._cleanupTimer) clearTimeout(room._cleanupTimer);
     if (room._hostTransferTimer) clearTimeout(room._hostTransferTimer);
-    io.to(code).emit('room:closed', { reason: 'Комната закрыта администратором' });
+    io.to(code).emit('room:closed', { code, reason: 'Комната закрыта администратором' });
     io.to(code).emit('toast', { text: 'Комната закрыта администратором' });
     const sids = io.sockets.adapter.rooms.get(code);
     if (sids) {
       for (const sid of Array.from(sids)) {
         const s = io.sockets.sockets.get(sid);
         if (s) {
-          s.leave(code);
+          s.emit('room:closed', { code, reason: 'Комната закрыта администратором' });
+          s.emit('room:kicked', { code, reason: 'Комната закрыта администратором' });
+          try { s.leave(code); } catch {}
           socketMeta.delete(sid);
         }
       }
@@ -864,16 +871,20 @@ app.delete('/api/admin/rooms/:code', adminMiddleware, (req, res) => {
 
 app.delete('/api/admin/rooms', adminMiddleware, (req, res) => {
   hydrateRoomsFromDb();
+  io.emit('room:closed', { reason: 'Все комнаты закрыты администратором' });
+  io.emit('room:kicked', { reason: 'Все комнаты закрыты администратором' });
   for (const [code, room] of Array.from(rooms.entries())) {
     if (room._cleanupTimer) clearTimeout(room._cleanupTimer);
     if (room._hostTransferTimer) clearTimeout(room._hostTransferTimer);
-    io.to(code).emit('room:closed', { reason: 'Все комнаты закрыты администратором' });
-    io.to(code).emit('toast', { text: 'Все комнаты закрыты администратором' });
+    io.to(code).emit('room:closed', { code, reason: 'Все комнаты закрыты администратором' });
     const sids = io.sockets.adapter.rooms.get(code);
     if (sids) {
       for (const sid of Array.from(sids)) {
         const s = io.sockets.sockets.get(sid);
-        if (s) s.leave(code);
+        if (s) {
+          s.emit('room:closed', { code, reason: 'Все комнаты закрыты администратором' });
+          try { s.leave(code); } catch {}
+        }
       }
     }
     rooms.delete(code);
