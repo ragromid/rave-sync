@@ -22,7 +22,7 @@
       },
       "createdAt": 1792993803285,
       "updatedAt": 1793010472508,
-      "lastSeenAt": 1793988995307,
+      "lastSeenAt": 1793988998966,
       "isAdmin": false,
       "pushSubscriptions": [
         {
@@ -64,7 +64,7 @@
       },
       "createdAt": 1793987941735,
       "updatedAt": 1793987941735,
-      "lastSeenAt": 1793988995362,
+      "lastSeenAt": 1793988999872,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -311,9 +311,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "1080p",
-        "currentTime": 83,
+        "currentTime": 207,
         "duration": 8920,
-        "updatedAt": 1793988863584
+        "updatedAt": 1793988996662
       }
     },
     "u_805b52bfc220": {
@@ -4194,12 +4194,12 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 206.460785632,
+        "currentTime": 208.136572727,
         "rate": 1,
-        "updatedAt": 1793988995307,
-        "lastAction": "seek",
-        "lastActionId": "act_1793988995307_ykdj",
-        "lastActionAt": 1793988995307,
+        "updatedAt": 1793988998153,
+        "lastAction": "play",
+        "lastActionId": "act_1793988998153_gmfb",
+        "lastActionAt": 1793988998153,
         "actorClientId": "dev_3zp0cky2_mw5agm3m",
         "actor": {
           "id": "u_80ab0d1134f5",
