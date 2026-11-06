@@ -1887,7 +1887,20 @@
     if (isHls && window.Hls && window.Hls.isSupported()) {
       const hls = new window.Hls({
         enableWorker: true,
-        lowLatencyMode: false
+        lowLatencyMode: false,
+        maxBufferLength: 45,             // Buffer up to 45s ahead to eliminate internet hiccups
+        maxMaxBufferLength: 120,         // Healthy max buffer
+        maxBufferSize: 60 * 1000 * 1000, // 60MB max buffer size
+        backBufferLength: 20,            // Clean up played segments (essential for Smart TV memory)
+        maxBufferHole: 0.6,              // Bridge micro-drops in video without freeze
+        highBufferWatchdogPeriod: 2,
+        nudgeOffset: 0.1,
+        nudgeMaxRetry: 5,
+        manifestLoadingTimeOut: 12000,
+        levelLoadingTimeOut: 12000,
+        fragLoadingTimeOut: 25000,
+        fragLoadingMaxRetry: 6,
+        levelLoadingMaxRetry: 5
       });
       state.hls = hls;
       hls.loadSource(streamUrl);
@@ -1895,12 +1908,25 @@
       hls.on(window.Hls.Events.MANIFEST_PARSED, onLoaded);
       hls.on(window.Hls.Events.ERROR, (_, data) => {
         if (data.fatal) {
-          // Automatic fallback to backend stream proxy if direct stream had a CORS/network/IP error!
-          if (media.proxyUrl && streamUrl !== media.proxyUrl) {
-            console.log('Direct HLS failed, switching to backend stream proxy...');
-            media.recommendedUrl = media.proxyUrl;
-            media.streamUrl = media.proxyUrl;
-            hls.loadSource(media.proxyUrl);
+          switch (data.type) {
+            case window.Hls.ErrorTypes.NETWORK_ERROR:
+              console.warn('HLS network error, attempting auto-recovery...', data.details);
+              hls.startLoad();
+              break;
+            case window.Hls.ErrorTypes.MEDIA_ERROR:
+              console.warn('HLS media error, attempting auto-recovery...', data.details);
+              hls.recoverMediaError();
+              break;
+            default:
+              if (media.proxyUrl && streamUrl !== media.proxyUrl) {
+                console.log('Direct HLS unrecoverable, falling back to backend stream proxy...');
+                media.recommendedUrl = media.proxyUrl;
+                media.streamUrl = media.proxyUrl;
+                hls.loadSource(media.proxyUrl);
+              } else {
+                hls.destroy();
+              }
+              break;
           }
         }
       });
@@ -2104,8 +2130,9 @@
     }
 
     const targetTime = Number(data.currentTime) || 0;
-    const drift = Math.abs((mainVideo.currentTime || 0) - targetTime);
-    const threshold = isHeartbeat ? 1.8 : 1.0;
+    const curTime = mainVideo.currentTime || 0;
+    const timeDiff = targetTime - curTime;
+    const absDiff = Math.abs(timeDiff);
 
     state.suppressSyncEmit = true;
 
@@ -2123,14 +2150,37 @@
       updateTvOsdUi();
     }
 
-    if (drift > threshold || data.action === 'seek' || data.action === 'resync') {
+    if (isHeartbeat) {
+      // Smooth Sync Algorithm (No Buffer Flush Stuttering):
+      // 1. Tiny drift (< 0.8s): completely imperceptible, do nothing!
+      if (absDiff < 0.8) {
+        if (mainVideo.playbackRate !== (data.rate || 1.0)) {
+          mainVideo.playbackRate = data.rate || 1.0;
+        }
+      }
+      // 2. Moderate drift (0.8s - 3.5s): gently speed up / slow down by 4% to smoothly catch up without flushing video buffer!
+      else if (absDiff <= 3.5) {
+        const baseRate = data.rate || 1.0;
+        const adjustedRate = timeDiff > 0 ? baseRate * 1.04 : baseRate * 0.96;
+        if (Math.abs(mainVideo.playbackRate - adjustedRate) > 0.01) {
+          mainVideo.playbackRate = adjustedRate;
+        }
+      }
+      // 3. Massive drift (> 3.5s): long pause/buffering occurred, perform hard seek
+      else {
+        mainVideo.playbackRate = data.rate || 1.0;
+        try { mainVideo.currentTime = targetTime; } catch {}
+      }
+    } else if (data.action === 'seek' || data.action === 'resync' || absDiff > 4.0) {
+      // Explicit user seek or resync
+      mainVideo.playbackRate = data.rate || 1.0;
       try { mainVideo.currentTime = targetTime; } catch {}
-      if (!isHeartbeat && data.actor) {
+      if (data.actor) {
         showSyncBadge(`${data.actor.avatar || '🍿'} ${data.actor.displayName} перемотал(а)`);
       }
     }
 
-    if (data.rate && mainVideo.playbackRate !== data.rate) {
+    if (data.rate && !isHeartbeat && mainVideo.playbackRate !== data.rate) {
       mainVideo.playbackRate = data.rate;
     }
 

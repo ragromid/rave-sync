@@ -1018,6 +1018,9 @@ app.get('/api/stream-proxy', async (req, res) => {
       const val = upstream.headers.get(h);
       if (val) res.setHeader(h, val);
     }
+    if (/\.(ts|m4s|mp4|aac|vtt)(\?|$)/i.test(finalTargetUrl)) {
+      res.setHeader('Cache-Control', 'public, max-age=3600, immutable');
+    }
 
     if (!upstream.body) return res.end();
     const reader = upstream.body.getReader();
