@@ -121,10 +121,10 @@
       "lastSeenAt": 1793047406403
     },
     {
-      "id": "u_09c2ee217349",
-      "username": "guest_d4363b",
-      "displayName": "Гость #9242",
-      "passwordHash": "765a5bf02a045ca085cd214c421c2128:6755f570e9670e5dcfb6ae975d68819396149036bc4cd2e8cc01b45d2288269c193e1b1296c1a710973382abafbe24a2443975c95f22131080102488a3a57715",
+      "id": "u_ac54daa0884a",
+      "username": "guest_ec4b43",
+      "displayName": "Гость #3670",
+      "passwordHash": "ecefbda022254805df2b5a3ab9f0ede9:ead4d99d9714ab3759687af4de42d9c7504dce91e81574f0ca96ea3e2c2e046c1a4e7871dcaa7b9f39ba4e377ba21c4e6a0ac102169d77ff2f2fb988955e002e",
       "avatar": "🦊",
       "color": "#7c5cff",
       "bio": "",
@@ -133,15 +133,15 @@
       },
       "stats": {
         "watchSeconds": 0,
-        "moviesWatched": 1,
-        "episodesWatched": 1,
-        "roomsCreated": 1,
+        "moviesWatched": 0,
+        "episodesWatched": 0,
+        "roomsCreated": 0,
         "messagesSent": 0,
         "reactionsSent": 0
       },
-      "createdAt": 1793997733634,
-      "updatedAt": 1793997733634,
-      "lastSeenAt": 1793998067009
+      "createdAt": 1793998161857,
+      "updatedAt": 1793998161857,
+      "lastSeenAt": 1793998170243
     }
   ],
   "friendships": [
@@ -269,71 +269,6 @@
         "voiceName": "Force Media",
         "updatedAt": 1793046112108
       }
-    ],
-    "u_09c2ee217349": [
-      {
-        "movie": {
-          "id": 292741,
-          "tmdb_id": 292741,
-          "imdb_id": "tt26598805",
-          "kinopoisk_id": "",
-          "type": "tv",
-          "serial": 1,
-          "title": "Ноктюрн",
-          "name": "Ноктюрн",
-          "original_title": "Nocturne",
-          "original_name": "Nocturne",
-          "original_language": "en",
-          "overview": "Когда жертва печально известного серийного убийцы Юрека Уолтера неожиданно оказывается жива, детектив Джона Линн отчаянно спешит найти человека, всё еще считающегося пропавшим, пока его протеже Сага Бауэр действует под прикрытием, чтобы получить ответы от самого убийцы.",
-          "release_date": "2026-10-29",
-          "first_air_date": "2026-10-29",
-          "year": "2026",
-          "vote_average": 7.7,
-          "poster": "https://imagetmdb.com/t/p/w500/ueZzyDf0sAAu6FLUAD0L4ux4c8y.jpg",
-          "backdrop": "https://imagetmdb.com/t/p/w1280/614k6C9doThoMe6GyH0nTnGgLXt.jpg",
-          "poster_path": "/ueZzyDf0sAAu6FLUAD0L4ux4c8y.jpg",
-          "backdrop_path": "/614k6C9doThoMe6GyH0nTnGgLXt.jpg",
-          "number_of_seasons": 1,
-          "runtime": 0,
-          "genres": []
-        },
-        "balancerKey": "veoveo",
-        "balancer": "VeoVeo",
-        "season": 1,
-        "episode": 1,
-        "voiceName": "",
-        "updatedAt": 1793998051030
-      },
-      {
-        "movie": {
-          "id": 1381071,
-          "tmdb_id": 1381071,
-          "imdb_id": "tt34384661",
-          "kinopoisk_id": "",
-          "type": "movie",
-          "serial": 0,
-          "title": "Годзилла: Минус ноль",
-          "original_title": "ゴジラ-0.0",
-          "original_language": "ja",
-          "overview": "Война отбросила Японию к нулевой отметке, а Годзилла загнал её в «минус». С тех пор прошло два года; страна с огромным трудом пытается восстановиться и вернуть себе привычную жизнь. Но едва человечеству удалось удержать с таким трудом добытый мир, как возникла новая угроза — и в одно мгновение уничтожила все надежды. Третьего шанса не будет. Здесь всё закончится.",
-          "release_date": "2026-11-03",
-          "year": "2026",
-          "vote_average": 8.1,
-          "poster": "https://imagetmdb.com/t/p/w500/hSuXLuBpR96TjX9KZcAi6dLbVla.jpg",
-          "backdrop": "https://imagetmdb.com/t/p/w1280/oqrYIDH4tvfEzPe1yqT4jzmAWHQ.jpg",
-          "poster_path": "/hSuXLuBpR96TjX9KZcAi6dLbVla.jpg",
-          "backdrop_path": "/oqrYIDH4tvfEzPe1yqT4jzmAWHQ.jpg",
-          "number_of_seasons": 0,
-          "runtime": 0,
-          "genres": []
-        },
-        "balancerKey": "hdvb",
-        "balancer": "HDVB",
-        "season": 0,
-        "episode": 0,
-        "voiceName": "Дубляж (Звук с TS)",
-        "updatedAt": 1793997782584
-      }
     ]
   },
   "progress": {
@@ -393,28 +328,6 @@
         "currentTime": 4509,
         "duration": 5999,
         "updatedAt": 1793046123929
-      }
-    },
-    "u_09c2ee217349": {
-      "292741": {
-        "balancerKey": "veoveo",
-        "balancerName": "VeoVeo",
-        "season": 1,
-        "episode": 1,
-        "voiceName": "",
-        "currentTime": 7,
-        "duration": 3798,
-        "updatedAt": 1793998059609
-      },
-      "1381071": {
-        "balancerKey": "hdvb",
-        "balancerName": "HDVB",
-        "season": 0,
-        "episode": 0,
-        "voiceName": "Дубляж (Звук с TS)",
-        "currentTime": 0,
-        "duration": 0,
-        "updatedAt": 1793997782584
       }
     }
   },
@@ -770,7 +683,8 @@
     "u_d6c42c3ab3ea": 1793991236296,
     "u_226eb830d92e": 1792993976756,
     "u_f1f96288bff3": 1793997638404,
-    "u_a3080ed13f51": 1793998148303
+    "u_a3080ed13f51": 1793998148303,
+    "u_09c2ee217349": 1793998152578
   },
   "deletedMessages": {
     "ntf_c0b9c501": 1792999871201,
@@ -885,6 +799,16 @@
           "hasPhoto": false,
           "imageUrl": "",
           "createdAt": 1793998051039,
+          "reactions": {}
+        },
+        {
+          "id": "m_3991fe7b",
+          "system": true,
+          "user": null,
+          "text": "🦊 Гость #3670 в комнате",
+          "hasPhoto": false,
+          "imageUrl": "",
+          "createdAt": 1793998161955,
           "reactions": {}
         }
       ],
