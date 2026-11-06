@@ -19,7 +19,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793997680419,
-      "lastSeenAt": 1793998351396,
+      "lastSeenAt": 1793998381508,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -297,6 +297,16 @@
         "currentTime": 522,
         "duration": 1450,
         "updatedAt": 1793001267614
+      },
+      "292741": {
+        "balancerKey": "veoveo",
+        "balancerName": "VeoVeo",
+        "season": 1,
+        "episode": 1,
+        "voiceName": "",
+        "currentTime": 7,
+        "duration": 3798,
+        "updatedAt": 1793998374233
       },
       "1218925": {
         "balancerKey": "kodik",
@@ -790,7 +800,7 @@
           "muted": false
         },
         {
-          "socketId": "http_u_805b52bfc220",
+          "socketId": "fpfyIHQIzsVWKA9LAAAE",
           "id": "u_805b52bfc220",
           "username": "rashid",
           "displayName": "Rashid Sultanov",
@@ -847,14 +857,14 @@
         "playing": false,
         "currentTime": 7.22379,
         "rate": 1,
-        "updatedAt": 1793998206900,
+        "updatedAt": 1793998373979,
         "lastAction": "seek",
-        "lastActionId": "act_1793998206900_sq4e",
-        "lastActionAt": 1793998206900,
-        "actorClientId": "dev_5ry64rks_mw5g7mum",
+        "lastActionId": "act_1793998373979_w6y4",
+        "lastActionAt": 1793998373979,
+        "actorClientId": "dev_x9qp8u9e_mw5g9l6x",
         "actor": {
-          "id": "u_ac54daa0884a",
-          "displayName": "Гость #3670",
+          "id": "u_805b52bfc220",
+          "displayName": "Rashid Sultanov",
           "avatar": "🦊"
         }
       },
@@ -867,10 +877,7 @@
           "hasPhoto": false,
           "imageUrl": "",
           "createdAt": 1793998048781,
-          "reactions": {},
-          "read": false,
-          "viewed": false,
-          "updatedAt": 1793998048781
+          "reactions": {}
         },
         {
           "id": "m_3b284a60",
@@ -880,10 +887,7 @@
           "hasPhoto": false,
           "imageUrl": "",
           "createdAt": 1793998051039,
-          "reactions": {},
-          "read": false,
-          "viewed": false,
-          "updatedAt": 1793998051039
+          "reactions": {}
         },
         {
           "id": "m_3991fe7b",
@@ -893,10 +897,7 @@
           "hasPhoto": false,
           "imageUrl": "",
           "createdAt": 1793998161955,
-          "reactions": {},
-          "read": false,
-          "viewed": false,
-          "updatedAt": 1793998161955
+          "reactions": {}
         }
       ],
       "viewOnceStore": {}
