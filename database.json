@@ -15,11 +15,11 @@
         "moviesWatched": 0,
         "episodesWatched": 2,
         "roomsCreated": 3,
-        "messagesSent": 113,
+        "messagesSent": 114,
         "reactionsSent": 0
       },
       "updatedAt": 1793997680419,
-      "lastSeenAt": 1793998250138,
+      "lastSeenAt": 1793998268888,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -35,7 +35,7 @@
             "p256dh": "BGBSyGpzc3yvwpqpodI-0WSI--smntccRP6Qe0F5rIlOeKPvsKDsSmWLMV6WeAhtKYrTmLh2WCGKBCEO1ceAGbA",
             "auth": "LsQqD48zlHcMsQb22mz5Mg"
           },
-          "updatedAt": 1793998250032
+          "updatedAt": 1793040136049
         },
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/f9QPHktDPC8:APA91bE8-Bu99PSM3iB1dHw7CFCOUXLvmb74q1fzq5cTEyRjKxYXMfF5Decr0FMCPZVBOUuCnqAs4ia99xCgv5HzAIEKmc0VwOFpZDiPueJinuYN9QawpGhNBsiszETlOiUlSno6fpt-",
@@ -141,7 +141,10 @@
       },
       "createdAt": 1793998161857,
       "updatedAt": 1793998161857,
-      "lastSeenAt": 1793998211894
+      "lastSeenAt": 1793998211894,
+      "avatarUrl": "",
+      "isAdmin": false,
+      "pushSubscriptions": []
     }
   ],
   "friendships": [
@@ -688,6 +691,20 @@
         "createdAt": 1793025683256,
         "read": false,
         "updatedAt": 1793025683256
+      },
+      {
+        "id": "dm_6e5dea3f2694",
+        "fromId": "u_805b52bfc220",
+        "toId": "u_80ab0d1134f5",
+        "text": "привет",
+        "imageUrl": "",
+        "hasImage": false,
+        "viewOnce": false,
+        "viewed": false,
+        "replyTo": null,
+        "reactions": {},
+        "createdAt": 1793998239084,
+        "read": false
       }
     ]
   },
@@ -702,7 +719,26 @@
     "ntf_c0b9c501": 1792999871201,
     "ntf_b80933e5": 1792999871201
   },
-  "notifications": {},
+  "notifications": {
+    "u_80ab0d1134f5": [
+      {
+        "id": "ntf_b3fee310",
+        "createdAt": 1793998239088,
+        "type": "dm_message",
+        "msgId": "dm_6e5dea3f2694",
+        "fromId": "u_805b52bfc220",
+        "from": {
+          "id": "u_805b52bfc220",
+          "username": "rashid",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊",
+          "color": "#1de9b6"
+        },
+        "title": "Rashid Sultanov",
+        "body": "привет"
+      }
+    ]
+  },
   "savedRooms": {
     "GTDRFP": {
       "code": "GTDRFP",
@@ -801,7 +837,10 @@
           "hasPhoto": false,
           "imageUrl": "",
           "createdAt": 1793998048781,
-          "reactions": {}
+          "reactions": {},
+          "read": false,
+          "viewed": false,
+          "updatedAt": 1793998048781
         },
         {
           "id": "m_3b284a60",
@@ -811,7 +850,10 @@
           "hasPhoto": false,
           "imageUrl": "",
           "createdAt": 1793998051039,
-          "reactions": {}
+          "reactions": {},
+          "read": false,
+          "viewed": false,
+          "updatedAt": 1793998051039
         },
         {
           "id": "m_3991fe7b",
@@ -821,7 +863,10 @@
           "hasPhoto": false,
           "imageUrl": "",
           "createdAt": 1793998161955,
-          "reactions": {}
+          "reactions": {},
+          "read": false,
+          "viewed": false,
+          "updatedAt": 1793998161955
         }
       ],
       "viewOnceStore": {}
