@@ -4781,8 +4781,61 @@
     if (audio) audio.remove();
   });
 
+  // ================= MOBILE KEYBOARD & VISUAL VIEWPORT (iOS / ANDROID) =================
+  function initVisualViewportHandler() {
+    function updateViewport() {
+      const vv = window.visualViewport;
+      const height = vv ? vv.height : window.innerHeight;
+      const windowH = window.innerHeight;
+      const isKeyboard = (windowH - height) > 110;
+
+      document.documentElement.style.setProperty('--visual-viewport-h', `${height}px`);
+      document.body.classList.toggle('keyboard-open', isKeyboard);
+
+      if (isKeyboard) {
+        if (state.currentView === 'room') {
+          const chatMsgs = $('chatMessages');
+          if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight;
+          const roomDMs = $('roomDmMessages');
+          if (roomDMs) roomDMs.scrollTop = roomDMs.scrollHeight;
+        } else if (state.currentView === 'friends') {
+          const fDMs = $('dmMessages');
+          if (fDMs) fDMs.scrollTop = fDMs.scrollHeight;
+        }
+      }
+    }
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateViewport);
+      window.visualViewport.addEventListener('scroll', updateViewport);
+    }
+    window.addEventListener('resize', updateViewport);
+
+    // Initial measurement
+    updateViewport();
+
+    // Hook focus/blur on text inputs to smoothly keep input visible above keyboard
+    document.addEventListener('focusin', (e) => {
+      const tag = e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') {
+        setTimeout(() => {
+          updateViewport();
+          e.target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }, 120);
+      }
+    });
+
+    document.addEventListener('focusout', (e) => {
+      const tag = e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') {
+        setTimeout(updateViewport, 120);
+      }
+    });
+  }
+
   // ================= INITIALIZATION =================
   async function boot() {
+    initVisualViewportHandler();
     try {
       const notice = sessionStorage.getItem('eviction_notice');
       if (notice) {

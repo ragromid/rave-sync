@@ -2659,12 +2659,16 @@ button {
 
   /* Room Layout on Mobile: Fixed Video on top + Categorized Tabs below */
   body.in-room-view .topbar,
-  body:has(#view-room.active) .topbar {
+  body:has(#view-room.active) .topbar,
+  body.in-room-view .nav-rail,
+  body:has(#view-room.active) .nav-rail {
     display: none !important;
   }
   .view-page.room-view {
-    padding: 0 0 calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px));
-    overflow: hidden;
+    padding: 0 !important;
+    height: var(--visual-viewport-h, 100dvh) !important;
+    max-height: var(--visual-viewport-h, 100dvh) !important;
+    overflow: hidden !important;
   }
   /* Prevent Smart TV bottom D-Pad bar from popping up on mobile phone touch & overlapping video */
   body:not(.tv-mode) .tv-player-osd {
@@ -2680,6 +2684,7 @@ button {
     padding: 6px 10px;
     gap: 6px;
     min-height: 48px;
+    flex-shrink: 0;
   }
   .room-title-text {
     font-size: 0.9rem;
@@ -2698,8 +2703,11 @@ button {
     font-size: 0.72rem;
   }
   .room-layout {
+    display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0;
     overflow: hidden;
   }
   .room-stage {
@@ -2707,8 +2715,40 @@ button {
     overflow: visible;
   }
   .player-wrapper {
-    max-height: 32vh;
+    max-height: 28vh;
+    transition: max-height 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
+
+  /* When on-screen virtual keyboard is active (typing on mobile) */
+  body.keyboard-open .player-wrapper {
+    max-height: 15vh !important;
+    min-height: 70px;
+  }
+  body.keyboard-open .player-overlay {
+    padding: 4px !important;
+  }
+  body.keyboard-open .player-empty-box {
+    gap: 4px !important;
+  }
+  body.keyboard-open .player-empty-box p,
+  body.keyboard-open .player-empty-actions {
+    display: none !important;
+  }
+  body.keyboard-open .mobile-room-tabs {
+    display: none !important;
+  }
+  body.keyboard-open .chat-reactions-strip {
+    display: none !important;
+  }
+  body.keyboard-open .chat-messages {
+    padding: 6px 10px !important;
+    gap: 6px !important;
+  }
+  body.keyboard-open .chat-input-row {
+    padding: 6px 8px !important;
+    background: var(--bg-surface) !important;
+  }
+
   .reaction-strip {
     display: none !important;
   }
@@ -2731,6 +2771,7 @@ button {
     scrollbar-width: none;
     background: var(--bg-surface);
     border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
   }
   .mobile-room-tabs::-webkit-scrollbar {
     display: none;
@@ -2783,10 +2824,19 @@ button {
     height: auto;
     border-left: none;
     border-top: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   /* Friends View & Private Chat on Mobile */
+  body:has(.friends-layout.chat-open) .nav-rail {
+    display: none !important;
+  }
   .friends-view-page {
-    padding: 0 0 calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px));
+    height: var(--visual-viewport-h, 100dvh) !important;
+    max-height: var(--visual-viewport-h, 100dvh) !important;
+    padding: 0 !important;
+    overflow: hidden !important;
   }
   .friends-list-pane {
     width: 100%;
@@ -2801,7 +2851,11 @@ button {
   }
   .friends-layout.chat-open .friends-chat-pane {
     display: flex;
+    flex-direction: column;
     width: 100%;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
   }
   .dm-back-btn {
     display: inline-flex;
