@@ -130,7 +130,7 @@
       },
       "createdAt": 1793987941725,
       "updatedAt": 1793987941725,
-      "lastSeenAt": 1793988704278,
+      "lastSeenAt": 1793988705292,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -157,7 +157,7 @@
       "createdAt": 1793988693548,
       "updatedAt": 1793988693548,
       "avatarUrl": "",
-      "lastSeenAt": 1793988704245,
+      "lastSeenAt": 1793988705470,
       "isAdmin": false,
       "pushSubscriptions": []
     }
@@ -4134,18 +4134,18 @@
         "subtitles": []
       },
       "playback": {
-        "playing": false,
-        "currentTime": 353.708,
+        "playing": true,
+        "currentTime": 354.329,
         "rate": 1,
-        "updatedAt": 1793988704167,
-        "lastAction": "pause",
-        "lastActionId": "act_1793988704167_zlyr",
-        "lastActionAt": 1793988704167,
-        "actorClientId": "dev_a4kzppc6_mw5a1u2o",
+        "updatedAt": 1793988705470,
+        "lastAction": "play",
+        "lastActionId": "act_1793988705470_pc52",
+        "lastActionAt": 1793988705470,
+        "actorClientId": "dev_o4uhsewd_mw5admwt",
         "actor": {
-          "id": "u_e1c30d7da3c0",
-          "displayName": "nara",
-          "avatar": "🦁"
+          "id": "u_6a2df5aa5f31",
+          "displayName": "Гость #9256",
+          "avatar": "🦊"
         },
         "volume": 1,
         "muted": false
