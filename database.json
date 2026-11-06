@@ -22,7 +22,7 @@
       },
       "createdAt": 1792997566919,
       "updatedAt": 1793990708457,
-      "lastSeenAt": 1793990744280,
+      "lastSeenAt": 1793990748507,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/f9QPHktDPC8:APA91bE8-Bu99PSM3iB1dHw7CFCOUXLvmb74q1fzq5cTEyRjKxYXMfF5Decr0FMCPZVBOUuCnqAs4ia99xCgv5HzAIEKmc0VwOFpZDiPueJinuYN9QawpGhNBsiszETlOiUlSno6fpt-",
@@ -30,15 +30,16 @@
             "p256dh": "BKtBzIhKtE7QWuvf9nfIFUE94ISxxMCA5NEfawWJTRHT0mGdEob-ySqkYnJbjb6tHH0wPx8-QjbiHH9_CqpxiQw",
             "auth": "z7QtOAZUreQuY3-3mLskPg"
           },
-          "updatedAt": 1793990744280
+          "updatedAt": 1793990708457
         }
-      ]
+      ],
+      "isAdmin": false
     },
     {
       "id": "u_d6c42c3ab3ea",
       "username": "ragromid",
       "displayName": "D35157595d",
-      "passwordHash": "",
+      "passwordHash": "4fa53b5b78f406a8900a554e26bfbf98:e2f0a1d688b8f81271890f00abcdb3d060d0d40d31b83189dc388c8ee6655e8d0377baaadbd09bbea0108a69571a78bf1b022e695fca226024608a2b9a6796f6",
       "avatar": "🦊",
       "avatarUrl": "",
       "color": "#ff6d00",
@@ -50,13 +51,13 @@
         "watchSeconds": 0,
         "moviesWatched": 0,
         "episodesWatched": 0,
-        "roomsCreated": 0,
+        "roomsCreated": 1,
         "messagesSent": 0,
         "reactionsSent": 0
       },
       "createdAt": 1793990774168,
       "updatedAt": 1793990774478,
-      "lastSeenAt": 1793990819478,
+      "lastSeenAt": 1793990972076,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/f9QPHktDPC8:APA91bE8-Bu99PSM3iB1dHw7CFCOUXLvmb74q1fzq5cTEyRjKxYXMfF5Decr0FMCPZVBOUuCnqAs4ia99xCgv5HzAIEKmc0VwOFpZDiPueJinuYN9QawpGhNBsiszETlOiUlSno6fpt-",
@@ -64,9 +65,10 @@
             "p256dh": "BKtBzIhKtE7QWuvf9nfIFUE94ISxxMCA5NEfawWJTRHT0mGdEob-ySqkYnJbjb6tHH0wPx8-QjbiHH9_CqpxiQw",
             "auth": "z7QtOAZUreQuY3-3mLskPg"
           },
-          "updatedAt": 1793990819478
+          "updatedAt": 1793990774478
         }
-      ]
+      ],
+      "isAdmin": false
     }
   ],
   "friendships": [],
@@ -77,5 +79,68 @@
   "deletedUsers": {},
   "deletedMessages": {},
   "notifications": {},
-  "savedRooms": {}
+  "savedRooms": {
+    "GTDRFP": {
+      "code": "GTDRFP",
+      "name": "Ноктюрн",
+      "isPublic": true,
+      "creatorId": "u_d6c42c3ab3ea",
+      "hostId": "u_d6c42c3ab3ea",
+      "hostOnlyControl": false,
+      "createdAt": 1793990971826,
+      "participants": [
+        {
+          "socketId": "http_u_d6c42c3ab3ea",
+          "id": "u_d6c42c3ab3ea",
+          "username": "ragromid",
+          "displayName": "D35157595d",
+          "avatar": "🦊",
+          "color": "#ff6d00",
+          "inVoice": false,
+          "muted": false
+        }
+      ],
+      "media": {
+        "type": "z01",
+        "title": "Ноктюрн",
+        "poster": "https://imagetmdb.com/t/p/w500/ueZzyDf0sAAu6FLUAD0L4ux4c8y.jpg",
+        "backdrop": "https://imagetmdb.com/t/p/w1280/614k6C9doThoMe6GyH0nTnGgLXt.jpg",
+        "movie": {
+          "id": 292741,
+          "tmdb_id": 292741,
+          "imdb_id": "",
+          "kinopoisk_id": "",
+          "type": "tv",
+          "serial": 1,
+          "title": "Ноктюрн",
+          "name": "Ноктюрн",
+          "original_title": "Nocturne",
+          "original_name": "Nocturne",
+          "original_language": "en",
+          "overview": "Когда жертва печально известного серийного убийцы Юрека Уолтера неожиданно оказывается жива, детектив Джона Линн отчаянно спешит найти человека, всё еще считающегося пропавшим, пока его протеже Сага Бауэр действует под прикрытием, чтобы получить ответы от самого убийцы.",
+          "release_date": "2026-10-29",
+          "first_air_date": "2026-10-29",
+          "year": "2026",
+          "vote_average": 7.7,
+          "poster": "https://imagetmdb.com/t/p/w500/ueZzyDf0sAAu6FLUAD0L4ux4c8y.jpg",
+          "backdrop": "https://imagetmdb.com/t/p/w1280/614k6C9doThoMe6GyH0nTnGgLXt.jpg",
+          "poster_path": "/ueZzyDf0sAAu6FLUAD0L4ux4c8y.jpg",
+          "backdrop_path": "/614k6C9doThoMe6GyH0nTnGgLXt.jpg",
+          "number_of_seasons": 1,
+          "runtime": 0,
+          "genres": []
+        },
+        "streamUrl": "",
+        "streamType": "hls"
+      },
+      "playback": {
+        "playing": false,
+        "currentTime": 0,
+        "rate": 1,
+        "updatedAt": 1793990971826
+      },
+      "messages": [],
+      "viewOnceStore": {}
+    }
+  }
 }
