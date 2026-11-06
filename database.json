@@ -130,7 +130,7 @@
       },
       "createdAt": 1793987941725,
       "updatedAt": 1793987941725,
-      "lastSeenAt": 1793988156560,
+      "lastSeenAt": 1793988157188,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -307,9 +307,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
-        "currentTime": 28,
+        "currentTime": 24,
         "duration": 0,
-        "updatedAt": 1793988133915
+        "updatedAt": 1793988126946
       }
     },
     "u_1333f556dd06": {
@@ -331,9 +331,9 @@
         "season": 0,
         "episode": 0,
         "voiceName": "Нюрнберг | Nuremberg 2025 (Русская многоголосая озвучка)",
-        "currentTime": 41,
+        "currentTime": 40,
         "duration": 0,
-        "updatedAt": 1793988156560
+        "updatedAt": 1793988155281
       }
     }
   },
@@ -4014,13 +4014,13 @@
         "subtitles": []
       },
       "playback": {
-        "playing": false,
-        "currentTime": 40.047,
+        "playing": true,
+        "currentTime": 41.440999999999995,
         "rate": 1,
-        "updatedAt": 1793988155269,
-        "lastAction": "mute",
-        "lastActionId": "act_1793988155269_auk3",
-        "lastActionAt": 1793988155269,
+        "updatedAt": 1793988157188,
+        "lastAction": "play",
+        "lastActionId": "act_1793988157188_o7s1",
+        "lastActionAt": 1793988157188,
         "actorClientId": "dev_a4kzppc6_mw5a1u2o",
         "actor": {
           "id": "u_e1c30d7da3c0",
