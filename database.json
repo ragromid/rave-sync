@@ -19,7 +19,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793997680419,
-      "lastSeenAt": 1793991746699,
+      "lastSeenAt": 1793998238285,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -141,7 +141,7 @@
       },
       "createdAt": 1793998161857,
       "updatedAt": 1793998161857,
-      "lastSeenAt": 1793998207388
+      "lastSeenAt": 1793998211894
     }
   ],
   "friendships": [
