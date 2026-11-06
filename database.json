@@ -141,7 +141,7 @@
       },
       "createdAt": 1793997733634,
       "updatedAt": 1793997733634,
-      "lastSeenAt": 1793998032509
+      "lastSeenAt": 1793998049005
     },
     {
       "id": "u_a3080ed13f51",
@@ -164,7 +164,7 @@
       },
       "createdAt": 1793997905639,
       "updatedAt": 1793997905639,
-      "lastSeenAt": 1793997926834
+      "lastSeenAt": 1793998037730
     }
   ],
   "friendships": [
@@ -829,6 +829,16 @@
           "color": "#1de9b6",
           "inVoice": false,
           "muted": false
+        },
+        {
+          "socketId": "2CCzmBOO0qJ0exXEAAAA",
+          "id": "u_09c2ee217349",
+          "username": "guest_d4363b",
+          "displayName": "Гость #9242",
+          "avatar": "🦊",
+          "color": "#7c5cff",
+          "inVoice": false,
+          "muted": false
         }
       ],
       "media": {
@@ -879,7 +889,18 @@
           "avatar": "🦊"
         }
       },
-      "messages": [],
+      "messages": [
+        {
+          "id": "m_397909c1",
+          "system": true,
+          "user": null,
+          "text": "🦊 Гость #9242 в комнате",
+          "hasPhoto": false,
+          "imageUrl": "",
+          "createdAt": 1793998048781,
+          "reactions": {}
+        }
+      ],
       "viewOnceStore": {}
     }
   }
