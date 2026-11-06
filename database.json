@@ -141,7 +141,7 @@
       },
       "createdAt": 1793997733634,
       "updatedAt": 1793997733634,
-      "lastSeenAt": 1793997763436
+      "lastSeenAt": 1793997793397
     }
   ],
   "friendships": [
@@ -294,12 +294,12 @@
           "runtime": 0,
           "genres": []
         },
-        "balancerKey": "filmix",
-        "balancer": "Filmix",
+        "balancerKey": "hdvb",
+        "balancer": "HDVB",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080, ru, звук с TS, AD)",
-        "updatedAt": 1793997761049
+        "voiceName": "Дубляж (Звук с TS)",
+        "updatedAt": 1793997782584
       }
     ]
   },
@@ -364,14 +364,14 @@
     },
     "u_09c2ee217349": {
       "1381071": {
-        "balancerKey": "filmix",
-        "balancerName": "Filmix",
+        "balancerKey": "hdvb",
+        "balancerName": "HDVB",
         "season": 0,
         "episode": 0,
-        "voiceName": "Дубляж (1080, ru, звук с TS, AD)",
+        "voiceName": "Дубляж (Звук с TS)",
         "currentTime": 0,
         "duration": 0,
-        "updatedAt": 1793997761050
+        "updatedAt": 1793997782584
       }
     }
   },
@@ -813,86 +813,6 @@
         }
       },
       "messages": [],
-      "viewOnceStore": {}
-    },
-    "6QCHSC": {
-      "code": "6QCHSC",
-      "name": "Годзилла: Минус ноль",
-      "isPublic": true,
-      "creatorId": "u_09c2ee217349",
-      "hostId": "u_09c2ee217349",
-      "hostOnlyControl": false,
-      "createdAt": 1793997733865,
-      "participants": [
-        {
-          "socketId": "COwXpa9DIPTxZARfAAAA",
-          "id": "u_09c2ee217349",
-          "username": "guest_d4363b",
-          "displayName": "Гость #9242",
-          "avatar": "🦊",
-          "color": "#7c5cff",
-          "inVoice": false,
-          "muted": false
-        }
-      ],
-      "media": {
-        "type": "z01",
-        "title": "Годзилла: Минус ноль",
-        "poster": "https://imagetmdb.com/t/p/w500/hSuXLuBpR96TjX9KZcAi6dLbVla.jpg",
-        "backdrop": "https://imagetmdb.com/t/p/w1280/oqrYIDH4tvfEzPe1yqT4jzmAWHQ.jpg",
-        "movie": {
-          "id": 1381071,
-          "tmdb_id": 1381071,
-          "imdb_id": "tt34384661",
-          "kinopoisk_id": "",
-          "type": "movie",
-          "serial": 0,
-          "title": "Годзилла: Минус ноль",
-          "original_title": "ゴジラ-0.0",
-          "original_language": "ja",
-          "overview": "Война отбросила Японию к нулевой отметке, а Годзилла загнал её в «минус». С тех пор прошло два года; страна с огромным трудом пытается восстановиться и вернуть себе привычную жизнь. Но едва человечеству удалось удержать с таким трудом добытый мир, как возникла новая угроза — и в одно мгновение уничтожила все надежды. Третьего шанса не будет. Здесь всё закончится.",
-          "release_date": "2026-11-03",
-          "year": "2026",
-          "vote_average": 8.1,
-          "poster": "https://imagetmdb.com/t/p/w500/hSuXLuBpR96TjX9KZcAi6dLbVla.jpg",
-          "backdrop": "https://imagetmdb.com/t/p/w1280/oqrYIDH4tvfEzPe1yqT4jzmAWHQ.jpg",
-          "poster_path": "/hSuXLuBpR96TjX9KZcAi6dLbVla.jpg",
-          "backdrop_path": "/oqrYIDH4tvfEzPe1yqT4jzmAWHQ.jpg",
-          "number_of_seasons": 0,
-          "runtime": 0,
-          "genres": []
-        },
-        "balancerKey": "filmix",
-        "balancerName": "Filmix",
-        "season": 0,
-        "episode": 0,
-        "voiceName": "Дубляж (1080, ru, звук с TS, AD)",
-        "quality": "720p",
-        "rawUrl": "https://nl221.werkecdn.me/s/FHPuBcvJhYD-gJSq0kaT7tFUFBQUFBQXhnT1VFUjVSRFZRU0ExR2xsU0t6aWdFMEhQUnc9PQ.eXaUjjP9VVJqLhFk41fYRNulYux7ElecMWaujQ/UHD_1212/Godzilla.Minus.Zero.2026.D.TELECINE.1O8Op_720.mp4",
-        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fnl221.werkecdn.me%2Fs%2FFHPuBcvJhYD-gJSq0kaT7tFUFBQUFBQXhnT1VFUjVSRFZRU0ExR2xsU0t6aWdFMEhQUnc9PQ.eXaUjjP9VVJqLhFk41fYRNulYux7ElecMWaujQ%2FUHD_1212%2FGodzilla.Minus.Zero.2026.D.TELECINE.1O8Op_720.mp4",
-        "recommendedUrl": "/api/stream-proxy?url=https%3A%2F%2Fnl221.werkecdn.me%2Fs%2FFHPuBcvJhYD-gJSq0kaT7tFUFBQUFBQXhnT1VFUjVSRFZRU0ExR2xsU0t6aWdFMEhQUnc9PQ.eXaUjjP9VVJqLhFk41fYRNulYux7ElecMWaujQ%2FUHD_1212%2FGodzilla.Minus.Zero.2026.D.TELECINE.1O8Op_720.mp4",
-        "streamUrl": "/api/stream-proxy?url=https%3A%2F%2Fnl221.werkecdn.me%2Fs%2FFHPuBcvJhYD-gJSq0kaT7tFUFBQUFBQXhnT1VFUjVSRFZRU0ExR2xsU0t6aWdFMEhQUnc9PQ.eXaUjjP9VVJqLhFk41fYRNulYux7ElecMWaujQ%2FUHD_1212%2FGodzilla.Minus.Zero.2026.D.TELECINE.1O8Op_720.mp4",
-        "streamType": "mp4",
-        "subtitles": []
-      },
-      "playback": {
-        "playing": true,
-        "currentTime": 0,
-        "rate": 1,
-        "updatedAt": 1793997761054
-      },
-      "messages": [
-        {
-          "id": "m_7f945fd6",
-          "system": true,
-          "user": null,
-          "text": "🎬 Гость #9242 включил(а): Годзилла: Минус ноль · Дубляж (1080, ru, звук с TS, AD)",
-          "hasPhoto": false,
-          "imageUrl": "",
-          "createdAt": 1793997761055,
-          "reactions": {}
-        }
-      ],
       "viewOnceStore": {}
     }
   }
