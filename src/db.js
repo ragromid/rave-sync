@@ -421,7 +421,7 @@ async function _doPushToCloudDb() {
       }
 
       const body = {
-        message: `Sync DB (${db.users.length} users)`,
+        message: `Sync DB (${db.users.length} users) [skip ci] [skip vercel]`,
         content: Buffer.from(JSON.stringify(db, null, 2), 'utf8').toString('base64'),
         branch: GH_BRANCH
       };
@@ -456,20 +456,33 @@ async function _doPushToCloudDb() {
   }
 }
 
+let lastCloudPushDoneAt = 0;
+
 async function pushToCloudDb() {
   if (!cloudInitialized) {
     cloudPendingSync = true;
+    return;
+  }
+  // Debounce cloud pushes to at most once every 30 seconds to prevent GitHub API rate limits & deployment storms
+  if (Date.now() - lastCloudPushDoneAt < 30000 && !cloudPendingSync) {
+    if (!cloudSyncTimer) {
+      cloudSyncTimer = setTimeout(() => {
+        cloudSyncTimer = null;
+        pushToCloudDb();
+      }, Math.max(1000, 30000 - (Date.now() - lastCloudPushDoneAt)));
+    }
     return;
   }
   if (cloudSyncInFlight) {
     cloudPendingSync = true;
     return cloudSyncInFlight;
   }
+  lastCloudPushDoneAt = Date.now();
   cloudSyncInFlight = _doPushToCloudDb().finally(() => {
     cloudSyncInFlight = null;
     if (cloudPendingSync) {
       cloudPendingSync = false;
-      pushToCloudDb();
+      setTimeout(() => { pushToCloudDb(); }, 20000);
     }
   });
   return cloudSyncInFlight;
@@ -1189,7 +1202,7 @@ function adminImpersonateUser(userId) {
 
 function saveRoomsSnapshot(roomsObj, immediate = false) {
   db.savedRooms = roomsObj || {};
-  saveDb(immediate);
+  saveDb(immediate ? false : 'lazy');
 }
 
 function getSavedRoomsSnapshot() {
