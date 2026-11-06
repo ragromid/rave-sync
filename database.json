@@ -130,7 +130,7 @@
       },
       "createdAt": 1793987941725,
       "updatedAt": 1793987941725,
-      "lastSeenAt": 1793988140283,
+      "lastSeenAt": 1793988142858,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -4015,12 +4015,12 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 29.959999999999997,
+        "currentTime": 32.208,
         "rate": 1,
-        "updatedAt": 1793988140283,
+        "updatedAt": 1793988142859,
         "lastAction": "play",
-        "lastActionId": "act_1793988140283_i3v8",
-        "lastActionAt": 1793988140283,
+        "lastActionId": "act_1793988142859_tsd3",
+        "lastActionAt": 1793988142859,
         "actorClientId": "dev_a4kzppc6_mw5a1u2o",
         "actor": {
           "id": "u_e1c30d7da3c0",
