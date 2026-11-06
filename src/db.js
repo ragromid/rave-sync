@@ -273,6 +273,10 @@ async function ensureCloudLoaded() {
 
 // Initialize & pull persistent DB from cloud branch on server startup or serverless refresh
 async function initCloudDb() {
+  if (!process.env.VERCEL) {
+    cloudInitialized = true;
+    return;
+  }
   const token = getCloudToken();
   if (!token) {
     cloudInitialized = true;
@@ -459,6 +463,7 @@ async function _doPushToCloudDb() {
 let lastCloudPushDoneAt = 0;
 
 async function pushToCloudDb() {
+  if (!process.env.VERCEL) return;
   if (!cloudInitialized) {
     cloudPendingSync = true;
     return;
@@ -489,6 +494,7 @@ async function pushToCloudDb() {
 }
 
 async function flushCloudDb() {
+  if (!process.env.VERCEL) return;
   if (cloudSyncTimer) {
     clearTimeout(cloudSyncTimer);
     cloudSyncTimer = null;
