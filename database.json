@@ -19,7 +19,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793997680419,
-      "lastSeenAt": 1793998381508,
+      "lastSeenAt": 1793998411395,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -796,16 +796,6 @@
           "displayName": "D35157595d",
           "avatar": "🦊",
           "color": "#ff6d00",
-          "inVoice": false,
-          "muted": false
-        },
-        {
-          "socketId": "fpfyIHQIzsVWKA9LAAAE",
-          "id": "u_805b52bfc220",
-          "username": "rashid",
-          "displayName": "Rashid Sultanov",
-          "avatar": "🦊",
-          "color": "#1de9b6",
           "inVoice": false,
           "muted": false
         }
