@@ -30,7 +30,7 @@
             "p256dh": "BKtBzIhKtE7QWuvf9nfIFUE94ISxxMCA5NEfawWJTRHT0mGdEob-ySqkYnJbjb6tHH0wPx8-QjbiHH9_CqpxiQw",
             "auth": "z7QtOAZUreQuY3-3mLskPg"
           },
-          "updatedAt": 1793990708457
+          "updatedAt": 1793990744280
         }
       ],
       "isAdmin": false
@@ -57,7 +57,7 @@
       },
       "createdAt": 1793990774168,
       "updatedAt": 1793990783210,
-      "lastSeenAt": 1793991067783,
+      "lastSeenAt": 1793991115762,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/f9QPHktDPC8:APA91bE8-Bu99PSM3iB1dHw7CFCOUXLvmb74q1fzq5cTEyRjKxYXMfF5Decr0FMCPZVBOUuCnqAs4ia99xCgv5HzAIEKmc0VwOFpZDiPueJinuYN9QawpGhNBsiszETlOiUlSno6fpt-",
@@ -120,7 +120,7 @@
         "voiceName": "",
         "currentTime": 36,
         "duration": 3798,
-        "updatedAt": 1793991052017
+        "updatedAt": 1793991114907
       }
     }
   },
@@ -184,12 +184,12 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 35.94809,
+        "currentTime": 36.69756,
         "rate": 1,
-        "updatedAt": 1793991051266,
-        "lastAction": "seek",
-        "lastActionId": "act_1793990996740_zn9r",
-        "lastActionAt": 1793990996740,
+        "updatedAt": 1793991114926,
+        "lastAction": "play",
+        "lastActionId": "act_1793991114926_7ph2",
+        "lastActionAt": 1793991114926,
         "actorClientId": "dev_79sg226f_mw5btatj",
         "actor": {
           "id": "u_d6c42c3ab3ea",
