@@ -15,7 +15,7 @@
       "stats": {
         "watchSeconds": 0,
         "moviesWatched": 0,
-        "episodesWatched": 0,
+        "episodesWatched": 1,
         "roomsCreated": 0,
         "messagesSent": 0,
         "reactionsSent": 0
@@ -73,6 +73,41 @@
         "voiceName": "",
         "updatedAt": 1793990978451
       }
+    ],
+    "u_805b52bfc220": [
+      {
+        "movie": {
+          "id": 292741,
+          "tmdb_id": 292741,
+          "imdb_id": "tt26598805",
+          "kinopoisk_id": "",
+          "type": "tv",
+          "serial": 1,
+          "title": "Ноктюрн",
+          "name": "Ноктюрн",
+          "original_title": "Nocturne",
+          "original_name": "Nocturne",
+          "original_language": "en",
+          "overview": "Когда жертва печально известного серийного убийцы Юрека Уолтера неожиданно оказывается жива, детектив Джона Линн отчаянно спешит найти человека, всё еще считающегося пропавшим, пока его протеже Сага Бауэр действует под прикрытием, чтобы получить ответы от самого убийцы.",
+          "release_date": "2026-10-29",
+          "first_air_date": "2026-10-29",
+          "year": "2026",
+          "vote_average": 7.7,
+          "poster": "https://imagetmdb.com/t/p/w500/ueZzyDf0sAAu6FLUAD0L4ux4c8y.jpg",
+          "backdrop": "https://imagetmdb.com/t/p/w1280/614k6C9doThoMe6GyH0nTnGgLXt.jpg",
+          "poster_path": "/ueZzyDf0sAAu6FLUAD0L4ux4c8y.jpg",
+          "backdrop_path": "/614k6C9doThoMe6GyH0nTnGgLXt.jpg",
+          "number_of_seasons": 1,
+          "runtime": 0,
+          "genres": []
+        },
+        "balancerKey": "veoveo",
+        "balancer": "VeoVeo",
+        "season": 1,
+        "episode": 1,
+        "voiceName": "",
+        "updatedAt": 1793991717926
+      }
     ]
   },
   "progress": {
@@ -85,7 +120,19 @@
         "voiceName": "",
         "currentTime": 36,
         "duration": 3798,
-        "updatedAt": 1793991114907
+        "updatedAt": 1793991052017
+      }
+    },
+    "u_805b52bfc220": {
+      "292741": {
+        "balancerKey": "veoveo",
+        "balancerName": "VeoVeo",
+        "season": 1,
+        "episode": 1,
+        "voiceName": "",
+        "currentTime": 641,
+        "duration": 3798,
+        "updatedAt": 1793991722836
       }
     }
   },
