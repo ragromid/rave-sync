@@ -22,7 +22,7 @@
       },
       "createdAt": 1792997566919,
       "updatedAt": 1793990708457,
-      "lastSeenAt": 1793990723650,
+      "lastSeenAt": 1793990744280,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/f9QPHktDPC8:APA91bE8-Bu99PSM3iB1dHw7CFCOUXLvmb74q1fzq5cTEyRjKxYXMfF5Decr0FMCPZVBOUuCnqAs4ia99xCgv5HzAIEKmc0VwOFpZDiPueJinuYN9QawpGhNBsiszETlOiUlSno6fpt-",
@@ -30,7 +30,41 @@
             "p256dh": "BKtBzIhKtE7QWuvf9nfIFUE94ISxxMCA5NEfawWJTRHT0mGdEob-ySqkYnJbjb6tHH0wPx8-QjbiHH9_CqpxiQw",
             "auth": "z7QtOAZUreQuY3-3mLskPg"
           },
-          "updatedAt": 1793990708457
+          "updatedAt": 1793990744280
+        }
+      ]
+    },
+    {
+      "id": "u_d6c42c3ab3ea",
+      "username": "ragromid",
+      "displayName": "D35157595d",
+      "passwordHash": "",
+      "avatar": "🦊",
+      "avatarUrl": "",
+      "color": "#ff6d00",
+      "bio": "",
+      "settings": {
+        "proxyMode": "auto"
+      },
+      "stats": {
+        "watchSeconds": 0,
+        "moviesWatched": 0,
+        "episodesWatched": 0,
+        "roomsCreated": 0,
+        "messagesSent": 0,
+        "reactionsSent": 0
+      },
+      "createdAt": 1793990774168,
+      "updatedAt": 1793990774478,
+      "lastSeenAt": 1793990775503,
+      "pushSubscriptions": [
+        {
+          "endpoint": "https://fcm.googleapis.com/fcm/send/f9QPHktDPC8:APA91bE8-Bu99PSM3iB1dHw7CFCOUXLvmb74q1fzq5cTEyRjKxYXMfF5Decr0FMCPZVBOUuCnqAs4ia99xCgv5HzAIEKmc0VwOFpZDiPueJinuYN9QawpGhNBsiszETlOiUlSno6fpt-",
+          "keys": {
+            "p256dh": "BKtBzIhKtE7QWuvf9nfIFUE94ISxxMCA5NEfawWJTRHT0mGdEob-ySqkYnJbjb6tHH0wPx8-QjbiHH9_CqpxiQw",
+            "auth": "z7QtOAZUreQuY3-3mLskPg"
+          },
+          "updatedAt": 1793990774478
         }
       ]
     }
