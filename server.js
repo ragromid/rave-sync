@@ -28,15 +28,14 @@ const io = new Server(server, {
 
 app.use(express.json({ limit: '5mb' }));
 
-// Canonical Domain Redirect (redirect raw IP to rave-sync.duckdns.org)
+// Canonical Domain Redirect (redirect raw IP to https://rave-sync.duckdns.org)
 const CANONICAL_DOMAIN = process.env.CANONICAL_DOMAIN || 'rave-sync.duckdns.org';
 app.use((req, res, next) => {
   const rawHost = String(req.headers.host || '').trim().toLowerCase();
   const hostname = rawHost.split(':')[0];
   const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname) || hostname === '130.61.47.155';
   if (isIp && hostname !== '127.0.0.1' && hostname !== 'localhost') {
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
-    return res.redirect(301, `${protocol}://${CANONICAL_DOMAIN}${req.originalUrl}`);
+    return res.redirect(301, `https://${CANONICAL_DOMAIN}${req.originalUrl}`);
   }
   next();
 });
