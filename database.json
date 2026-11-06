@@ -20,7 +20,7 @@
         "reactionsSent": 0
       },
       "updatedAt": 1793040177623,
-      "lastSeenAt": 1793988444791,
+      "lastSeenAt": 1793988445338,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/e7vkB4wZte4:APA91bF4TlpFvDNiXGmNoLF2DAlADTBhcMMUKgpTSdfad97D3U9ninJ6ZH2AQlZKtxOB2PdirZvMY2y8jVp9Aiv8BCdiAvEKMs4WAPhIUMKYsW6bcKpvRp9ExEyTHa9wXaV2-82w4abG",
@@ -130,7 +130,7 @@
       },
       "createdAt": 1793987941725,
       "updatedAt": 1793987941725,
-      "lastSeenAt": 1793988443682,
+      "lastSeenAt": 1793988445007,
       "avatarUrl": "",
       "isAdmin": false,
       "pushSubscriptions": []
@@ -4057,17 +4057,17 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 166.197,
+        "currentTime": 169.455,
         "rate": 1,
-        "updatedAt": 1793988444451,
+        "updatedAt": 1793988445064,
         "lastAction": "play",
-        "lastActionId": "act_1793988444451_zh2s",
-        "lastActionAt": 1793988444451,
-        "actorClientId": "dev_jcn9gkb3_mw5adlnq",
+        "lastActionId": "act_1793988445064_rgpx",
+        "lastActionAt": 1793988445064,
+        "actorClientId": "dev_p86clxhi_mw5adpyu",
         "actor": {
-          "id": "u_80ab0d1134f5",
-          "displayName": "Murad",
-          "avatar": "🔥"
+          "id": "u_805b52bfc220",
+          "displayName": "Rashid Sultanov",
+          "avatar": "🦊"
         },
         "volume": 1,
         "muted": false
