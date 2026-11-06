@@ -118,29 +118,6 @@
       "isAdmin": false,
       "pushSubscriptions": [],
       "lastSeenAt": 1793047406403
-    },
-    {
-      "id": "u_f1f96288bff3",
-      "username": "guest_48fc3a",
-      "displayName": "Гость #7936",
-      "passwordHash": "1484894d07b763c83236373f0dc87859:94f336be341310cea56948dba3793efabade59f14bd2cbfeb8da8f1d79ff7085014be7ad1de72d76614527ecbbb038764f596f3204c1f7fb8bfddc97ebe2747f",
-      "avatar": "🦊",
-      "color": "#7c5cff",
-      "bio": "",
-      "settings": {
-        "proxyMode": "auto"
-      },
-      "stats": {
-        "watchSeconds": 0,
-        "moviesWatched": 0,
-        "episodesWatched": 0,
-        "roomsCreated": 1,
-        "messagesSent": 0,
-        "reactionsSent": 0
-      },
-      "createdAt": 1793276019237,
-      "updatedAt": 1793276019237,
-      "lastSeenAt": 1793276019264
     }
   ],
   "friendships": [
@@ -680,7 +657,8 @@
   },
   "deletedUsers": {
     "u_d6c42c3ab3ea": 1793991236296,
-    "u_226eb830d92e": 1792993976756
+    "u_226eb830d92e": 1792993976756,
+    "u_f1f96288bff3": 1793997638404
   },
   "deletedMessages": {
     "ntf_c0b9c501": 1792999871201,
