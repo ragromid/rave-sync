@@ -22,7 +22,7 @@
       },
       "createdAt": 1792997566919,
       "updatedAt": 1793990708457,
-      "lastSeenAt": 1793990748507,
+      "lastSeenAt": 1793991389140,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/f9QPHktDPC8:APA91bE8-Bu99PSM3iB1dHw7CFCOUXLvmb74q1fzq5cTEyRjKxYXMfF5Decr0FMCPZVBOUuCnqAs4ia99xCgv5HzAIEKmc0VwOFpZDiPueJinuYN9QawpGhNBsiszETlOiUlSno6fpt-",
@@ -118,9 +118,9 @@
         "season": 1,
         "episode": 1,
         "voiceName": "",
-        "currentTime": 12,
+        "currentTime": 36,
         "duration": 3798,
-        "updatedAt": 1793991006301
+        "updatedAt": 1793991114907
       }
     }
   },
