@@ -134,14 +134,14 @@
       "stats": {
         "watchSeconds": 0,
         "moviesWatched": 1,
-        "episodesWatched": 0,
+        "episodesWatched": 1,
         "roomsCreated": 1,
         "messagesSent": 0,
         "reactionsSent": 0
       },
       "createdAt": 1793997733634,
       "updatedAt": 1793997733634,
-      "lastSeenAt": 1793998049005
+      "lastSeenAt": 1793998067009
     },
     {
       "id": "u_a3080ed13f51",
@@ -296,6 +296,39 @@
     "u_09c2ee217349": [
       {
         "movie": {
+          "id": 292741,
+          "tmdb_id": 292741,
+          "imdb_id": "tt26598805",
+          "kinopoisk_id": "",
+          "type": "tv",
+          "serial": 1,
+          "title": "Ноктюрн",
+          "name": "Ноктюрн",
+          "original_title": "Nocturne",
+          "original_name": "Nocturne",
+          "original_language": "en",
+          "overview": "Когда жертва печально известного серийного убийцы Юрека Уолтера неожиданно оказывается жива, детектив Джона Линн отчаянно спешит найти человека, всё еще считающегося пропавшим, пока его протеже Сага Бауэр действует под прикрытием, чтобы получить ответы от самого убийцы.",
+          "release_date": "2026-10-29",
+          "first_air_date": "2026-10-29",
+          "year": "2026",
+          "vote_average": 7.7,
+          "poster": "https://imagetmdb.com/t/p/w500/ueZzyDf0sAAu6FLUAD0L4ux4c8y.jpg",
+          "backdrop": "https://imagetmdb.com/t/p/w1280/614k6C9doThoMe6GyH0nTnGgLXt.jpg",
+          "poster_path": "/ueZzyDf0sAAu6FLUAD0L4ux4c8y.jpg",
+          "backdrop_path": "/614k6C9doThoMe6GyH0nTnGgLXt.jpg",
+          "number_of_seasons": 1,
+          "runtime": 0,
+          "genres": []
+        },
+        "balancerKey": "veoveo",
+        "balancer": "VeoVeo",
+        "season": 1,
+        "episode": 1,
+        "voiceName": "",
+        "updatedAt": 1793998051030
+      },
+      {
+        "movie": {
           "id": 1381071,
           "tmdb_id": 1381071,
           "imdb_id": "tt34384661",
@@ -418,6 +451,16 @@
       }
     },
     "u_09c2ee217349": {
+      "292741": {
+        "balancerKey": "veoveo",
+        "balancerName": "VeoVeo",
+        "season": 1,
+        "episode": 1,
+        "voiceName": "",
+        "currentTime": 7,
+        "duration": 3798,
+        "updatedAt": 1793998059609
+      },
       "1381071": {
         "balancerKey": "hdvb",
         "balancerName": "HDVB",
@@ -829,16 +872,6 @@
           "color": "#1de9b6",
           "inVoice": false,
           "muted": false
-        },
-        {
-          "socketId": "2CCzmBOO0qJ0exXEAAAA",
-          "id": "u_09c2ee217349",
-          "username": "guest_d4363b",
-          "displayName": "Гость #9242",
-          "avatar": "🦊",
-          "color": "#7c5cff",
-          "inVoice": false,
-          "muted": false
         }
       ],
       "media": {
@@ -849,7 +882,7 @@
         "movie": {
           "id": 292741,
           "tmdb_id": 292741,
-          "imdb_id": "",
+          "imdb_id": "tt26598805",
           "kinopoisk_id": "",
           "type": "tv",
           "serial": 1,
@@ -871,21 +904,31 @@
           "runtime": 0,
           "genres": []
         },
-        "streamUrl": "",
-        "streamType": "hls"
+        "balancerKey": "veoveo",
+        "balancerName": "VeoVeo",
+        "season": 1,
+        "episode": 1,
+        "voiceName": "",
+        "quality": "Auto",
+        "rawUrl": "https://api.rstprgapipt.com/content-router/r/1794005249/uzB_vzsLyJlDMQBMZJy3Ig/anon/anon/movies/files/episodes/110431_110431/110431_110431__master.m3u8?pl=9fcyRyztku4vBuhmGDtDd7Ccnev7ygZ9GjcRXuShP6oUQTHxWzBnm6QTkh874Bk5Aj6pr2",
+        "proxyUrl": "/api/stream-proxy?url=https%3A%2F%2Fapi.rstprgapipt.com%2Fcontent-router%2Fr%2F1794005249%2FuzB_vzsLyJlDMQBMZJy3Ig%2Fanon%2Fanon%2Fmovies%2Ffiles%2Fepisodes%2F110431_110431%2F110431_110431__master.m3u8%3Fpl%3D9fcyRyztku4vBuhmGDtDd7Ccnev7ygZ9GjcRXuShP6oUQTHxWzBnm6QTkh874Bk5Aj6pr2",
+        "recommendedUrl": "/api/stream-proxy?url=https%3A%2F%2Fapi.rstprgapipt.com%2Fcontent-router%2Fr%2F1794005249%2FuzB_vzsLyJlDMQBMZJy3Ig%2Fanon%2Fanon%2Fmovies%2Ffiles%2Fepisodes%2F110431_110431%2F110431_110431__master.m3u8%3Fpl%3D9fcyRyztku4vBuhmGDtDd7Ccnev7ygZ9GjcRXuShP6oUQTHxWzBnm6QTkh874Bk5Aj6pr2",
+        "streamUrl": "/api/stream-proxy?url=https%3A%2F%2Fapi.rstprgapipt.com%2Fcontent-router%2Fr%2F1794005249%2FuzB_vzsLyJlDMQBMZJy3Ig%2Fanon%2Fanon%2Fmovies%2Ffiles%2Fepisodes%2F110431_110431%2F110431_110431__master.m3u8%3Fpl%3D9fcyRyztku4vBuhmGDtDd7Ccnev7ygZ9GjcRXuShP6oUQTHxWzBnm6QTkh874Bk5Aj6pr2",
+        "streamType": "hls",
+        "subtitles": []
       },
       "playback": {
-        "playing": true,
-        "currentTime": 658.644517,
+        "playing": false,
+        "currentTime": 7.22379,
         "rate": 1,
-        "updatedAt": 1793991739824,
-        "lastAction": "seek",
-        "lastActionId": "act_1793991739824_6xai",
-        "lastActionAt": 1793991739824,
-        "actorClientId": "dev_22mna9yw_mw5c7n5p",
+        "updatedAt": 1793998059605,
+        "lastAction": "pause",
+        "lastActionId": "act_1793998059605_6eg9",
+        "lastActionAt": 1793998059605,
+        "actorClientId": "dev_arbhyzqm_mw5g1uzq",
         "actor": {
-          "id": "u_805b52bfc220",
-          "displayName": "Rashid Sultanov",
+          "id": "u_09c2ee217349",
+          "displayName": "Гость #9242",
           "avatar": "🦊"
         }
       },
@@ -898,6 +941,16 @@
           "hasPhoto": false,
           "imageUrl": "",
           "createdAt": 1793998048781,
+          "reactions": {}
+        },
+        {
+          "id": "m_3b284a60",
+          "system": true,
+          "user": null,
+          "text": "🎬 Гость #9242 включил(а): Ноктюрн (S1E1)",
+          "hasPhoto": false,
+          "imageUrl": "",
+          "createdAt": 1793998051039,
           "reactions": {}
         }
       ],
