@@ -30,7 +30,7 @@
             "p256dh": "BKtBzIhKtE7QWuvf9nfIFUE94ISxxMCA5NEfawWJTRHT0mGdEob-ySqkYnJbjb6tHH0wPx8-QjbiHH9_CqpxiQw",
             "auth": "z7QtOAZUreQuY3-3mLskPg"
           },
-          "updatedAt": 1793990708457
+          "updatedAt": 1793990744280
         }
       ],
       "isAdmin": false
@@ -56,8 +56,8 @@
         "reactionsSent": 0
       },
       "createdAt": 1793990774168,
-      "updatedAt": 1793990774478,
-      "lastSeenAt": 1793990998771,
+      "updatedAt": 1793990783210,
+      "lastSeenAt": 1793991034799,
       "pushSubscriptions": [
         {
           "endpoint": "https://fcm.googleapis.com/fcm/send/f9QPHktDPC8:APA91bE8-Bu99PSM3iB1dHw7CFCOUXLvmb74q1fzq5cTEyRjKxYXMfF5Decr0FMCPZVBOUuCnqAs4ia99xCgv5HzAIEKmc0VwOFpZDiPueJinuYN9QawpGhNBsiszETlOiUlSno6fpt-",
@@ -118,9 +118,9 @@
         "season": 1,
         "episode": 1,
         "voiceName": "",
-        "currentTime": 0,
-        "duration": 0,
-        "updatedAt": 1793990978452
+        "currentTime": 14,
+        "duration": 3798,
+        "updatedAt": 1793991029428
       }
     }
   },
@@ -184,9 +184,9 @@
       },
       "playback": {
         "playing": true,
-        "currentTime": 8.053405,
+        "currentTime": 18.44707,
         "rate": 1,
-        "updatedAt": 1793990996740,
+        "updatedAt": 1793991033776,
         "lastAction": "seek",
         "lastActionId": "act_1793990996740_zn9r",
         "lastActionAt": 1793990996740,
