@@ -88,24 +88,40 @@
   // ================= HELPERS & API =================
   const $ = (id) => document.getElementById(id);
 
-  // Prevent iOS/Android Home Screen PWA from shifting the viewport upward when virtual keyboard opens/closes
-  function lockMobileViewport() {
-    const vv = window.visualViewport;
-    const h = vv ? vv.height : window.innerHeight;
-    document.documentElement.style.setProperty('--app-height', `${Math.round(h)}px`);
-    if (window.scrollY !== 0 || window.scrollX !== 0) {
-      window.scrollTo(0, 0);
+  // ================= UNIFIED MOBILE KEYBOARD & VIEWPORT HANDLER =================
+  function setupMobileViewport() {
+    function update() {
+      const vv = window.visualViewport;
+      const windowH = window.innerHeight;
+      const vvH = vv ? vv.height : windowH;
+      const offsetTop = vv ? vv.offsetTop : 0;
+
+      // Keyboard overlap at the bottom of the screen
+      const keyboardOverlap = Math.max(0, Math.round(windowH - (offsetTop + vvH)));
+
+      document.documentElement.style.setProperty('--keyboard-inset', `${keyboardOverlap}px`);
+      document.documentElement.style.setProperty('--app-height', `${Math.round(vvH)}px`);
+
+      if (keyboardOverlap > 80) {
+        if (state.currentView === 'room') {
+          const chatMsgs = $('chatMessages');
+          if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight;
+        } else if (state.currentView === 'friends') {
+          const fDMs = $('dmMessages');
+          if (fDMs) fDMs.scrollTop = fDMs.scrollHeight;
+        }
+      }
     }
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', update);
+      window.visualViewport.addEventListener('scroll', update);
+    }
+    window.addEventListener('resize', update);
+    window.addEventListener('orientationchange', () => setTimeout(update, 200));
+    update();
   }
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', lockMobileViewport);
-    window.visualViewport.addEventListener('scroll', lockMobileViewport);
-  }
-  window.addEventListener('resize', lockMobileViewport);
-  document.addEventListener('focusout', () => {
-    setTimeout(lockMobileViewport, 80);
-  });
-  lockMobileViewport();
+  setupMobileViewport();
 
   async function api(path, options = {}) {
     const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
@@ -3863,17 +3879,16 @@
     box.scrollTop = box.scrollHeight;
   }
 
-  $('chatForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+  async function sendActiveRoomChat() {
     if (!state.room) return;
     const input = $('chatInput');
-    const text = input.value.trim();
+    const text = input ? input.value.trim() : '';
     const comp = composers.room;
 
     // Handle Edit Mode in Room Chat
     if (comp.editingMsg) {
       const editId = comp.editingMsg.id;
-      input.value = '';
+      if (input) input.value = '';
       comp.editingMsg = null;
       renderComposerBar('room');
       if (!text) return;
@@ -3900,7 +3915,10 @@
       replyTo: comp.replyTo || null
     };
 
-    input.value = '';
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
     comp.imageUrl = '';
     comp.viewOnce = false;
     comp.replyTo = null;
@@ -3915,6 +3933,17 @@
     } catch (err) {
       showToast(err.message);
     }
+  }
+
+  $('chatInput')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      sendActiveRoomChat();
+    }
+  });
+  $('chatSendBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    sendActiveRoomChat();
   });
 
   // Mobile Room Quick Switcher (💬 Чат | 🎬 Серии | 👥 Зрители | 💌 Друзья | ⚙️ Опции)
@@ -4318,6 +4347,7 @@
   async function openFriendChat(friendId) {
     activeDmFriendId = friendId;
     $('friendsLayout')?.classList.add('chat-open');
+    document.body.classList.add('in-friends-chat');
     $('dmEmptyPrompt')?.classList.add('hidden');
     $('dmActiveBox')?.classList.remove('hidden');
 
@@ -4355,6 +4385,7 @@
 
   $('dmBackBtn')?.addEventListener('click', () => {
     $('friendsLayout')?.classList.remove('chat-open');
+    document.body.classList.remove('in-friends-chat');
   });
 
   async function submitDirectMessageForm(friendId, inputId, composerKey) {
@@ -4394,7 +4425,10 @@
       replyTo: comp?.replyTo || null
     };
 
-    if (input) input.value = '';
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
     if (comp) {
       comp.imageUrl = '';
       comp.viewOnce = false;
@@ -4413,7 +4447,13 @@
     }
   }
 
-  $('dmForm')?.addEventListener('submit', (e) => {
+  $('dmInput')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitDirectMessageForm(activeDmFriendId, 'dmInput', 'dm');
+    }
+  });
+  $('dmSendBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
     submitDirectMessageForm(activeDmFriendId, 'dmInput', 'dm');
   });
@@ -4490,7 +4530,13 @@
     renderRoomDmFriendsList();
   });
 
-  $('roomDmForm')?.addEventListener('submit', (e) => {
+  $('roomDmInput')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitDirectMessageForm(roomActiveDmFriendId, 'roomDmInput', 'roomDm');
+    }
+  });
+  $('roomDmSendBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
     submitDirectMessageForm(roomActiveDmFriendId, 'roomDmInput', 'roomDm');
   });
@@ -4781,43 +4827,8 @@
     if (audio) audio.remove();
   });
 
-  // ================= MOBILE KEYBOARD & VISUAL VIEWPORT (iOS / ANDROID) =================
-  function initVisualViewportHandler() {
-    function updateViewport() {
-      const vv = window.visualViewport;
-      const height = vv ? vv.height : window.innerHeight;
-      document.documentElement.style.setProperty('--visual-viewport-h', `${height}px`);
-
-      if (state.currentView === 'room') {
-        const chatMsgs = $('chatMessages');
-        if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight;
-        const roomDMs = $('roomDmMessages');
-        if (roomDMs) roomDMs.scrollTop = roomDMs.scrollHeight;
-      } else if (state.currentView === 'friends') {
-        const fDMs = $('dmMessages');
-        if (fDMs) fDMs.scrollTop = fDMs.scrollHeight;
-      }
-    }
-
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', updateViewport);
-    }
-    window.addEventListener('resize', updateViewport);
-
-    // Initial measurement
-    updateViewport();
-
-    // Prevent iOS Safari from scrolling the window upwards when typing
-    window.addEventListener('scroll', () => {
-      if (window.scrollY !== 0 || window.scrollX !== 0) {
-        window.scrollTo(0, 0);
-      }
-    }, { passive: false });
-  }
-
   // ================= INITIALIZATION =================
   async function boot() {
-    initVisualViewportHandler();
     try {
       const notice = sessionStorage.getItem('eviction_notice');
       if (notice) {

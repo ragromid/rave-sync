@@ -2661,13 +2661,14 @@ button {
   body.in-room-view .topbar,
   body:has(#view-room.active) .topbar,
   body.in-room-view .nav-rail,
+  body.in-friends-chat .nav-rail,
   body:has(#view-room.active) .nav-rail {
     display: none !important;
   }
   .view-page.room-view {
     padding: 0 !important;
-    height: var(--visual-viewport-h, 100dvh) !important;
-    max-height: var(--visual-viewport-h, 100dvh) !important;
+    height: 100% !important;
+    max-height: 100% !important;
     overflow: hidden !important;
   }
   /* Prevent Smart TV bottom D-Pad bar from popping up on mobile phone touch & overlapping video */
@@ -2803,14 +2804,17 @@ button {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    padding-bottom: var(--keyboard-inset, 0px);
+    transition: padding-bottom 0.12s ease-out;
   }
   /* Friends View & Private Chat on Mobile */
+  body.in-friends-chat .nav-rail,
   body:has(.friends-layout.chat-open) .nav-rail {
     display: none !important;
   }
   .friends-view-page {
-    height: var(--visual-viewport-h, 100dvh) !important;
-    max-height: var(--visual-viewport-h, 100dvh) !important;
+    height: 100% !important;
+    max-height: 100% !important;
     padding: 0 !important;
     overflow: hidden !important;
   }
@@ -2832,6 +2836,8 @@ button {
     height: 100% !important;
     max-height: 100% !important;
     overflow: hidden !important;
+    padding-bottom: var(--keyboard-inset, 0px);
+    transition: padding-bottom 0.12s ease-out;
   }
   .dm-back-btn {
     display: inline-flex;
