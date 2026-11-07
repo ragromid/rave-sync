@@ -6,6 +6,7 @@ const { Server } = require('socket.io');
 
 const db = require('./src/db');
 const z01 = require('./src/z01');
+const rezka = require('./src/rezka');
 const webPush = require('./src/push');
 
 async function sendPushToUser(userId, payload) {
@@ -167,7 +168,7 @@ function hydrateRoomsFromDb() {
 // Middleware to ensure Cloud DB is loaded before DB-backed API requests (crucial on Vercel Serverless cold starts)
 app.use(async (req, res, next) => {
   const p = req.path || '';
-  const isStatelessMediaRoute = p.startsWith('/api/catalog') || p.startsWith('/api/z01') || p.startsWith('/api/stream');
+  const isStatelessMediaRoute = p.startsWith('/api/catalog') || p.startsWith('/api/z01') || p.startsWith('/api/rezka') || p.startsWith('/api/stream');
   if (!isStatelessMediaRoute && (p.startsWith('/api/') || p === '/admin')) {
     await db.ensureCloudLoaded();
     hydrateRoomsFromDb();
@@ -1010,6 +1011,107 @@ app.post('/api/z01/resolve', async (req, res) => {
     });
   } catch (e) {
     res.status(500).json({ error: e.message || 'Не удалось извлечь видеопоток' });
+  }
+});
+
+// ================= HDREZKA API ROUTES =================
+app.get('/api/rezka/search', async (req, res) => {
+  try {
+    const { q = '' } = req.query;
+    if (!q) return res.status(400).json({ error: 'Параметр поиска q обязателен' });
+    const items = await rezka.search(q);
+    res.json({ results: items });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Ошибка поиска на HDRezka' });
+  }
+});
+
+app.get('/api/rezka/details', async (req, res) => {
+  try {
+    const { id, url } = req.query;
+    const target = id || url;
+    if (!target) return res.status(400).json({ error: 'Параметр id или url обязателен' });
+    const data = await rezka.getDetails(target);
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Ошибка загрузки данных HDRezka' });
+  }
+});
+
+app.get('/api/rezka/episodes', async (req, res) => {
+  try {
+    const { id, translator_id, url } = req.query;
+    if (!id || !translator_id) return res.status(400).json({ error: 'Параметры id и translator_id обязательны' });
+    const data = await rezka.getEpisodes(id, translator_id, url);
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Ошибка загрузки эпизодов HDRezka' });
+  }
+});
+
+app.get('/api/rezka/stream', async (req, res) => {
+  try {
+    const { id, translator_id, season, episode, is_movie, url } = req.query;
+    if (!id) return res.status(400).json({ error: 'Параметр id обязателен' });
+    const resolved = await rezka.getStream({
+      id,
+      translatorId: translator_id,
+      season: season ? parseInt(season, 10) : null,
+      episode: episode ? parseInt(episode, 10) : null,
+      isMovie: is_movie === 'true' || is_movie === '1',
+      refererUrl: url
+    });
+
+    const proxyUrl = buildProxyStreamUrl(resolved.primaryUrl, resolved.headers);
+    const proxiedQualities = {};
+    for (const [qk, qv] of Object.entries(resolved.qualities || {})) {
+      proxiedQualities[qk] = {
+        raw: qv,
+        proxy: buildProxyStreamUrl(qv, resolved.headers)
+      };
+    }
+
+    res.json({
+      ...resolved,
+      proxyUrl,
+      proxiedQualities,
+      recommendedUrl: proxyUrl
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Ошибка получения потока HDRezka' });
+  }
+});
+
+app.post('/api/rezka/stream', async (req, res) => {
+  try {
+    const { id, translatorId, season, episode, isMovie, url } = req.body || {};
+    if (!id) return res.status(400).json({ error: 'Параметр id обязателен' });
+    const resolved = await rezka.getStream({
+      id,
+      translatorId,
+      season: season ? parseInt(season, 10) : null,
+      episode: episode ? parseInt(episode, 10) : null,
+      isMovie: Boolean(isMovie),
+      refererUrl: url
+    });
+
+    const proxyUrl = buildProxyStreamUrl(resolved.primaryUrl, resolved.headers);
+    const proxiedQualities = {};
+    for (const [qk, qv] of Object.entries(resolved.qualities || {})) {
+      proxiedQualities[qk] = {
+        raw: qv,
+        proxy: buildProxyStreamUrl(qv, resolved.headers)
+      };
+    }
+
+    res.json({
+      ...resolved,
+      proxyUrl,
+      proxiedQualities,
+      recommendedUrl: proxyUrl
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Ошибка получения потока HDRezka' });
   }
 });
 
