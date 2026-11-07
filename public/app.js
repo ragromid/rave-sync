@@ -775,6 +775,13 @@
       // Remove any legacy browser cache token so only server session is used
       try { localStorage.removeItem('ravelampa_token'); } catch {}
       const data = await api('/api/auth/me');
+      if (data && data.user && data.user.username && data.user.username.startsWith('guest_')) {
+        try { await api('/api/auth/logout', { method: 'POST' }); } catch {}
+        state.token = '';
+        state.user = null;
+        updateHeaderUser();
+        return;
+      }
       applyServerUserData(data);
       loadFriends();
     } catch {
@@ -1042,6 +1049,13 @@
       $('authModal').classList.add('hidden');
       showToast(`Привет, ${state.user.displayName}!`);
       loadFriends();
+      try {
+        const pendingRoom = sessionStorage.getItem('active_room_code');
+        if (pendingRoom) {
+          sessionStorage.removeItem('active_room_code');
+          joinRoomByCode(pendingRoom);
+        }
+      } catch {}
     } catch (err) {
       errEl.textContent = err.message;
       errEl.classList.remove('hidden');
@@ -1115,17 +1129,12 @@
   });
 
   async function ensureAuthenticated() {
-    if (state.user) return true;
-    try {
-      // Auto-create guest session so Smart TV and mobile viewers can watch immediately without manual signup
-      const data = await api('/api/auth/guest', { method: 'POST' });
-      applyServerUserData(data);
+    if (state.user && (!state.user.username || !state.user.username.startsWith('guest_'))) {
       return true;
-    } catch {
-      openAuthModal();
-      showToast('Войдите или зарегистрируйтесь');
-      return false;
     }
+    openAuthModal();
+    showToast('Войдите или зарегистрируйтесь для продолжения');
+    return false;
   }
 
   // ================= CATALOG (LAMPA x TMDB) =================
@@ -3793,7 +3802,7 @@
     let html = '';
 
     if (showAuthor && !isOwn) {
-      html += `<div class="chat-author" style="color:${esc(u.color || '#00e676')}">${esc(u.displayName || 'Гость')}</div>`;
+      html += `<div class="chat-author" style="color:${esc(u.color || '#00e676')}">${esc(u.displayName || 'Пользователь')}</div>`;
     }
 
     if (msg.replyTo && msg.replyTo.id) {
@@ -5260,8 +5269,11 @@
       try { roomCode = sessionStorage.getItem('active_room_code'); } catch {}
     }
     if (roomCode) {
-      await ensureAuthenticated();
-      if (state.user) {
+      if (!state.user) {
+        try { sessionStorage.setItem('active_room_code', roomCode); } catch {}
+        openAuthModal();
+        showToast('Для входа в комнату войдите или зарегистрируйтесь');
+      } else {
         joinRoomByCode(roomCode);
       }
     }

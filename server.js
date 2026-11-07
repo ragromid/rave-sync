@@ -326,8 +326,9 @@ function authMiddleware(req, res, next) {
     return res.status(401).json({ error: 'Требуется авторизация' });
   }
   const user = db.getUserById(payload.id);
-  if (!user) {
-    return res.status(401).json({ error: 'Пользователь не найден' });
+  if (!user || (user.username && user.username.startsWith('guest_'))) {
+    clearAuthCookie(res);
+    return res.status(401).json({ error: 'Требуется авторизация' });
   }
   db.touchUserOnline(user.id);
   req.user = user;
@@ -367,30 +368,9 @@ app.post('/api/auth/login', (req, res) => {
   }
 });
 
-// Fast 1-click Guest login (for Smart TV & immediate watch party)
+// Fast 1-click Guest login disabled
 app.post('/api/auth/guest', (req, res) => {
-  try {
-    hydrateRoomsFromDb();
-    const guestNum = Math.floor(1000 + Math.random() * 9000);
-    const guestUser = 'guest_' + crypto.randomBytes(3).toString('hex');
-    const guestPass = crypto.randomBytes(8).toString('hex');
-    const result = db.registerUser({
-      username: guestUser,
-      password: guestPass,
-      displayName: `Гость #${guestNum}`,
-      avatar: '🦊',
-      color: '#7c5cff'
-    });
-    setAuthCookie(res, result.token);
-    res.json({
-      ...result,
-      bookmarks: [],
-      history: [],
-      progress: {}
-    });
-  } catch (e) {
-    res.status(500).json({ error: e.message || 'Ошибка гостевого входа' });
-  }
+  res.status(403).json({ error: 'Гостевой доступ отключен. Пожалуйста, войдите или зарегистрируйтесь.' });
 });
 
 app.post('/api/auth/logout', (req, res) => {
@@ -1742,7 +1722,7 @@ io.on('connection', (socket) => {
     const payload = db.verifyToken(token);
     if (!payload || !payload.id) return;
     const user = db.getUserById(payload.id);
-    if (!user) return;
+    if (!user || (user.username && user.username.startsWith('guest_'))) return;
     currentUser = user;
     socketMeta.set(socket.id, { userId: user.id, roomCode: null });
 
@@ -1852,7 +1832,7 @@ io.on('connection', (socket) => {
       const payload = db.verifyToken(token);
       if (payload && payload.id) currentUser = db.getUserById(payload.id);
     }
-    if (!currentUser) {
+    if (!currentUser || (currentUser.username && currentUser.username.startsWith('guest_'))) {
       return socket.emit('room:error', { error: 'Войдите в аккаунт для входа в комнату' });
     }
 
