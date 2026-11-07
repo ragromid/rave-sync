@@ -232,7 +232,7 @@
                 <div id="dmComposerBar" class="composer-bar hidden"></div>
                 <div id="dmForm" class="chat-input-row">
                   <button type="button" class="attach-photo-btn" data-chat-target="dm" title="Прикрепить фото (обычное или одноразовое)">📷</button>
-                  <div id="dmInput" class="chat-input-field" contenteditable="true" role="textbox" aria-multiline="false" spellcheck="true" autocapitalize="sentences" data-placeholder="Написать другу..."></div>
+                  <input type="text" id="dmInput" class="chat-input-field" placeholder="Написать сообщение..." autocomplete="off" autocorrect="on" autocapitalize="sentences" enterkeyhint="send">
                   <button type="button" id="dmSendBtn" class="send-btn" title="Отправить">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                   </button>
@@ -437,7 +437,7 @@
                 </div>
                 <div id="chatForm" class="chat-input-row">
                   <button type="button" class="attach-photo-btn" data-chat-target="room" title="Прикрепить фото (обычное или одноразовое)">📷</button>
-                  <div id="chatInput" class="chat-input-field" contenteditable="true" role="textbox" aria-multiline="false" spellcheck="true" autocapitalize="sentences" data-placeholder="Написать в комнату..."></div>
+                  <input type="text" id="chatInput" class="chat-input-field" placeholder="Написать в комнату..." autocomplete="off" autocorrect="on" autocapitalize="sentences" enterkeyhint="send">
                   <button type="button" id="chatSendBtn" class="send-btn" title="Отправить">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                   </button>
@@ -462,7 +462,7 @@
                   <div id="roomDmComposerBar" class="composer-bar hidden"></div>
                   <div id="roomDmForm" class="chat-input-row">
                     <button type="button" class="attach-photo-btn" data-chat-target="roomDm" title="Прикрепить фото (обычное или одноразовое)">📷</button>
-                    <div id="roomDmInput" class="chat-input-field" contenteditable="true" role="textbox" aria-multiline="false" spellcheck="true" autocapitalize="sentences" data-placeholder="Личное сообщение другу..."></div>
+                    <input type="text" id="roomDmInput" class="chat-input-field" placeholder="Личное сообщение другу..." autocomplete="off" autocorrect="on" autocapitalize="sentences" enterkeyhint="send">
                     <button type="button" id="roomDmSendBtn" class="send-btn" title="Отправить">
                       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                     </button>

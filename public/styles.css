@@ -89,6 +89,10 @@ button {
 
 /* App Shell */
 .app-shell {
+  position: fixed;
+  top: var(--app-top, 0px);
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -2869,6 +2873,41 @@ body.keyboard-open .chat-input-row {
     aspect-ratio: 16 / 9;
     width: 100%;
     flex-shrink: 0;
+    transition: max-height 0.2s ease, height 0.2s ease;
+  }
+
+  /* When typing on mobile phone: smoothly compact player so chat is spacious and unblocked */
+  body.keyboard-open .player-wrapper {
+    max-height: 85px !important;
+    height: 85px !important;
+    aspect-ratio: auto !important;
+    flex-shrink: 0 !important;
+  }
+  body.keyboard-open .player-wrapper video {
+    object-fit: cover !important;
+  }
+  body.keyboard-open .player-controls-bottom {
+    display: none !important;
+  }
+  body.keyboard-open .chat-reactions-strip {
+    display: none !important;
+  }
+  body.keyboard-open .room-topbar {
+    min-height: 38px !important;
+    padding: 4px 10px !important;
+  }
+  body.keyboard-open .mobile-room-tabs {
+    height: 32px !important;
+    min-height: 32px !important;
+  }
+  body.keyboard-open .m-rtab {
+    height: 32px !important;
+    font-size: 0.72rem !important;
+    padding: 0 6px !important;
+  }
+  body.keyboard-open .chat-input-row {
+    padding: 6px 10px !important;
+    padding-bottom: 8px !important;
   }
 
   .reaction-strip {

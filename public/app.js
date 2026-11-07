@@ -93,19 +93,21 @@
     function update() {
       const vv = window.visualViewport;
       const windowH = window.innerHeight;
-      const vvH = vv ? vv.height : windowH;
-      const offsetTop = vv ? vv.offsetTop : 0;
-
-      // Lock scroll position at 0,0 to prevent Safari scrolling viewport into empty space
-      if (offsetTop > 0 || window.scrollY > 0) {
-        window.scrollTo(0, 0);
-      }
+      const vvH = vv ? Math.round(vv.height) : windowH;
+      const offsetTop = vv ? Math.round(vv.offsetTop) : 0;
 
       const keyboardOverlap = Math.max(0, Math.round(windowH - (offsetTop + vvH)));
-      const isKeyboardOpen = keyboardOverlap > 60;
+      const isKeyboardOpen = keyboardOverlap > 60 || (windowH - vvH > 100);
 
-      document.documentElement.style.setProperty('--app-height', `${Math.round(vvH)}px`);
+      document.documentElement.style.setProperty('--app-height', `${vvH}px`);
+      document.documentElement.style.setProperty('--app-top', `${offsetTop}px`);
       document.body.classList.toggle('keyboard-open', isKeyboardOpen);
+
+      const shell = document.querySelector('.app-shell');
+      if (shell) {
+        shell.style.height = `${vvH}px`;
+        shell.style.top = `${offsetTop}px`;
+      }
 
       if (isKeyboardOpen) {
         if (state.currentView === 'room') {
@@ -125,9 +127,6 @@
       window.visualViewport.addEventListener('scroll', update);
     }
     window.addEventListener('resize', update);
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 0) window.scrollTo(0, 0);
-    });
     window.addEventListener('orientationchange', () => setTimeout(update, 200));
     update();
   }
