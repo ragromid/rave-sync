@@ -632,8 +632,11 @@ async function getStream({ id, translatorId, season = null, episode = null, isMo
   const qualities = parseStreamQualities(rawUrl);
   const subtitles = parseSubtitles(json.subtitle || '');
 
-  // Recommended URL: prefer 1080p -> 720p -> 480p -> 360p -> first
-  const order = ['1080p Ultra', '1080p', '720p', '480p', '360p', 'auto'];
+  // Strictly omit 1080p Ultra as requested by user (only 1080p or lower)
+  delete qualities['1080p Ultra'];
+
+  // Recommended URL: prefer 1080p -> 720p -> 480p -> 360p
+  const order = ['1080p', '720p', '480p', '360p', 'auto'];
   let primaryUrl = '';
   let primaryQuality = 'HD';
   for (const q of order) {

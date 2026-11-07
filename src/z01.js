@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const rezka = require('./rezka');
 
 const TMDB_KEY = '4ef0d7355d9ffb5151e987764708ce96';
 const TMDB_MIRRORS = [
@@ -488,6 +489,16 @@ async function getZ01Sources(movie) {
     return (qRank[b.badge] || 0) - (qRank[a.badge] || 0);
   });
 
+  // Native HDRezka source alongside other balancers
+  sources.unshift({
+    key: 'hdrezka',
+    name: 'HDRezka',
+    fullName: 'HDRezka',
+    badge: 'FHD',
+    url: 'rezka://details',
+    show: true
+  });
+
   const result = {
     movie: enrichedMovie,
     uid,
@@ -582,7 +593,229 @@ function parseZ01HtmlElements(htmlStr, classToken, movie) {
 }
 
 // Step 2: Query a specific balancer URL (handles seasons, voices, similars, and episodes)
+async function handleRezkaBalancerQuery({ url, movie, prevSeasons = [], prevVoices = [] }) {
+  try {
+    const u = new URL(url);
+    const pathname = u.hostname || u.pathname.replace(/^\/\//, '');
+    const query = u.searchParams;
+
+    if (pathname === 'details' || url === 'rezka://details') {
+      const q = movie?.title || movie?.name || movie?.original_title || '';
+      const items = await rezka.search(q);
+      if (!items.length) {
+        return {
+          error: `«${q}» не найден в HDRezka. Выберите другой источник.`,
+          videos: [],
+          seasons: [],
+          voices: [],
+          similars: []
+        };
+      }
+
+      let best = items[0];
+      if (movie && (movie.year || movie.release_date)) {
+        const yr = parseInt(movie.year || (movie.release_date || '').slice(0, 4), 10);
+        if (yr) {
+          const matchYr = items.find(it => it.year === yr);
+          if (matchYr) best = matchYr;
+        }
+      }
+
+      const details = await rezka.getDetails(best.url);
+      const translators = details.translators || [];
+      const defaultTr = translators.find(t => t.isDefault) || translators[0] || { id: '0', name: 'Стандартная' };
+
+      const voices = translators.map((t, idx) => ({
+        index: idx,
+        title: t.name,
+        rawTitle: t.name,
+        kind: 'mvo',
+        groupTitle: 'Озвучка',
+        url: `rezka://episodes?id=${details.id}&tr=${t.id}&movie_url=${encodeURIComponent(details.url)}&is_series=${details.isSeries ? 1 : 0}`,
+        active: t.id === defaultTr.id
+      }));
+
+      const seasons = (details.seasons || []).map((s, idx) => ({
+        index: idx,
+        title: s.title,
+        season: s.season,
+        url: `rezka://episodes?id=${details.id}&tr=${defaultTr.id}&season=${s.season}&movie_url=${encodeURIComponent(details.url)}&is_series=1`,
+        active: idx === 0
+      }));
+
+      const activeSeasonNum = seasons[0]?.season || 1;
+      let episodes = details.episodes || [];
+      if (details.isSeries && seasons.length > 0) {
+        episodes = episodes.filter(e => String(e.season) === String(activeSeasonNum));
+      }
+
+      let videos = [];
+      if (details.isSeries) {
+        videos = episodes.map((ep, idx) => ({
+          index: idx,
+          title: ep.name || `${ep.episode} серия`,
+          season: parseInt(ep.season, 10),
+          episode: parseInt(ep.episode, 10),
+          voice_name: defaultTr.name,
+          method: 'call',
+          url: `rezka://stream?id=${details.id}&tr=${defaultTr.id}&season=${ep.season}&episode=${ep.episode}&movie_url=${encodeURIComponent(details.url)}&is_movie=0`,
+          quality: 'FHD',
+          qualities: {},
+          headers: null,
+          subtitles: []
+        }));
+      } else {
+        videos = [{
+          index: 0,
+          title: details.title || (movie && (movie.title || movie.name)) || 'Фильм',
+          season: 0,
+          episode: 0,
+          voice_name: defaultTr.name,
+          method: 'call',
+          url: `rezka://stream?id=${details.id}&tr=${defaultTr.id}&is_movie=1&movie_url=${encodeURIComponent(details.url)}`,
+          quality: 'FHD',
+          qualities: {},
+          headers: null,
+          subtitles: []
+        }];
+      }
+
+      return {
+        videos,
+        seasons,
+        voices,
+        similars: []
+      };
+    }
+
+    if (pathname === 'episodes' || url.startsWith('rezka://episodes')) {
+      const id = query.get('id');
+      const tr = query.get('tr') || '0';
+      const season = query.get('season') || '1';
+      const movieUrl = query.get('movie_url') || '';
+      const isSeries = query.get('is_series') === '1';
+
+      if (!isSeries) {
+        return {
+          videos: [{
+            index: 0,
+            title: movie?.title || movie?.name || 'Фильм',
+            season: 0,
+            episode: 0,
+            voice_name: '',
+            method: 'call',
+            url: `rezka://stream?id=${id}&tr=${tr}&is_movie=1&movie_url=${encodeURIComponent(movieUrl)}`,
+            quality: 'FHD',
+            qualities: {},
+            headers: null,
+            subtitles: []
+          }],
+          seasons: [],
+          voices: prevVoices.map(v => ({
+            ...v,
+            active: v.url.includes(`tr=${tr}`)
+          })),
+          similars: []
+        };
+      }
+
+      const epData = await rezka.getEpisodes(id, tr, movieUrl);
+      const seasons = (epData.seasons || []).map((s, idx) => ({
+        index: idx,
+        title: s.title,
+        season: s.season,
+        url: `rezka://episodes?id=${id}&tr=${tr}&season=${s.season}&movie_url=${encodeURIComponent(movieUrl)}&is_series=1`,
+        active: String(s.season) === String(season)
+      }));
+
+      const activeSeasonNum = season || seasons[0]?.season || 1;
+      const filteredEps = (epData.episodes || []).filter(e => String(e.season) === String(activeSeasonNum));
+
+      const videos = filteredEps.map((ep, idx) => ({
+        index: idx,
+        title: ep.name || `${ep.episode} серия`,
+        season: parseInt(ep.season, 10),
+        episode: parseInt(ep.episode, 10),
+        voice_name: '',
+        method: 'call',
+        url: `rezka://stream?id=${id}&tr=${tr}&season=${ep.season}&episode=${ep.episode}&movie_url=${encodeURIComponent(movieUrl)}&is_movie=0`,
+        quality: 'FHD',
+        qualities: {},
+        headers: null,
+        subtitles: []
+      }));
+
+      return {
+        videos,
+        seasons,
+        voices: prevVoices.map(v => ({
+          ...v,
+          active: v.url.includes(`tr=${tr}`)
+        })),
+        similars: []
+      };
+    }
+  } catch (err) {
+    return {
+      error: `Ошибка HDRezka: ${err.message}`,
+      videos: [],
+      seasons: prevSeasons,
+      voices: prevVoices,
+      similars: []
+    };
+  }
+}
+
+async function handleRezkaStreamResolve({ url }) {
+  const u = new URL(url);
+  const q = u.searchParams;
+  const id = q.get('id');
+  const tr = q.get('tr');
+  const season = q.get('season') ? parseInt(q.get('season'), 10) : null;
+  const episode = q.get('episode') ? parseInt(q.get('episode'), 10) : null;
+  const isMovie = q.get('is_movie') === '1';
+  const movieUrl = q.get('movie_url');
+
+  const streamData = await rezka.getStream({
+    id,
+    translatorId: tr,
+    season,
+    episode,
+    isMovie,
+    refererUrl: movieUrl
+  });
+
+  const cleanedQualities = {};
+  for (const [qk, qv] of Object.entries(streamData.qualities || {})) {
+    if (qk.toLowerCase().includes('ultra')) continue; // Strictly no 1080p Ultra
+    cleanedQualities[qk] = qv;
+  }
+
+  const order = ['1080p', '720p', '480p', '360p', 'auto'];
+  let finalUrl = '';
+  for (const ord of order) {
+    if (cleanedQualities[ord]) {
+      finalUrl = cleanedQualities[ord];
+      break;
+    }
+  }
+  if (!finalUrl) {
+    finalUrl = Object.values(cleanedQualities)[0] || streamData.primaryUrl;
+  }
+
+  return {
+    url: finalUrl,
+    headers: streamData.headers,
+    qualities: cleanedQualities,
+    subtitles: streamData.subtitles || [],
+    streamType: 'mp4'
+  };
+}
+
 async function queryZ01Balancer({ url, movie, uid, depth = 0, prevSeasons = [], prevVoices = [] }) {
+  if (typeof url === 'string' && url.startsWith('rezka://')) {
+    return handleRezkaBalancerQuery({ url, movie, prevSeasons, prevVoices });
+  }
   if (!url || depth > 4) {
     return { videos: [], seasons: prevSeasons, voices: prevVoices, similars: [] };
   }
@@ -779,6 +1012,9 @@ async function queryZ01Balancer({ url, movie, uid, depth = 0, prevSeasons = [], 
 
 // Step 3: Resolve a video item (if method === 'call', fetch its JSON to get the actual stream URL)
 async function resolveZ01Stream({ url, method, headers, qualities, subtitles, uid }) {
+  if (typeof url === 'string' && url.startsWith('rezka://stream')) {
+    return handleRezkaStreamResolve({ url });
+  }
   const reqUid = uid || ('rave' + crypto.randomBytes(4).toString('hex'));
   let finalUrl = typeof url === 'string' ? url.split(' or ')[0].trim() : '';
   let finalHeaders = headers || null;
