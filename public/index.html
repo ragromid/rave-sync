@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261107_rezka_chat_2" />
+  <link rel="stylesheet" href="/styles.css?v=20261107_profile_folders_1" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -38,27 +38,13 @@
       </form>
 
       <div class="topbar-actions">
-        <button id="customLinkBtn" class="pill-btn ghost" title="Вставить ссылку YouTube / MP4 / M3U8">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke-linecap="round"/></svg>
-          <span class="hide-sm">Ссылка</span>
-        </button>
-
-        <button id="joinByCodeBtn" class="pill-btn ghost" title="Войти в комнату по коду">
-          <span>#</span><span class="hide-sm">&nbsp;Код</span>
-        </button>
-
         <!-- Active room mini-pill when browsing catalog while in a room -->
-        <button id="returnToRoomBtn" class="pill-btn accent pulse hidden">
+        <button id="returnToRoomBtn" class="pill-btn accent pulse hidden" title="Вернуться в комнату">
           <span>🔴</span><span class="hide-sm">&nbsp;В комнату</span>
         </button>
 
-        <!-- Notification Bell / Permission Button -->
-        <button id="notifBellBtn" class="pill-btn ghost" title="Уведомления">
-          <span id="notifBellIcon">🔔</span>
-        </button>
-
-        <!-- User Avatar / Auth Button -->
-        <button id="userMenuBtn" class="user-chip">
+        <!-- User Avatar / Profile & Settings Button -->
+        <button id="userMenuBtn" class="user-chip" title="Мой профиль и настройки">
           <span id="headerUserAvatar" class="avatar-circle">👤</span>
           <span id="headerUserName" class="hide-sm">Войти</span>
         </button>
@@ -624,61 +610,145 @@
         </form>
       </div>
 
-      <!-- Logged-in User Profile -->
+      <!-- Logged-in User Profile & Settings Modal -->
       <div id="authProfileView" class="hidden">
-        <h3>Мой профиль</h3>
-        <div class="profile-header-box">
-          <div id="profileBigAvatar" class="profile-big-avatar">🦊</div>
-          <div class="profile-meta-col">
-            <div id="profileUsernameTag" class="profile-username">@user</div>
-            <div class="profile-photo-btns">
-              <input type="file" id="profilePhotoInput" accept="image/*" hidden />
-              <button type="button" id="uploadPhotoBtn" class="pill-btn tiny accent">📷 Загрузить фото</button>
-              <button type="button" id="removePhotoBtn" class="pill-btn tiny hidden">✕ Удалить фото</button>
+        <div class="profile-modal-top">
+          <h3>Настройки и профиль</h3>
+        </div>
+
+        <!-- Folder Tabs Navigation -->
+        <div class="profile-folders-nav" id="profileFoldersNav">
+          <button type="button" class="pfolder-tab active" data-ptab="profile">
+            <span class="pfolder-icon">👤</span>
+            <span>Профиль</span>
+          </button>
+          <button type="button" class="pfolder-tab" data-ptab="quick-actions">
+            <span class="pfolder-icon">🔗</span>
+            <span>Подключение</span>
+          </button>
+          <button type="button" class="pfolder-tab" data-ptab="personalization">
+            <span class="pfolder-icon">🎨</span>
+            <span>Оформление</span>
+          </button>
+          <button type="button" class="pfolder-tab" data-ptab="notifications">
+            <span class="pfolder-icon">🔔</span>
+            <span>Уведомления</span>
+          </button>
+          <button type="button" class="pfolder-tab" data-ptab="playback">
+            <span class="pfolder-icon">⚙️</span>
+            <span>Плеер</span>
+          </button>
+        </div>
+
+        <!-- Folder 1: Профиль (Profile info, Stats, Display name, Bio, Logout) -->
+        <div id="ptab-profile" class="pfolder-content active">
+          <div class="profile-header-box">
+            <div id="profileBigAvatar" class="profile-big-avatar">🦊</div>
+            <div class="profile-meta-col">
+              <div id="profileUsernameTag" class="profile-username">@user</div>
+              <div class="profile-photo-btns">
+                <input type="file" id="profilePhotoInput" accept="image/*" hidden />
+                <button type="button" id="uploadPhotoBtn" class="pill-btn tiny accent">📷 Загрузить фото</button>
+                <button type="button" id="removePhotoBtn" class="pill-btn tiny hidden">✕ Удалить фото</button>
+              </div>
             </div>
           </div>
+
+          <!-- User Watch Statistics Grid -->
+          <div class="profile-stats-grid" id="profileStatsGrid">
+            <div class="stat-card">
+              <div class="stat-val" id="statWatchTime">0 мин</div>
+              <div class="stat-label">⏱️ В просмотре</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" id="statWatchedCount">0</div>
+              <div class="stat-label">🎬 Фильмов и серий</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" id="statRoomsCreated">0</div>
+              <div class="stat-label">🎉 Комнат создано</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" id="statMessagesSent">0</div>
+              <div class="stat-label">💬 Сообщений</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" id="statReactionsSent">0</div>
+              <div class="stat-label">🔥 Реакций</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" id="statSocialCount">0</div>
+              <div class="stat-label">👥 Друзей / 🔖 Закл.</div>
+            </div>
+          </div>
+
+          <form id="profileForm" class="auth-form">
+            <div class="form-group">
+              <label>Отображаемое имя</label>
+              <input type="text" id="profileDisplayName" required maxlength="32" />
+            </div>
+            <div class="form-group">
+              <label>О себе / Статус</label>
+              <input type="text" id="profileBio" placeholder="Что любите смотреть?" maxlength="140" />
+            </div>
+            <div class="profile-actions">
+              <button type="submit" class="btn primary">Сохранить профиль</button>
+              <button type="button" id="logoutBtn" class="btn glass danger">Выйти</button>
+            </div>
+          </form>
         </div>
 
-        <!-- User Watch Statistics Grid -->
-        <div class="profile-stats-grid" id="profileStatsGrid">
-          <div class="stat-card">
-            <div class="stat-val" id="statWatchTime">0 мин</div>
-            <div class="stat-label">⏱️ В просмотре</div>
+        <!-- Folder 2: Быстрое подключение & Ссылки (Custom Link & Join Room Code) -->
+        <div id="ptab-quick-actions" class="pfolder-content">
+          <div class="pfolder-card">
+            <div class="pfolder-card-header">
+              <span class="pfolder-card-icon">🔗</span>
+              <div>
+                <div class="pfolder-card-title">Своя ссылка на видео</div>
+                <div class="pfolder-card-sub">YouTube, HDRezka, прямые потоки HLS (.m3u8) и MP4</div>
+              </div>
+            </div>
+            <form id="pfolderCustomLinkForm" class="auth-form" style="margin-top:10px;">
+              <div class="form-group">
+                <label>URL видео или фильма</label>
+                <input type="url" id="pfolderCustomLinkUrl" required placeholder="https://..." />
+              </div>
+              <div class="form-group">
+                <label>Название (необязательно)</label>
+                <input type="text" id="pfolderCustomLinkTitle" placeholder="Видео по ссылке" />
+              </div>
+              <button type="submit" class="btn primary full">▶️ Запустить просмотр</button>
+            </form>
           </div>
-          <div class="stat-card">
-            <div class="stat-val" id="statWatchedCount">0</div>
-            <div class="stat-label">🎬 Фильмов и серий</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val" id="statRoomsCreated">0</div>
-            <div class="stat-label">🎉 Комнат создано</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val" id="statMessagesSent">0</div>
-            <div class="stat-label">💬 Сообщений</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val" id="statReactionsSent">0</div>
-            <div class="stat-label">🔥 Реакций</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val" id="statSocialCount">0</div>
-            <div class="stat-label">👥 Друзей / 🔖 Закл.</div>
+
+          <div class="pfolder-card" style="margin-top:14px;">
+            <div class="pfolder-card-header">
+              <span class="pfolder-card-icon">#️⃣</span>
+              <div>
+                <div class="pfolder-card-title">Войти по коду комнаты</div>
+                <div class="pfolder-card-sub">Введите код совместного просмотра от друга</div>
+              </div>
+            </div>
+            <form id="pfolderJoinCodeForm" class="auth-form" style="margin-top:10px;">
+              <div class="form-group">
+                <input type="text" id="pfolderJoinCodeInput" required placeholder="AB12CD" style="text-transform:uppercase;text-align:center;font-size:1.15rem;letter-spacing:0.15em;" maxlength="10" />
+              </div>
+              <button type="submit" class="btn primary full">🚀 Войти в комнату</button>
+            </form>
           </div>
         </div>
 
-        <form id="profileForm" class="auth-form">
-          <div class="form-group">
-            <label>Отображаемое имя</label>
-            <input type="text" id="profileDisplayName" required maxlength="32" />
-          </div>
-          <div class="form-group">
-            <label>О себе / Статус</label>
-            <input type="text" id="profileBio" placeholder="Что любите смотреть?" maxlength="140" />
-          </div>
-          <div class="form-group">
-            <label>Цвет профиля</label>
-            <div class="color-picker" id="profileColorPicker">
+        <!-- Folder 3: Оформление & Персонализация (Colors, Avatars, Preview) -->
+        <div id="ptab-personalization" class="pfolder-content">
+          <div class="pfolder-card">
+            <div class="pfolder-card-header">
+              <span class="pfolder-card-icon">🎨</span>
+              <div>
+                <div class="pfolder-card-title">Цвет профиля и темы</div>
+                <div class="pfolder-card-sub">Акцентный оттенок кнопок, свечения и вашего аватара</div>
+              </div>
+            </div>
+            <div class="color-picker" id="profileColorPicker" style="margin-top:12px;">
               <button type="button" class="color-swatch selected" data-color="#7c5cff" style="background:#7c5cff"></button>
               <button type="button" class="color-swatch" data-color="#ff3e80" style="background:#ff3e80"></button>
               <button type="button" class="color-swatch" data-color="#00d2ff" style="background:#00d2ff"></button>
@@ -689,9 +759,16 @@
               <button type="button" class="color-swatch" data-color="#3b82f6" style="background:#3b82f6"></button>
             </div>
           </div>
-          <div class="form-group">
-            <label>Эмодзи-аватар (если нет фото)</label>
-            <div class="avatar-picker" id="profileAvatarPicker">
+
+          <div class="pfolder-card" style="margin-top:14px;">
+            <div class="pfolder-card-header">
+              <span class="pfolder-card-icon">🦊</span>
+              <div>
+                <div class="pfolder-card-title">Эмодзи-аватар (если нет фото)</div>
+                <div class="pfolder-card-sub">Выберите символ вашего персонажа</div>
+              </div>
+            </div>
+            <div class="avatar-picker" id="profileAvatarPicker" style="margin-top:12px;">
               <button type="button" class="av-pick" data-av="🦊">🦊</button>
               <button type="button" class="av-pick" data-av="🐱">🐱</button>
               <button type="button" class="av-pick" data-av="🐼">🐼</button>
@@ -702,13 +779,122 @@
               <button type="button" class="av-pick" data-av="🤖">🤖</button>
               <button type="button" class="av-pick" data-av="🔥">🔥</button>
               <button type="button" class="av-pick" data-av="🎬">🎬</button>
+              <button type="button" class="av-pick" data-av="🚀">🚀</button>
+              <button type="button" class="av-pick" data-av="🍿">🍿</button>
             </div>
           </div>
-          <div class="profile-actions">
-            <button type="submit" class="btn primary">Сохранить</button>
-            <button type="button" id="logoutBtn" class="btn glass danger">Выйти</button>
+
+          <div style="margin-top:14px;text-align:right;">
+            <button type="button" id="savePersonalizationBtn" class="btn primary">Сохранить оформление</button>
           </div>
-        </form>
+        </div>
+
+        <!-- Folder 4: Уведомления (Notifications, Sound, Test) -->
+        <div id="ptab-notifications" class="pfolder-content">
+          <div class="pfolder-card">
+            <div class="pfolder-card-header">
+              <span class="pfolder-card-icon" id="notifFolderIcon">🔔</span>
+              <div>
+                <div class="pfolder-card-title">Браузерные и системные уведомления</div>
+                <div class="pfolder-card-sub" id="notifFolderSub">Разрешение на push и звуковые оповещения</div>
+              </div>
+            </div>
+            <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+              <button type="button" id="profileNotifToggleBtn" class="btn primary">🔔 Проверить уведомления</button>
+            </div>
+          </div>
+
+          <div class="pfolder-card" style="margin-top:14px;">
+            <div class="pfolder-card-header">
+              <span class="pfolder-card-icon">🔊</span>
+              <div>
+                <div class="pfolder-card-title">Звуковые сигналы в чате</div>
+                <div class="pfolder-card-sub">Воспроизведение звуков при новых сообщениях и реакциях</div>
+              </div>
+            </div>
+            <div class="setting-toggle-row" style="margin-top:12px;">
+              <span class="setting-toggle-label">Звук сообщений</span>
+              <label class="switch-ui">
+                <input type="checkbox" id="profileSoundToggle" checked />
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="pfolder-card" style="margin-top:14px;">
+            <div class="pfolder-card-header">
+              <span class="pfolder-card-icon">💬</span>
+              <div>
+                <div class="pfolder-card-title">Всплывающие карточки Telegram</div>
+                <div class="pfolder-card-sub">Оповещения сверху экрана при входящих сообщениях</div>
+              </div>
+            </div>
+            <div class="setting-toggle-row" style="margin-top:12px;">
+              <span class="setting-toggle-label">Всплывающие карточки</span>
+              <label class="switch-ui">
+                <input type="checkbox" id="profileInAppNotifToggle" checked />
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Folder 5: Плеер & Стрим (Proxy mode, Auto sync, Cache) -->
+        <div id="ptab-playback" class="pfolder-content">
+          <div class="pfolder-card">
+            <div class="pfolder-card-header">
+              <span class="pfolder-card-icon">⚡</span>
+              <div>
+                <div class="pfolder-card-title">Режим проксирования видео</div>
+                <div class="pfolder-card-sub">Настройка обхода CORS и прямых потоков балансеров</div>
+              </div>
+            </div>
+            <div class="proxy-select-grid" id="profileProxyGrid" style="margin-top:12px;">
+              <button type="button" class="proxy-opt-btn active" data-pmode="auto">
+                <span class="proxy-opt-title">⚡ Авто (Рекомендуется)</span>
+                <span class="proxy-opt-desc">Умный выбор прямого потока или прокси</span>
+              </button>
+              <button type="button" class="proxy-opt-btn" data-pmode="always">
+                <span class="proxy-opt-title">🛡️ Всегда через сервер</span>
+                <span class="proxy-opt-desc">Надёжный обход любых блокировок провайдера</span>
+              </button>
+              <button type="button" class="proxy-opt-btn" data-pmode="off">
+                <span class="proxy-opt-title">🚀 Напрямую без прокси</span>
+                <span class="proxy-opt-desc">Прямое воспроизведение видео (если не блокируется)</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="pfolder-card" style="margin-top:14px;">
+            <div class="pfolder-card-header">
+              <span class="pfolder-card-icon">🔄</span>
+              <div>
+                <div class="pfolder-card-title">Синхронизация совместного просмотра</div>
+                <div class="pfolder-card-sub">Автоматическая синхронизация таймкода комнаты</div>
+              </div>
+            </div>
+            <div class="setting-toggle-row" style="margin-top:12px;">
+              <span class="setting-toggle-label">Мягкая синхронизация</span>
+              <label class="switch-ui">
+                <input type="checkbox" id="profileSyncToggle" checked />
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="pfolder-card" style="margin-top:14px;">
+            <div class="pfolder-card-header">
+              <span class="pfolder-card-icon">🧹</span>
+              <div>
+                <div class="pfolder-card-title">Локальные данные и кэш</div>
+                <div class="pfolder-card-sub">Сброс сохранённых позиций фильмов и временных данных</div>
+              </div>
+            </div>
+            <div style="margin-top:12px;">
+              <button type="button" id="profileClearCacheBtn" class="pill-btn danger">Очистить кэш просмотра</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1034,6 +1220,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261107_rezka_chat_2"></script>
+  <script src="/app.js?v=20261107_profile_folders_1"></script>
 </body>
 </html>

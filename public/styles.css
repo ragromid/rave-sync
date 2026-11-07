@@ -2320,7 +2320,14 @@ body.keyboard-open .chat-input-row {
 .movie-modal-card {
   max-width: 520px;
 }
-.auth-modal-card,
+.auth-modal-card {
+  max-width: 560px;
+  width: 95%;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 24px 22px;
+  border-radius: 24px;
+}
 .small-modal-card {
   max-width: 440px;
   max-height: 90vh;
@@ -2575,6 +2582,191 @@ body.keyboard-open .chat-input-row {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   font-size: 0.82rem;
+}
+
+.profile-modal-top {
+  margin-bottom: 14px;
+}
+.profile-modal-top h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+/* Profile Folders Navigation */
+.profile-folders-nav {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 4px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+  border: 1px solid var(--border-subtle);
+}
+.profile-folders-nav::-webkit-scrollbar {
+  display: none;
+}
+.pfolder-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  border: none;
+}
+.pfolder-tab:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.06);
+}
+.pfolder-tab.active {
+  color: #fff;
+  background: var(--accent);
+  box-shadow: 0 4px 14px rgba(124, 92, 255, 0.35);
+}
+.pfolder-icon {
+  font-size: 0.95rem;
+}
+
+/* Folder Content Panes */
+.pfolder-content {
+  display: none;
+}
+.pfolder-content.active {
+  display: block;
+  animation: fadeIn 0.16s ease;
+}
+
+/* Folder Section Cards */
+.pfolder-card {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 14px 16px;
+  transition: border-color 0.15s ease;
+}
+.pfolder-card:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+.pfolder-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pfolder-card-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+.pfolder-card-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.pfolder-card-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Settings Toggle Rows and iOS-style switch */
+.setting-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.setting-toggle-label {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+.switch-ui {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.switch-ui input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.16);
+  transition: 0.2s ease;
+  border-radius: 99px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.2s ease;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+.switch-ui input:checked + .switch-slider {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+.switch-ui input:checked + .switch-slider:before {
+  transform: translateX(20px);
+}
+
+/* Proxy Mode Selector in Settings */
+.proxy-select-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.proxy-opt-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  width: 100%;
+}
+.proxy-opt-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.proxy-opt-btn.active {
+  background: rgba(124, 92, 255, 0.16);
+  border-color: var(--accent);
+  box-shadow: 0 0 14px rgba(124, 92, 255, 0.25);
+}
+.proxy-opt-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+.proxy-opt-desc {
+  font-size: 0.74rem;
+  color: var(--text-muted);
 }
 
 /* Minimalist Room Settings Modal */

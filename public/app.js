@@ -35,7 +35,10 @@
 
     // Active Watch Party Room
     room: null,
-    proxyMode: 'auto', // 'auto' | 'always' | 'off'
+    proxyMode: localStorage.getItem('ravelampa_proxy_mode') || 'auto', // 'auto' | 'always' | 'off'
+    soundEnabled: localStorage.getItem('ravelampa_sound_enabled') !== 'false',
+    inAppNotifsEnabled: localStorage.getItem('ravelampa_inapp_notifs') !== 'false',
+    autoSync: localStorage.getItem('ravelampa_auto_sync') !== 'false',
 
     // Z01 State for the active movie/series in Room
     z01: {
@@ -437,6 +440,7 @@
   }
 
   function playNotificationSound(kind = 'message') {
+    if (state.soundEnabled === false) return;
     try {
       const Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return;
@@ -576,6 +580,7 @@
   });
 
   function showTelegramTopCard({ title, body, user, onClick }) {
+    if (state.inAppNotifsEnabled === false) return;
     const container = $('tgTopNotifContainer');
     if (!container) return;
     const card = document.createElement('div');
@@ -792,12 +797,127 @@
     $('statSocialCount').textContent = `${friendsCnt} / ${bmCnt}`;
   }
 
-  async function openAuthModal() {
+  function switchProfileFolder(target) {
+    document.querySelectorAll('.pfolder-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.ptab === target);
+    });
+    document.querySelectorAll('.pfolder-content').forEach(c => {
+      c.classList.toggle('active', c.id === `ptab-${target}`);
+    });
+    if (target === 'notifications') {
+      updateProfileNotifUI();
+    } else if (target === 'playback') {
+      updateProfilePlaybackUI();
+    }
+  }
+
+  document.querySelectorAll('.pfolder-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      switchProfileFolder(tab.dataset.ptab);
+    });
+  });
+
+  function updateProfileNotifUI() {
+    const hasNotifApi = 'Notification' in window;
+    const perm = hasNotifApi ? Notification.permission : (inAppSoundUnlocked ? 'granted' : 'default');
+    const icon = $('notifFolderIcon');
+    const sub = $('notifFolderSub');
+    const btn = $('profileNotifToggleBtn');
+    const soundToggle = $('profileSoundToggle');
+    const inAppToggle = $('profileInAppNotifToggle');
+
+    if (soundToggle) soundToggle.checked = state.soundEnabled !== false;
+    if (inAppToggle) inAppToggle.checked = state.inAppNotifsEnabled !== false;
+
+    if (!btn) return;
+    if (perm === 'granted' || inAppSoundUnlocked) {
+      if (icon) icon.textContent = '🔔';
+      if (sub) sub.textContent = 'Оповещения включены и активны в браузере';
+      btn.textContent = '🔔 Проверить звук и пуш';
+      btn.className = 'btn primary';
+    } else if (perm === 'denied') {
+      if (icon) icon.textContent = '🔕';
+      if (sub) sub.textContent = 'Уведомления заблокированы в настройках браузера';
+      btn.textContent = '🔕 Разрешить в браузере';
+      btn.className = 'btn glass danger';
+    } else {
+      if (icon) icon.textContent = '🔔';
+      if (sub) sub.textContent = 'Нажмите кнопку, чтобы разрешить системные уведомления';
+      btn.textContent = '🔔 Включить уведомления';
+      btn.className = 'btn primary';
+    }
+  }
+
+  $('profileNotifToggleBtn')?.addEventListener('click', async () => {
+    const hasGrant = ('Notification' in window && Notification.permission === 'granted');
+    if (!hasGrant) {
+      await requestBrowserNotificationPermission();
+      updateProfileNotifUI();
+    } else {
+      triggerAppNotification({
+        title: 'Проверка уведомлений 🔔',
+        body: 'Уведомления и звук RaveLampa работают отлично!',
+        user: state.user || { avatar: '🔔', color: '#7c5cff' },
+        forceSystem: true
+      });
+      showToast('Тестовое уведомление отправлено!');
+    }
+  });
+
+  $('profileSoundToggle')?.addEventListener('change', (e) => {
+    state.soundEnabled = e.target.checked;
+    localStorage.setItem('ravelampa_sound_enabled', state.soundEnabled ? 'true' : 'false');
+    showToast(state.soundEnabled ? '🔊 Звуки сообщений включены' : '🔇 Звуки сообщений выключены');
+  });
+
+  $('profileInAppNotifToggle')?.addEventListener('change', (e) => {
+    state.inAppNotifsEnabled = e.target.checked;
+    localStorage.setItem('ravelampa_inapp_notifs', state.inAppNotifsEnabled ? 'true' : 'false');
+    showToast(state.inAppNotifsEnabled ? '💬 Всплывающие карточки включены' : '💬 Всплывающие карточки выключены');
+  });
+
+  function updateProfilePlaybackUI() {
+    const grid = $('profileProxyGrid');
+    if (!grid) return;
+    grid.querySelectorAll('.proxy-opt-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.pmode === state.proxyMode);
+    });
+    const syncToggle = $('profileSyncToggle');
+    if (syncToggle) syncToggle.checked = state.autoSync !== false;
+  }
+
+  $('profileProxyGrid')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.proxy-opt-btn');
+    if (!btn) return;
+    state.proxyMode = btn.dataset.pmode || 'auto';
+    localStorage.setItem('ravelampa_proxy_mode', state.proxyMode);
+    updateProfilePlaybackUI();
+    const modeNames = { auto: '⚡ Авто', always: '🛡️ Всегда через сервер', off: '🚀 Напрямую без прокси' };
+    showToast(`Режим потока: ${modeNames[state.proxyMode] || state.proxyMode}`);
+  });
+
+  $('profileSyncToggle')?.addEventListener('change', (e) => {
+    state.autoSync = e.target.checked;
+    localStorage.setItem('ravelampa_auto_sync', state.autoSync ? 'true' : 'false');
+    showToast(state.autoSync ? '🔄 Автосинхронизация включена' : '⏸️ Автосинхронизация выключена');
+  });
+
+  $('profileClearCacheBtn')?.addEventListener('click', () => {
+    localStorage.removeItem('ravelampa_progress');
+    showToast('Кэш просмотра очищен');
+  });
+
+  $('savePersonalizationBtn')?.addEventListener('click', () => {
+    $('profileForm')?.requestSubmit();
+  });
+
+  async function openAuthModal(defaultTab = 'profile') {
     const modal = $('authModal');
     modal.classList.remove('hidden');
     if (state.user) {
       $('authGuestView').classList.add('hidden');
       $('authProfileView').classList.remove('hidden');
+      switchProfileFolder(defaultTab);
       pendingAvatarUrl = null;
       setAvatarElement($('profileBigAvatar'), state.user, '🦊');
       $('removePhotoBtn').classList.toggle('hidden', !state.user.avatarUrl);
@@ -813,6 +933,9 @@
       });
 
       populateProfileStats(state.user);
+      updateProfileNotifUI();
+      updateProfilePlaybackUI();
+
       // Refresh latest stats from server in background
       try {
         const fresh = await api('/api/auth/me');
@@ -827,7 +950,7 @@
     }
   }
 
-  $('userMenuBtn').addEventListener('click', openAuthModal);
+  $('userMenuBtn')?.addEventListener('click', () => openAuthModal('profile'));
 
   // Custom photo upload with client-side square crop & compression (160x160 JPEG)
   $('uploadPhotoBtn').addEventListener('click', () => {
@@ -1476,45 +1599,59 @@
     });
   });
 
-  $('joinByCodeBtn').addEventListener('click', () => {
-    $('joinCodeModal').classList.remove('hidden');
-    $('joinCodeInput').focus();
+  $('joinByCodeBtn')?.addEventListener('click', () => {
+    if (state.user) {
+      openAuthModal('quick-actions');
+    } else {
+      $('joinCodeModal')?.classList.remove('hidden');
+      $('joinCodeInput')?.focus();
+    }
   });
 
-  $('joinCodeForm').addEventListener('submit', (e) => {
+  $('joinCodeForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const code = $('joinCodeInput').value.trim().toUpperCase();
     if (!code) return;
-    $('joinCodeModal').classList.add('hidden');
+    $('joinCodeModal')?.classList.add('hidden');
     $('joinCodeInput').value = '';
+    joinRoomByCode(code);
+  });
+
+  $('pfolderJoinCodeForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const code = $('pfolderJoinCodeInput').value.trim().toUpperCase();
+    if (!code) return;
+    $('authModal')?.classList.add('hidden');
+    $('pfolderJoinCodeInput').value = '';
     joinRoomByCode(code);
   });
 
   // Custom link (YouTube / MP4 / M3U8)
   function openCustomLinkModal() {
-    $('customLinkModal').classList.remove('hidden');
-    $('customLinkUrl').focus();
+    if (state.user) {
+      openAuthModal('quick-actions');
+    } else {
+      $('customLinkModal')?.classList.remove('hidden');
+      $('customLinkUrl')?.focus();
+    }
   }
-  $('customLinkBtn').addEventListener('click', openCustomLinkModal);
-  $('openLinkFromRoomBtn').addEventListener('click', openCustomLinkModal);
-  $('openCatalogFromRoomBtn').addEventListener('click', () => switchView('explore'));
+  $('customLinkBtn')?.addEventListener('click', openCustomLinkModal);
+  $('openLinkFromRoomBtn')?.addEventListener('click', openCustomLinkModal);
+  $('openCatalogFromRoomBtn')?.addEventListener('click', () => switchView('explore'));
 
   function extractYouTubeId(url) {
     const m = String(url || '').match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
     return m ? m[1] : null;
   }
 
-  $('customLinkForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+  async function handleLaunchCustomVideo(rawUrl, customTitle) {
     if (!(await ensureAuthenticated())) return;
-    const rawUrl = $('customLinkUrl').value.trim();
-    const customTitle = $('customLinkTitle').value.trim() || 'Видео по ссылке';
     if (!rawUrl) return;
 
+    $('customLinkModal')?.classList.add('hidden');
+    $('authModal')?.classList.add('hidden');
+
     if (/rezka/i.test(rawUrl)) {
-      $('customLinkModal').classList.add('hidden');
-      $('customLinkUrl').value = '';
-      $('customLinkTitle').value = '';
       try {
         setPlayerOverlay(true, true, 'Загружаем HDRezka...');
         const details = await api(`/api/rezka/details?url=${encodeURIComponent(rawUrl)}`);
@@ -1549,10 +1686,6 @@
       streamType: ytId ? 'youtube' : (isHls ? 'hls' : 'mp4')
     };
 
-    $('customLinkModal').classList.add('hidden');
-    $('customLinkUrl').value = '';
-    $('customLinkTitle').value = '';
-
     if (state.room) {
       switchView('room');
       socket.emit('room:set_media', { media });
@@ -1574,6 +1707,24 @@
       });
       await joinRoomByCode(res.room.code);
     }
+  }
+
+  $('customLinkForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const rawUrl = $('customLinkUrl').value.trim();
+    const customTitle = $('customLinkTitle').value.trim() || 'Видео по ссылке';
+    $('customLinkUrl').value = '';
+    $('customLinkTitle').value = '';
+    handleLaunchCustomVideo(rawUrl, customTitle);
+  });
+
+  $('pfolderCustomLinkForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const rawUrl = $('pfolderCustomLinkUrl').value.trim();
+    const customTitle = $('pfolderCustomLinkTitle').value.trim() || 'Видео по ссылке';
+    $('pfolderCustomLinkUrl').value = '';
+    $('pfolderCustomLinkTitle').value = '';
+    handleLaunchCustomVideo(rawUrl, customTitle);
   });
 
   // ================= Z01 ONLINE ENGINE IN ROOM =================
