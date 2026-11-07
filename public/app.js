@@ -572,7 +572,7 @@
     } else {
       triggerAppNotification({
         title: 'Проверка уведомлений 🔔',
-        body: 'Уведомления и звук RaveLampa работают отлично!',
+        body: 'Уведомления и звук oulo работают отлично!',
         user: state.user || { avatar: '🔔', color: '#7c5cff' },
         forceSystem: true
       });
@@ -615,9 +615,9 @@
   let titleFlashTimer = null;
   function flashTabTitle(text) {
     clearTimeout(titleFlashTimer);
-    document.title = `💬 ${text} — RaveLampa`;
+    document.title = `💬 ${text} — oulo`;
     titleFlashTimer = setTimeout(() => {
-      document.title = 'RaveLampa — Кинотеатр с друзьями';
+      document.title = 'oulo — совместный просмотр';
     }, 5000);
   }
 
@@ -856,7 +856,7 @@
     } else {
       triggerAppNotification({
         title: 'Проверка уведомлений 🔔',
-        body: 'Уведомления и звук RaveLampa работают отлично!',
+        body: 'Уведомления и звук oulo работают отлично!',
         user: state.user || { avatar: '🔔', color: '#7c5cff' },
         forceSystem: true
       });
@@ -1087,7 +1087,7 @@
       setAvatarElement($('ucAvatar'), u, '🦊');
       $('ucDisplayName').textContent = u.displayName;
       $('ucUsername').textContent = `@${u.username}`;
-      $('ucBio').textContent = u.bio || 'Смотрит фильмы в RaveLampa 🍿';
+      $('ucBio').textContent = u.bio || 'Смотрит фильмы в oulo 🍿';
       const st = u.stats || {};
       $('ucStatsGrid').innerHTML = `
         <div class="stat-card"><div class="stat-val">${esc(formatWatchTime(st.watchSeconds || 0))}</div><div class="stat-label">⏱️ В просмотре</div></div>

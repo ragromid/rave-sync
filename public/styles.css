@@ -129,26 +129,31 @@ button {
   width: 36px;
   height: 36px;
   border-radius: 11px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-pink));
+  background: #11131c;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(124, 92, 255, 0.4);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+}
+.brand:hover .brand-icon {
+  background: #181b2a;
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: scale(1.04);
 }
 .brand-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   color: #fff;
 }
 
 .brand-name {
   font-weight: 800;
-  font-size: 1.15rem;
-  letter-spacing: -0.02em;
-}
-.brand-name span {
-  color: var(--accent-cyan);
-  font-weight: 600;
+  font-size: 1.3rem;
+  letter-spacing: -0.04em;
+  color: #fff;
+  line-height: 1;
 }
 
 .search-box {

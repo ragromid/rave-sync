@@ -1,15 +1,15 @@
 {
-  "name": "RaveLampa — Смотри вместе",
-  "short_name": "RaveLampa",
-  "description": "Совместный просмотр фильмов и сериалов (Rave x Lampa Z01)",
+  "name": "oulo — совместный просмотр",
+  "short_name": "oulo",
+  "description": "Синхронный просмотр фильмов и сериалов с друзьями",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#090a0f",
-  "theme_color": "#7c5cff",
+  "theme_color": "#090a0f",
   "orientation": "any",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%237c5cff'/><path d='M35 28v44l38-22z' fill='white'/></svg>",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='26' fill='%23090a0f'/%3E%3Cpath d='M26 23c0-2.8 3.1-4.4 5.5-2.8l38 24.8c2.4 1.6 2.4 5.1 0 6.7l-38 24.8c-2.4 1.6-5.5 0-5.5-2.8V23z' fill='%23ffffff'/%3E%3Ccircle cx='82' cy='47' r='7.5' fill='%235ce1e6'/%3E%3C/svg%3E",
       "sizes": "192x192",
       "type": "image/svg+xml"
     }
