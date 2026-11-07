@@ -696,6 +696,27 @@ async function handleRezkaBalancerQuery({ url, movie, prevSeasons = [], prevVoic
       const movieUrl = query.get('movie_url') || '';
       const isSeries = query.get('is_series') === '1';
 
+      let voices = prevVoices;
+      if (!voices.length && movieUrl) {
+        try {
+          const details = await rezka.getDetails(movieUrl);
+          if (details.translators?.length) {
+            voices = details.translators.map((t, idx) => ({
+              index: idx,
+              title: t.name,
+              rawTitle: t.name,
+              kind: 'mvo',
+              groupTitle: 'Озвучка',
+              url: `rezka://episodes?id=${id}&tr=${t.id}&movie_url=${encodeURIComponent(movieUrl)}&is_series=${isSeries ? 1 : 0}`,
+              active: String(t.id) === String(tr)
+            }));
+          }
+        } catch {}
+      }
+
+      const activeVoice = voices.find(v => v.url && v.url.includes(`tr=${tr}`)) || voices.find(v => v.active) || voices[0];
+      const voiceName = activeVoice ? activeVoice.title : '';
+
       if (!isSeries) {
         return {
           videos: [{
@@ -703,7 +724,7 @@ async function handleRezkaBalancerQuery({ url, movie, prevSeasons = [], prevVoic
             title: movie?.title || movie?.name || 'Фильм',
             season: 0,
             episode: 0,
-            voice_name: '',
+            voice_name: voiceName,
             method: 'call',
             url: `rezka://stream?id=${id}&tr=${tr}&is_movie=1&movie_url=${encodeURIComponent(movieUrl)}`,
             quality: 'FHD',
@@ -712,7 +733,7 @@ async function handleRezkaBalancerQuery({ url, movie, prevSeasons = [], prevVoic
             subtitles: []
           }],
           seasons: [],
-          voices: prevVoices.map(v => ({
+          voices: voices.map(v => ({
             ...v,
             active: v.url.includes(`tr=${tr}`)
           })),
@@ -737,7 +758,7 @@ async function handleRezkaBalancerQuery({ url, movie, prevSeasons = [], prevVoic
         title: ep.name || `${ep.episode} серия`,
         season: parseInt(ep.season, 10),
         episode: parseInt(ep.episode, 10),
-        voice_name: '',
+        voice_name: voiceName,
         method: 'call',
         url: `rezka://stream?id=${id}&tr=${tr}&season=${ep.season}&episode=${ep.episode}&movie_url=${encodeURIComponent(movieUrl)}&is_movie=0`,
         quality: 'FHD',
@@ -749,7 +770,7 @@ async function handleRezkaBalancerQuery({ url, movie, prevSeasons = [], prevVoic
       return {
         videos,
         seasons,
-        voices: prevVoices.map(v => ({
+        voices: voices.map(v => ({
           ...v,
           active: v.url.includes(`tr=${tr}`)
         })),

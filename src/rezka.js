@@ -552,17 +552,32 @@ async function getDetails(idOrUrl, domain = DEFAULT_MIRROR) {
 
   // Extract Translators / Voice Studios
   const translators = [];
-  const translRegex = /<li[^>]*data-translator_id="(\d+)"[^>]*title="([^"]+)"[^>]*class="([^"]*)"[^>]*>([\s\S]*?)<\/li>/gi;
+  const seenTrIds = new Set();
+  const ulMatch = html.match(/<ul[^>]*id="translators-list"[^>]*>([\s\S]*?)<\/ul>/i);
+  const searchBlock = ulMatch ? ulMatch[1] : html;
+
+  const tagRegex = /<(?:li|a)\b([^>]*\bdata-translator_id=["']?(\d+)["']?[^>]*)>([\s\S]*?)<\/(?:li|a)>/gi;
   let trm;
-  while ((trm = translRegex.exec(html)) !== null) {
-    const trId = trm[1];
-    const trTitle = trm[2].trim();
-    const trClass = trm[3] || '';
-    const isDefault = trClass.includes('active');
+  while ((trm = tagRegex.exec(searchBlock)) !== null) {
+    const attrStr = trm[1];
+    const trId = trm[2];
+    const innerHtml = trm[3];
+
+    if (seenTrIds.has(trId)) continue;
+    seenTrIds.add(trId);
+
+    const titleAttrMatch = attrStr.match(/\btitle=["']([^"']+)["']/i);
+    let name = titleAttrMatch ? titleAttrMatch[1].trim() : '';
+    if (!name) {
+      name = innerHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    const isActive = /\bclass=["'][^"']*\bactive\b[^"']*["']/i.test(attrStr) || /\bclass=["'][^"']*\bactive\b[^"']*["']/i.test(trm[0]);
+
     translators.push({
       id: trId,
-      name: trTitle,
-      isDefault
+      name,
+      isDefault: isActive
     });
   }
 
@@ -576,6 +591,11 @@ async function getDetails(idOrUrl, domain = DEFAULT_MIRROR) {
         isDefault: true
       });
     }
+  }
+
+  // Ensure at least one is active/default
+  if (translators.length > 0 && !translators.some(t => t.isDefault)) {
+    translators[0].isDefault = true;
   }
 
   // Default translator
@@ -758,5 +778,6 @@ module.exports = {
   getStream,
   decodeHDRezkaUrl,
   parseStreamQualities,
-  DEFAULT_MIRROR
+  DEFAULT_MIRROR,
+  rezkaFetch
 };

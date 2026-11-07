@@ -1813,7 +1813,7 @@
     }
 
     // 3. Voice segment
-    if (voices.length > 1) {
+    if (voices.length >= 1) {
       const curV = voices[activeVoiceIdx] || voices[0];
       addSegment('voice', 'Озвучка', curV.title, curV.groupTitle);
     } else if (videos.length > 1 && !seasons.length && ! videos[0]?.episode) {
