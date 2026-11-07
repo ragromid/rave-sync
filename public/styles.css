@@ -1,28 +1,25 @@
 :root {
   --bg-main: #000000;
-  --bg-elevated: #080a08;
-  --bg-card: #0d100d;
-  --bg-glass: rgba(10, 14, 10, 0.85);
-  --border-subtle: rgba(255, 255, 255, 0.07);
+  --bg-elevated: #0a0a0a;
+  --bg-card: #121212;
+  --bg-glass: rgba(10, 10, 10, 0.88);
+  --border-subtle: rgba(255, 255, 255, 0.09);
   --border-focus: #00e676;
-  --border-glow: rgba(0, 230, 118, 0.35);
   --accent: #00e676;
-  --accent-hover: #00ff88;
+  --accent-hover: #00c853;
   --accent-pink: #00e676;
   --accent-cyan: #00e676;
   --text-main: #ffffff;
-  --text-muted: #79827a;
+  --text-muted: #888888;
   --success: #00e676;
   --warning: #00e676;
   --danger: #ffffff;
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 18px;
+  --radius-lg: 16px;
   --topbar-h: 62px;
   --nav-w: 84px;
   --mobile-nav-h: 64px;
-  --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
-  --tempo-bar: 3.69s; /* 65 BPM 4-beat bar */
 }
 
 * {
@@ -37,44 +34,13 @@ html, body {
   inset: 0;
   width: 100%;
   height: 100%;
-  background: #000000;
-  background-image: 
-    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(0, 230, 118, 0.055) 0%, transparent 65%),
-    radial-gradient(circle at 10% 95%, rgba(0, 230, 118, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 90% 75%, rgba(255, 255, 255, 0.015) 0%, transparent 40%);
+  background: var(--bg-main);
   color: var(--text-main);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow: hidden;
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
   user-select: none;
-  box-shadow: inset 0 0 160px rgba(0, 0, 0, 0.94);
-}
-
-/* Ambient synth pad breathing overlay (65 BPM tempo) */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse 95% 65% at 50% 20%, rgba(0, 230, 118, 0.04) 0%, transparent 75%);
-  animation: ambientSubPulse var(--tempo-bar) ease-in-out infinite alternate;
-  z-index: 0;
-}
-
-@keyframes ambientSubPulse {
-  0% {
-    opacity: 0.25;
-    transform: scale(0.985);
-  }
-  50% {
-    opacity: 0.75;
-    transform: scale(1.02);
-  }
-  100% {
-    opacity: 0.35;
-    transform: scale(0.995);
-  }
 }
 
 input, button {
@@ -144,11 +110,10 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  background: rgba(6, 8, 6, 0.88);
-  backdrop-filter: blur(24px) saturate(130%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
-  z-index: 50;
+  background: rgba(9, 10, 15, 0.92);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: 40;
   flex-shrink: 0;
 }
 
@@ -164,49 +129,32 @@ button {
   width: 36px;
   height: 36px;
   border-radius: 11px;
-  background: rgba(10, 14, 10, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  transition: all 0.4s var(--ease-cinematic);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  transition: all 0.2s ease;
 }
 .brand:hover .brand-icon {
-  background: rgba(16, 24, 16, 0.85);
+  background: #141414;
   border-color: #00e676;
-  box-shadow: 0 0 20px rgba(0, 230, 118, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
+  box-shadow: 0 0 14px rgba(0, 230, 118, 0.3);
+  transform: scale(1.04);
 }
 .brand-icon svg {
   width: 22px;
   height: 22px;
   color: #fff;
 }
-.brand-icon circle {
-  animation: etherealDotPulse var(--tempo-bar) ease-in-out infinite;
-  transform-origin: center;
-}
-@keyframes etherealDotPulse {
-  0%, 100% {
-    filter: drop-shadow(0 0 3px #00e676);
-    opacity: 0.8;
-  }
-  50% {
-    filter: drop-shadow(0 0 12px #00e676) drop-shadow(0 0 20px rgba(0, 230, 118, 0.6));
-    opacity: 1;
-  }
-}
 
 .brand-name {
   font-weight: 800;
-  font-size: 1.25rem;
-  letter-spacing: 0.08em;
-  text-transform: lowercase;
+  font-size: 1.3rem;
+  letter-spacing: -0.04em;
   color: #fff;
   line-height: 1;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 .search-box {
@@ -214,21 +162,18 @@ button {
   min-width: 0;
   max-width: 460px;
   height: 40px;
-  background: rgba(10, 14, 10, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
   border-radius: 99px;
   display: flex;
   align-items: center;
-  padding: 0 14px;
+  padding: 0 12px;
   gap: 8px;
-  backdrop-filter: blur(16px);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
-  transition: all 0.35s var(--ease-cinematic);
+  transition: border-color 0.2s, box-shadow 0.2s, max-width 0.2s;
 }
 .search-box:focus-within {
   border-color: #00e676;
-  background: rgba(12, 18, 12, 0.95);
-  box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.18), 0 0 28px rgba(0, 230, 118, 0.15);
+  box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.2);
 }
 .search-icon {
   width: 18px;
@@ -260,21 +205,17 @@ button {
   align-items: center;
   gap: 6px;
   height: 36px;
-  padding: 0 14px;
+  padding: 0 13px;
   border-radius: 99px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  background: rgba(14, 18, 14, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  transition: all 0.35s var(--ease-cinematic);
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  transition: all 0.18s;
   white-space: nowrap;
 }
 .pill-btn:hover {
-  background: rgba(22, 28, 22, 0.85);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.11);
 }
 .pill-btn svg {
   width: 15px;
@@ -282,71 +223,27 @@ button {
 }
 .pill-btn.tiny {
   height: 30px;
-  padding: 0 11px;
-  font-size: 0.75rem;
+  padding: 0 10px;
+  font-size: 0.78rem;
 }
 .pill-btn.accent {
   background: #00e676;
   border-color: #00e676;
   color: #000000;
   font-weight: 700;
-  box-shadow: 0 4px 18px rgba(0, 230, 118, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 .pill-btn.accent:hover {
-  background: #00ff88;
-  border-color: #00ff88;
+  background: #00c853;
+  border-color: #00c853;
   color: #000000;
-  box-shadow: 0 6px 24px rgba(0, 230, 118, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 .pill-btn.pulse {
-  animation: pulseGlow var(--tempo-bar) infinite;
+  animation: pulseGlow 2.5s infinite;
 }
 
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.55), 0 0 14px rgba(0, 230, 118, 0.2); }
-  50% { box-shadow: 0 0 0 8px rgba(0, 230, 118, 0), 0 0 28px rgba(0, 230, 118, 0.45); }
-}
-
-#ambientAtmosphereBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: 99px;
-  background: rgba(14, 18, 14, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  color: var(--text-muted);
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  padding: 5px 12px;
-  backdrop-filter: blur(14px);
-  transition: all 0.35s var(--ease-cinematic);
-}
-#ambientAtmosphereBtn:hover {
-  background: rgba(0, 230, 118, 0.08);
-  border-color: rgba(0, 230, 118, 0.4);
-  color: #fff;
-  box-shadow: 0 0 20px rgba(0, 230, 118, 0.2);
-  transform: translateY(-1px);
-}
-#ambientAtmosphereBtn.active {
-  background: rgba(0, 230, 118, 0.16);
-  border-color: #00e676;
-  color: #00e676;
-  box-shadow: 0 0 24px rgba(0, 230, 118, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-.ambient-pulse-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--text-muted);
-  transition: all 0.3s;
-}
-#ambientAtmosphereBtn.active .ambient-pulse-dot {
-  background: #00e676;
-  animation: etherealDotPulse var(--tempo-bar) ease-in-out infinite;
-  box-shadow: 0 0 8px #00e676;
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.45); }
+  50% { box-shadow: 0 0 0 6px rgba(0, 230, 118, 0); }
 }
 
 .user-chip {
@@ -394,9 +291,8 @@ button {
 /* Left Rail Navigation (Desktop) */
 .nav-rail {
   width: var(--nav-w);
-  background: rgba(6, 8, 6, 0.92);
-  backdrop-filter: blur(24px);
-  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--bg-elevated);
+  border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -418,31 +314,21 @@ button {
   gap: 5px;
   color: var(--text-muted);
   font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  transition: all 0.35s var(--ease-cinematic);
+  font-weight: 600;
+  transition: all 0.18s;
 }
 .nav-item svg {
   width: 22px;
   height: 22px;
-  transition: transform 0.35s var(--ease-cinematic), color 0.35s ease;
 }
 .nav-item:hover {
   color: var(--text-main);
-  background: rgba(255, 255, 255, 0.04);
-  transform: translateY(-1px);
-}
-.nav-item:hover svg {
-  transform: scale(1.08);
+  background: rgba(255, 255, 255, 0.05);
 }
 .nav-item.active {
   color: #00e676;
-  background: rgba(0, 230, 118, 0.09);
-  box-shadow: inset 0 0 0 1px rgba(0, 230, 118, 0.4), 0 0 24px rgba(0, 230, 118, 0.15);
-}
-.nav-item.active svg {
-  color: #00e676;
-  filter: drop-shadow(0 0 8px rgba(0, 230, 118, 0.6));
+  background: rgba(0, 230, 118, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(0, 230, 118, 0.35);
 }
 .nav-item.active svg {
   color: #00e676;
@@ -581,54 +467,41 @@ button {
   padding: 0 18px;
   border-radius: var(--radius-sm);
   font-weight: 600;
-  font-size: 0.88rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  transition: all 0.35s var(--ease-cinematic);
+  font-size: 0.9rem;
+  transition: all 0.18s;
 }
 .btn svg {
   width: 18px;
   height: 18px;
-  transition: transform 0.35s var(--ease-cinematic);
 }
 .btn.primary {
   background: #00e676;
   color: #000000;
-  font-weight: 800;
+  font-weight: 700;
   border: 1px solid #00e676;
-  box-shadow: 0 4px 18px rgba(0, 230, 118, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 230, 118, 0.25);
 }
 .btn.primary:hover {
-  background: #00ff88;
-  border-color: #00ff88;
+  background: #00c853;
+  border-color: #00c853;
   color: #000000;
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 30px rgba(0, 230, 118, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
 }
 .btn.glass {
-  background: rgba(14, 18, 14, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  backdrop-filter: blur(14px);
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
 }
 .btn.glass:hover {
-  background: rgba(22, 28, 22, 0.88);
-  border-color: rgba(255, 255, 255, 0.22);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+  background: rgba(255, 255, 255, 0.12);
 }
 .btn.accent-outline {
-  border: 1px solid rgba(0, 230, 118, 0.4);
+  border: 1px solid #00e676;
   color: #00e676;
-  background: rgba(0, 230, 118, 0.06);
-  backdrop-filter: blur(12px);
+  background: rgba(0, 230, 118, 0.08);
 }
 .btn.accent-outline:hover {
-  background: rgba(0, 230, 118, 0.14);
-  border-color: #00e676;
-  box-shadow: 0 0 20px rgba(0, 230, 118, 0.25);
-  transform: translateY(-1px);
+  background: rgba(0, 230, 118, 0.16);
 }
 .btn.danger {
   color: #ffffff;
@@ -716,16 +589,13 @@ button {
   transition: all 0.18s;
 }
 .cat-pill:hover {
-  background: rgba(0, 230, 118, 0.08);
-  border-color: rgba(0, 230, 118, 0.35);
-  color: #fff;
-  transform: translateY(-1px);
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.08);
 }
 .cat-pill.active {
-  background: #00e676;
-  color: #000000;
-  border-color: #00e676;
-  box-shadow: 0 0 24px rgba(0, 230, 118, 0.4);
+  background: #fff;
+  color: #090a0f;
+  border-color: #fff;
 }
 
 /* Poster Grid (Lampa style clean cards) */
@@ -738,7 +608,7 @@ button {
 .poster-card {
   appearance: none;
   -webkit-appearance: none;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.005);
   border: none;
   padding: 0;
   margin: 0;
@@ -749,8 +619,8 @@ button {
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  transition: transform 0.4s var(--ease-cinematic), box-shadow 0.4s var(--ease-cinematic);
+  gap: 7px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   border-radius: var(--radius-md);
   outline: none;
   -webkit-tap-highlight-color: transparent;
@@ -759,13 +629,13 @@ button {
   z-index: 1;
 }
 .poster-card:focus-visible {
-  transform: translateY(-5px) scale(1.03);
+  transform: translateY(-4px) scale(1.03);
   z-index: 4;
 }
-/* Hover effects only on real mouse devices */
+/* Hover effects only on real mouse devices — on iPhone/iPad Safari a :hover style change makes the first tap only "hover" instead of clicking */
 @media (hover: hover) and (pointer: fine) {
   .poster-card:hover {
-    transform: translateY(-5px) scale(1.03);
+    transform: translateY(-4px) scale(1.03);
     z-index: 4;
   }
   .poster-card:hover .poster-play-hover {
@@ -773,7 +643,7 @@ button {
   }
 }
 .poster-card:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 .poster-card > * {
   pointer-events: none;
@@ -783,8 +653,8 @@ button {
   pointer-events: auto;
 }
 .poster-card:focus-visible .poster-art {
-  border-color: #00e676;
-  box-shadow: 0 0 0 3px #00e676, 0 16px 36px rgba(0, 0, 0, 0.9), 0 0 28px rgba(0, 230, 118, 0.45);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px var(--accent-cyan), 0 8px 28px rgba(0, 229, 255, 0.55);
 }
 .poster-card:focus-visible .poster-play-hover {
   opacity: 1;
@@ -795,14 +665,8 @@ button {
   aspect-ratio: 2 / 3;
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: #080a08;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
-  transition: border-color 0.4s var(--ease-cinematic), box-shadow 0.4s var(--ease-cinematic);
-}
-.poster-card:hover .poster-art {
-  border-color: rgba(0, 230, 118, 0.5);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 230, 118, 0.22);
+  background: var(--bg-card);
+  border: 2px solid var(--border-subtle);
 }
 .poster-art img {
   width: 100%;
@@ -1104,14 +968,12 @@ button {
 }
 
 .spinner {
-  width: 38px;
-  height: 38px;
-  border: 2px solid rgba(255, 255, 255, 0.08);
-  border-top: 2px solid #00e676;
-  border-right: 2px solid rgba(0, 230, 118, 0.4);
+  width: 34px;
+  height: 34px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--accent-cyan);
   border-radius: 50%;
-  animation: spin 0.923s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite; /* 65 BPM tempo */
-  box-shadow: 0 0 18px rgba(0, 230, 118, 0.35);
+  animation: spin 0.8s linear infinite;
 }
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -2480,35 +2342,23 @@ body.keyboard-open .chat-input-row {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.88);
-  backdrop-filter: blur(28px) saturate(120%);
+  background: rgba(4, 5, 10, 0.82);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
   z-index: 1000;
-  transition: opacity 0.4s var(--ease-cinematic);
 }
 .modal-card {
   position: relative;
   width: 100%;
-  background: rgba(10, 14, 10, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.95), 0 0 50px rgba(0, 230, 118, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65);
   z-index: 1001;
-  animation: modalSwellIn 0.4s var(--ease-cinematic);
-}
-@keyframes modalSwellIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
 }
 .movie-modal-card {
   max-width: 520px;
@@ -3540,7 +3390,7 @@ body.keyboard-open .chat-input-row {
 .tv-timeline-bar:focus-visible {
   height: 14px;
   outline: none;
-  box-shadow: 0 0 0 3px var(--accent-cyan), 0 0 18px rgba(0, 230, 118, 0.55);
+  box-shadow: 0 0 0 3px var(--accent-cyan), 0 0 18px rgba(0, 229, 255, 0.55);
 }
 .tv-timeline-fill {
   height: 100%;
@@ -3620,7 +3470,7 @@ body.tv-mode .z01-seg-btn:focus,
 body.tv-mode .z01-opt:focus {
   outline: none !important;
   border-color: var(--accent-cyan) !important;
-  box-shadow: 0 0 0 3px var(--accent-cyan), 0 0 22px rgba(0, 230, 118, 0.65) !important;
+  box-shadow: 0 0 0 3px var(--accent-cyan), 0 0 22px rgba(0, 229, 255, 0.65) !important;
   transform: scale(1.04);
   z-index: 5;
 }

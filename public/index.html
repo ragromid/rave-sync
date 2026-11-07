@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261107_oulo_ambient" />
+  <link rel="stylesheet" href="/styles.css?v=20261107_oulo_4" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -42,12 +42,6 @@
       </form>
 
       <div class="topbar-actions">
-        <!-- Atmospheric Ambient Audio & Immersion Mode -->
-        <button id="ambientAtmosphereBtn" class="pill-btn tiny" title="Атмосферный эмбиент (C minor • 65 BPM)">
-          <span class="ambient-pulse-dot"></span>
-          <span class="hide-sm">Эмбиент</span>
-        </button>
-
         <!-- Active room mini-pill when browsing catalog while in a room -->
         <button id="returnToRoomBtn" class="pill-btn accent pulse hidden" title="Вернуться в комнату">
           <span>🔴</span><span class="hide-sm">&nbsp;В комнату</span>
@@ -794,23 +788,6 @@
             </div>
           </div>
 
-          <div class="pfolder-card" style="margin-top:14px;">
-            <div class="pfolder-card-header">
-              <span class="pfolder-card-icon">🎧</span>
-              <div>
-                <div class="pfolder-card-title">Кинематографичный эмбиент (C minor • 65 BPM)</div>
-                <div class="pfolder-card-sub">Аналоговые синтезаторные пэды, суб-басовый пульс и тактильный звуковой отклик интерфейса</div>
-              </div>
-            </div>
-            <div class="setting-toggle-row" style="margin-top:12px;">
-              <span class="setting-toggle-label">Фоновый эмбиент-генератор</span>
-              <label class="switch-ui">
-                <input type="checkbox" id="ambientSoundToggle" />
-                <span class="switch-slider"></span>
-              </label>
-            </div>
-          </div>
-
           <div style="margin-top:14px;text-align:right;">
             <button type="button" id="savePersonalizationBtn" class="btn primary">Сохранить оформление</button>
           </div>
@@ -1247,6 +1224,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261107_oulo_ambient"></script>
+  <script src="/app.js?v=20261107_oulo_4"></script>
 </body>
 </html>

@@ -439,191 +439,6 @@
     });
   }
 
-  // ================= CINEMATIC DARK AMBIENT SOUND ENGINE =================
-  // C minor | 65 BPM | Ethereal Synth Pads | Sub-bass Pulses | Metallic Percussion
-  let ambientGainNode = null;
-  let ambientPadOscs = [];
-  let ambientPadFilter = null;
-  let ambientPulseInterval = null;
-  let isAmbientPlaying = false;
-  let ambientDucked = false;
-
-  function getAudioCtx() {
-    if (!audioCtx) {
-      const Ctx = window.AudioContext || window.webkitAudioContext;
-      if (Ctx) audioCtx = new Ctx();
-    }
-    if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume().catch(() => {});
-    }
-    return audioCtx;
-  }
-
-  // Subtle metallic percussion tick for micro interactions
-  function playMetallicTick() {
-    try {
-      const ctx = getAudioCtx();
-      if (!ctx || ctx.state !== 'running') return;
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(3400, now);
-      osc.frequency.exponentialRampToValueAtTime(1200, now + 0.035);
-      filter.type = 'highpass';
-      filter.frequency.setValueAtTime(1800, now);
-      gain.gain.setValueAtTime(0.025, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.045);
-    } catch {}
-  }
-
-  // Deep resonant sub-bass pulse (55Hz / C2 65.4Hz)
-  function playSubBassPulse(volume = 0.1) {
-    try {
-      const ctx = getAudioCtx();
-      if (!ctx || ctx.state !== 'running') return;
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(65.41, now); // C2
-      osc.frequency.exponentialRampToValueAtTime(42, now + 0.28);
-      gain.gain.setValueAtTime(volume, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.36);
-    } catch {}
-  }
-
-  // Ethereal C-minor chord swell (C3, Eb3, G3, Bb3) on modal open & transitions
-  function playEtherealSwell() {
-    try {
-      const ctx = getAudioCtx();
-      if (!ctx || ctx.state !== 'running') return;
-      const now = ctx.currentTime;
-      const notes = [130.81, 155.56, 196.00, 233.08]; // C minor 7
-      notes.forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now);
-        osc.detune.setValueAtTime((idx - 1.5) * 5, now);
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.linearRampToValueAtTime(0.03, now + 0.35);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.6);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 1.65);
-      });
-    } catch {}
-  }
-
-  // Continuous atmospheric track: Ethereal Synth Pads + 65 BPM Steady Sub-bass Pulse
-  function startAmbientAtmosphere() {
-    try {
-      const ctx = getAudioCtx();
-      if (!ctx) return;
-      if (isAmbientPlaying) return;
-
-      ambientGainNode = ctx.createGain();
-      ambientGainNode.gain.setValueAtTime(0.0001, ctx.currentTime);
-      ambientGainNode.gain.linearRampToValueAtTime(0.16, ctx.currentTime + 2.5); // Volume swell
-
-      ambientPadFilter = ctx.createBiquadFilter();
-      ambientPadFilter.type = 'lowpass';
-      ambientPadFilter.frequency.setValueAtTime(360, ctx.currentTime);
-      ambientPadFilter.Q.setValueAtTime(2.2, ctx.currentTime);
-
-      ambientPadFilter.connect(ambientGainNode);
-      ambientGainNode.connect(ctx.destination);
-
-      // C-minor ethereal chord drone: C2 (65.4), G2 (98), Eb3 (155.6), Bb3 (233.1)
-      const droneNotes = [65.41, 98.00, 155.56, 233.08];
-      ambientPadOscs = droneNotes.map((freq, idx) => {
-        const osc = ctx.createOscillator();
-        osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime);
-        osc.detune.setValueAtTime((idx - 1.5) * 6, ctx.currentTime);
-        osc.connect(ambientPadFilter);
-        osc.start();
-        return osc;
-      });
-
-      // Slow breathing filter sweep
-      let sweepUp = true;
-      const doSweep = () => {
-        if (!isAmbientPlaying || !ambientPadFilter) return;
-        const target = sweepUp ? 620 : 310;
-        sweepUp = !sweepUp;
-        ambientPadFilter.frequency.exponentialRampToValueAtTime(target, ctx.currentTime + 3.69);
-      };
-      doSweep();
-
-      // 65 BPM rhythmic pulse: 60/65 = 0.923 seconds per beat
-      ambientPulseInterval = setInterval(() => {
-        if (isAmbientPlaying && !ambientDucked) {
-          playSubBassPulse(0.06);
-          doSweep();
-        }
-      }, (60 / 65) * 1000);
-
-      isAmbientPlaying = true;
-      updateAmbientUiState();
-    } catch (e) {
-      console.warn('Ambient engine start error:', e);
-    }
-  }
-
-  function stopAmbientAtmosphere() {
-    try {
-      if (ambientPulseInterval) {
-        clearInterval(ambientPulseInterval);
-        ambientPulseInterval = null;
-      }
-      if (ambientGainNode && audioCtx) {
-        ambientGainNode.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 1.2);
-        setTimeout(() => {
-          ambientPadOscs.forEach(o => { try { o.stop(); o.disconnect(); } catch {} });
-          ambientPadOscs = [];
-          if (ambientGainNode) { try { ambientGainNode.disconnect(); } catch {} }
-          isAmbientPlaying = false;
-          updateAmbientUiState();
-        }, 1250);
-      } else {
-        isAmbientPlaying = false;
-        updateAmbientUiState();
-      }
-    } catch {}
-  }
-
-  function toggleAmbientAtmosphere() {
-    if (isAmbientPlaying) {
-      stopAmbientAtmosphere();
-      localStorage.setItem('oulo_ambient_active', 'false');
-      showToast('Эмбиент-фон выключен');
-    } else {
-      startAmbientAtmosphere();
-      localStorage.setItem('oulo_ambient_active', 'true');
-      showToast('Эмбиент-фон включен (C minor • 65 BPM)');
-    }
-  }
-
-  function updateAmbientUiState() {
-    const btn = $('ambientAtmosphereBtn');
-    const toggle = $('ambientSoundToggle');
-    if (btn) btn.classList.toggle('active', isAmbientPlaying);
-    if (toggle) toggle.checked = isAmbientPlaying;
-  }
-
   function playNotificationSound(kind = 'message') {
     if (state.soundEnabled === false) return;
     try {
@@ -1104,7 +919,6 @@
   });
 
   async function openAuthModal(defaultTab = 'profile') {
-    playEtherealSwell();
     const modal = $('authModal');
     modal.classList.remove('hidden');
     if (state.user) {
@@ -1530,7 +1344,6 @@
   // ================= MOVIE MODAL =================
   async function openMovieModal(movie) {
     if (!movie) return;
-    playEtherealSwell();
     state.selectedMovie = movie;
     try {
       if ($('modalBackdrop')) {
@@ -2595,18 +2408,10 @@
   }
 
   mainVideo.addEventListener('play', () => {
-    if (isAmbientPlaying && ambientGainNode && audioCtx) {
-      ambientDucked = true;
-      ambientGainNode.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 0.8);
-    }
     updateTvOsdUi();
     emitPlayerSync('play');
   });
   mainVideo.addEventListener('pause', () => {
-    if (isAmbientPlaying && ambientGainNode && audioCtx && ambientDucked) {
-      ambientDucked = false;
-      ambientGainNode.gain.linearRampToValueAtTime(0.16, audioCtx.currentTime + 1.2);
-    }
     updateTvOsdUi();
     if (mainVideo.seeking) return;
     emitPlayerSync('pause');
@@ -5456,35 +5261,6 @@
     loadPublicRooms();
     await initAuth();
     updateNotificationBellUi();
-
-    $('ambientAtmosphereBtn')?.addEventListener('click', toggleAmbientAtmosphere);
-    $('ambientSoundToggle')?.addEventListener('change', (e) => {
-      if (e.target.checked !== isAmbientPlaying) toggleAmbientAtmosphere();
-    });
-
-    // Subtle tactile metallic percussion & sub-bass pulse on pointer interaction
-    document.addEventListener('pointerdown', (e) => {
-      const ctx = getAudioCtx();
-      if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
-      const target = e.target.closest('button, .poster-card, .cat-pill, .nav-item, .pfolder-tab, .user-row, .ep-btn');
-      if (target) {
-        playMetallicTick();
-        if (target.classList.contains('primary') || target.classList.contains('accent') || target.classList.contains('poster-card') || target.classList.contains('active')) {
-          playSubBassPulse(0.08);
-        }
-      }
-    }, { passive: true });
-
-    // Auto-resume ambient mode if user previously enabled it
-    if (localStorage.getItem('oulo_ambient_active') === 'true') {
-      const autoStartOnce = () => {
-        startAmbientAtmosphere();
-        document.removeEventListener('pointerdown', autoStartOnce);
-      };
-      document.addEventListener('pointerdown', autoStartOnce, { once: true });
-      if ($('ambientSoundToggle')) $('ambientSoundToggle').checked = true;
-      if ($('ambientAtmosphereBtn')) $('ambientAtmosphereBtn').classList.add('active');
-    }
 
     // Check URL or session for active room
     const params = new URLSearchParams(window.location.search);
