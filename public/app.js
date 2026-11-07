@@ -3860,18 +3860,59 @@
   }
 
   // ================= ROOM UI: HEADER, CHAT, REACTIONS, PARTICIPANTS =================
-  function renderRoomHeader(room) {
-    $('roomTitleText').textContent = room.name;
-    $('roomPrivacyBadge').textContent = room.isPublic ? 'Публичная' : 'Приватная';
-    $('roomCodeLabel').textContent = `#${room.code}`;
-    if ($('roomCodeOptionsDisplay')) $('roomCodeOptionsDisplay').textContent = `#${room.code}`;
-    const isHost = state.user && room.hostId === state.user.id;
-    $('roomSettingsBtn').classList.toggle('hidden', !isHost);
+  function updateVoiceSettingsUi() {
+    const active = !!state.voiceActive;
+    const voiceToggleBtn = $('voiceToggleBtn');
+    if (voiceToggleBtn) voiceToggleBtn.classList.toggle('active', active);
+
+    const voiceBtn = $('settingsVoiceToggleBtn');
+    const voiceSub = $('settingsVoiceSub');
+    const voiceBadge = $('settingsVoiceBadge');
+
+    if (voiceBtn) voiceBtn.classList.toggle('active', active);
+    if (voiceSub) voiceSub.textContent = active ? 'Микрофон включен 🟢' : 'Микрофон отключен ⚪';
+    if (voiceBadge) voiceBadge.textContent = active ? 'Отключить 🔴' : 'Включить 🎙️';
   }
 
-  $('roomSettingsBtn').addEventListener('click', () => {
+  function openRoomSettingsModal() {
+    if (!state.room) return;
+    const room = state.room;
+    if ($('settingsRoomCode')) $('settingsRoomCode').textContent = `#${room.code}`;
+    if ($('settingsModalRoomTitle')) $('settingsModalRoomTitle').textContent = room.name || 'Комната';
+
+    const isHost = state.user && room.hostId === state.user.id;
+    const hostGroup = $('settingsHostGroup');
+    if (hostGroup) hostGroup.style.display = isHost ? 'flex' : 'none';
+
+    const privBadge = $('settingsModalPrivacyBadge');
+    if (privBadge) {
+      privBadge.textContent = room.isPublic ? 'Публичная' : 'Приватная';
+      privBadge.className = `badge tiny ${room.isPublic ? 'accent' : ''}`;
+    }
+
+    const privAction = $('settingsPrivacyAction');
+    if (privAction) {
+      privAction.textContent = room.isPublic ? 'Сделать приватной' : 'Сделать публичной';
+    }
+
+    const privIcon = $('settingsPrivacyIcon');
+    if (privIcon) {
+      privIcon.textContent = room.isPublic ? '🌐' : '🔒';
+    }
+
+    const privSub = $('settingsPrivacySub');
+    if (privSub) {
+      privSub.textContent = room.isPublic ? 'В общем каталоге комнат' : 'Доступ только по прямой ссылке';
+    }
+
+    updateVoiceSettingsUi();
+    openModal('roomSettingsModal');
+  }
+
+  function toggleRoomPrivacy() {
     if (!state.room) return;
     const nextPublic = !state.room.isPublic;
+    state.room.isPublic = nextPublic;
     socket.emit('room:settings', { isPublic: nextPublic });
     if (!socket.connected) {
       api(`/api/rooms/${encodeURIComponent(state.room.code)}/sync`, {
@@ -3879,7 +3920,68 @@
         body: JSON.stringify({ settings: { isPublic: nextPublic } })
       }).catch(() => {});
     }
+    const privBadge = $('settingsModalPrivacyBadge');
+    if (privBadge) {
+      privBadge.textContent = nextPublic ? 'Публичная' : 'Приватная';
+      privBadge.className = `badge tiny ${nextPublic ? 'accent' : ''}`;
+    }
+    const roomBadge = $('roomPrivacyBadge');
+    if (roomBadge) {
+      roomBadge.textContent = nextPublic ? 'Публичная' : 'Приватная';
+      roomBadge.className = `badge tiny ${nextPublic ? 'accent' : ''}`;
+    }
+    const privAction = $('settingsPrivacyAction');
+    if (privAction) privAction.textContent = nextPublic ? 'Сделать приватной' : 'Сделать публичной';
+    const privIcon = $('settingsPrivacyIcon');
+    if (privIcon) privIcon.textContent = nextPublic ? '🌐' : '🔒';
+    const privSub = $('settingsPrivacySub');
+    if (privSub) privSub.textContent = nextPublic ? 'В общем каталоге комнат' : 'Доступ только по прямой ссылке';
     showToast(nextPublic ? 'Комната теперь публичная' : 'Комната теперь приватная (только по коду/ссылке)');
+  }
+
+  function renderRoomHeader(room) {
+    $('roomTitleText').textContent = room.name;
+    const privBadge = $('roomPrivacyBadge');
+    if (privBadge) {
+      privBadge.textContent = room.isPublic ? 'Публичная' : 'Приватная';
+      privBadge.className = `badge tiny ${room.isPublic ? 'accent' : ''}`;
+    }
+    $('roomCodeLabel').textContent = `#${room.code}`;
+    if ($('roomCodeOptionsDisplay')) $('roomCodeOptionsDisplay').textContent = `#${room.code}`;
+    if ($('settingsRoomCode')) $('settingsRoomCode').textContent = `#${room.code}`;
+    $('roomSettingsBtn')?.classList.remove('hidden');
+  }
+
+  $('roomSettingsBtn')?.addEventListener('click', openRoomSettingsModal);
+  $('settingsCopyLinkBtn')?.addEventListener('click', () => {
+    if (!state.room) return;
+    const shareUrl = `${window.location.origin}/?room=${state.room.code}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('Ссылка на комнату скопирована! 📋');
+    }).catch(() => {
+      showToast(`Код комнаты: #${state.room.code}`);
+    });
+  });
+  $('settingsInviteFriendsBtn')?.addEventListener('click', () => {
+    closeModal('roomSettingsModal');
+    $('inviteFriendsModalBtn')?.click();
+  });
+  $('settingsVoiceToggleBtn')?.addEventListener('click', () => {
+    toggleVoiceChat();
+    updateVoiceSettingsUi();
+  });
+  $('settingsTogglePrivacyBtn')?.addEventListener('click', toggleRoomPrivacy);
+  $('settingsResyncBtn')?.addEventListener('click', () => {
+    closeModal('roomSettingsModal');
+    $('resyncPlayerBtn')?.click();
+  });
+  $('settingsTvRemoteBtn')?.addEventListener('click', () => {
+    closeModal('roomSettingsModal');
+    openModal('tvRemoteModal');
+  });
+  $('settingsLeaveRoomBtn')?.addEventListener('click', () => {
+    closeModal('roomSettingsModal');
+    leaveRoom();
   });
 
   function renderRoomParticipants(list) {
@@ -4046,9 +4148,7 @@
       } else if (rtab === 'dms') {
         renderRoomDmFriendsList();
       } else if (rtab === 'options') {
-        if ($('roomCodeOptionsDisplay') && state.room) {
-          $('roomCodeOptionsDisplay').textContent = `#${state.room.code}`;
-        }
+        openRoomSettingsModal();
       }
     }
   }
@@ -4072,9 +4172,7 @@
       } else if (rtab === 'dms') {
         renderRoomDmFriendsList();
       } else if (rtab === 'options') {
-        if ($('roomCodeOptionsDisplay') && state.room) {
-          $('roomCodeOptionsDisplay').textContent = `#${state.room.code}`;
-        }
+        openRoomSettingsModal();
       }
     });
   });
@@ -4791,7 +4889,7 @@
     try {
       state.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
       state.voiceActive = true;
-      $('voiceToggleBtn').classList.add('active');
+      updateVoiceSettingsUi();
       socket.emit('voice:toggle', { active: true, muted: false });
       showToast('🎙️ Вы подключились к голосовому чату');
     } catch {
@@ -4801,7 +4899,7 @@
 
   function stopVoiceChat() {
     state.voiceActive = false;
-    $('voiceToggleBtn').classList.remove('active');
+    updateVoiceSettingsUi();
     if (state.localStream) {
       state.localStream.getTracks().forEach(t => t.stop());
       state.localStream = null;

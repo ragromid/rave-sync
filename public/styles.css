@@ -2568,6 +2568,116 @@ body.keyboard-open .chat-input-row {
   font-size: 0.82rem;
 }
 
+/* Minimalist Room Settings Modal */
+.room-settings-card {
+  max-width: 440px;
+  width: 92%;
+  border-radius: 24px;
+  background: rgba(14, 16, 26, 0.96);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 18px 20px 22px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.75);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+.room-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+.room-settings-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.room-settings-title-group h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+.room-settings-content {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-right: 2px;
+}
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.settings-group-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  padding-left: 2px;
+}
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.settings-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.settings-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+.settings-item-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.settings-item-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.settings-item-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.settings-item-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.voice-pill.active {
+  background: var(--success) !important;
+  color: #06130e !important;
+  font-weight: 700;
+}
+
 /* Toasts */
 .toast-container {
   position: fixed;
@@ -2709,26 +2819,37 @@ body.keyboard-open .chat-input-row {
     display: none !important;
   }
   .room-topbar {
-    padding: 6px 10px;
-    gap: 6px;
+    padding: 8px 12px;
+    gap: 10px;
     min-height: 48px;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
   .room-title-text {
-    font-size: 0.9rem;
-    max-width: 130px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    max-width: 230px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .room-top-actions {
-    gap: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     flex-shrink: 0;
   }
-  .room-top-actions .pill-btn {
-    height: 28px;
-    padding: 0 8px;
-    font-size: 0.72rem;
+  .room-top-actions .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-main);
   }
   .room-layout {
     display: flex;
