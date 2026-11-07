@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261107_oulo_4" />
+  <link rel="stylesheet" href="/styles.css?v=20261107_oulo_5" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -135,15 +135,36 @@
             <div id="liveRoomsStrip" class="rooms-horizontal"></div>
           </div>
 
-          <!-- Category Filter Pills (Lampa style, clean) -->
+          <!-- Category Filter Pills (clean SVG icons) -->
           <div class="category-bar" id="categoryBar">
-            <button class="cat-pill active" data-cat="trending">🔥 В тренде</button>
-            <button class="cat-pill" data-cat="popular_movies">🎬 Фильмы</button>
-            <button class="cat-pill" data-cat="popular_tv">📺 Сериалы</button>
-            <button class="cat-pill" data-cat="anime">⛩️ Аниме</button>
-            <button class="cat-pill" data-cat="cartoons">🧸 Мультфильмы</button>
-            <button class="cat-pill" data-cat="top_movies">🏆 Топ фильмов</button>
-            <button class="cat-pill" data-cat="top_tv">⭐ Топ сериалов</button>
+            <button class="cat-pill active" data-cat="trending">
+              <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+              <span>В тренде</span>
+            </button>
+            <button class="cat-pill" data-cat="popular_movies">
+              <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+              <span>Фильмы</span>
+            </button>
+            <button class="cat-pill" data-cat="popular_tv">
+              <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+              <span>Сериалы</span>
+            </button>
+            <button class="cat-pill" data-cat="anime">
+              <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span>Аниме</span>
+            </button>
+            <button class="cat-pill" data-cat="cartoons">
+              <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+              <span>Мультфильмы</span>
+            </button>
+            <button class="cat-pill" data-cat="top_movies">
+              <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-2.34"/><path d="M14 14.66V17c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-2.34"/><path d="M6 4h12v7a6 6 0 0 1-12 0V4z"/></svg>
+              <span>Топ фильмов</span>
+            </button>
+            <button class="cat-pill" data-cat="top_tv">
+              <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span>Топ сериалов</span>
+            </button>
           </div>
 
           <!-- Movies Poster Grid -->
@@ -360,22 +381,29 @@
                 </div>
               </div>
 
-              <!-- Mobile Room Quick Switcher (Clean tabs right under player) -->
+              <!-- Mobile Room Quick Switcher (Clean SVG tabs right under player) -->
               <div class="mobile-room-tabs" id="mobileRoomTabs">
                 <button type="button" class="m-rtab active" data-mrtab="chat">
-                  💬 Чат <span id="chatUnreadBadge" class="nav-badge inline-badge hidden">0</span>
+                  <svg class="m-rtab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <span>Чат</span>
+                  <span id="chatUnreadBadge" class="nav-badge inline-badge hidden">0</span>
                 </button>
                 <button type="button" class="m-rtab" data-mrtab="z01">
-                  🎬 Серии
+                  <svg class="m-rtab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <span>Серии</span>
                 </button>
                 <button type="button" class="m-rtab" data-mrtab="users">
-                  👥 Зрители (<span id="roomUserCountMobile">1</span>)
+                  <svg class="m-rtab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  <span>Зрители (<span id="roomUserCountMobile">1</span>)</span>
                 </button>
                 <button type="button" class="m-rtab" data-mrtab="dms">
-                  💌 Друзья <span id="roomDmBadgeMobile" class="nav-badge inline-badge hidden">0</span>
+                  <svg class="m-rtab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  <span>Друзья</span>
+                  <span id="roomDmBadgeMobile" class="nav-badge inline-badge hidden">0</span>
                 </button>
                 <button type="button" class="m-rtab" data-mrtab="options">
-                  ⚙️ Опции
+                  <svg class="m-rtab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  <span>Опции</span>
                 </button>
               </div>
 
@@ -623,23 +651,23 @@
         <!-- Folder Tabs Navigation -->
         <div class="profile-folders-nav" id="profileFoldersNav">
           <button type="button" class="pfolder-tab active" data-ptab="profile">
-            <span class="pfolder-icon">👤</span>
+            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span>Профиль</span>
           </button>
           <button type="button" class="pfolder-tab" data-ptab="quick-actions">
-            <span class="pfolder-icon">🔗</span>
+            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
             <span>Подключение</span>
           </button>
           <button type="button" class="pfolder-tab" data-ptab="personalization">
-            <span class="pfolder-icon">🎨</span>
+            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
             <span>Оформление</span>
           </button>
           <button type="button" class="pfolder-tab" data-ptab="notifications">
-            <span class="pfolder-icon">🔔</span>
+            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span>Уведомления</span>
           </button>
           <button type="button" class="pfolder-tab" data-ptab="playback">
-            <span class="pfolder-icon">⚙️</span>
+            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
             <span>Плеер</span>
           </button>
         </div>
@@ -1224,6 +1252,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261107_oulo_4"></script>
+  <script src="/app.js?v=20261107_oulo_5"></script>
 </body>
 </html>

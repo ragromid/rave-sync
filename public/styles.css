@@ -578,24 +578,49 @@ button {
   display: none;
 }
 .cat-pill {
-  padding: 8px 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
   border-radius: 99px;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   color: var(--text-muted);
-  font-size: 0.86rem;
+  font-size: 0.85rem;
   font-weight: 600;
   white-space: nowrap;
-  transition: all 0.18s;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .cat-pill:hover {
   color: var(--text-main);
   background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-2px);
+}
+.cat-pill:active {
+  transform: scale(0.96);
 }
 .cat-pill.active {
-  background: #fff;
-  color: #090a0f;
-  border-color: #fff;
+  background: #00e676;
+  color: #000000;
+  border-color: #00e676;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0, 230, 118, 0.35);
+  transform: translateY(-1px);
+}
+.cat-pill.active .cat-ico {
+  stroke: #000000;
+}
+.cat-ico {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.cat-pill:hover .cat-ico {
+  transform: scale(1.12);
 }
 
 /* Poster Grid (Lampa style clean cards) */
@@ -748,85 +773,103 @@ button {
   padding: 26px 0 12px;
 }
 
-/* Rooms Cards (Rave style) */
+/* Rooms Cards (Rave style compact cards) */
 .rooms-horizontal {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   overflow-x: auto;
-  padding-bottom: 6px;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+.rooms-horizontal::-webkit-scrollbar {
+  display: none;
 }
 .rooms-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
 }
 .room-card {
   appearance: none;
   -webkit-appearance: none;
   position: relative;
-  min-width: 265px;
-  width: 100%;
+  width: 230px;
+  max-width: 250px;
+  min-width: 200px;
+  flex: 0 0 230px;
   padding: 0;
   margin: 0;
   text-align: left;
   color: inherit;
   font: inherit;
-  display: block;
+  display: flex;
+  flex-direction: column;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.18s, border-color 0.18s;
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s, box-shadow 0.22s;
 }
 @media (hover: hover) and (pointer: fine) {
   .room-card:hover {
-    transform: translateY(-3px);
-    border-color: var(--border-focus);
+    transform: translateY(-3px) scale(1.01);
+    border-color: #00e676;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(0, 230, 118, 0.2);
   }
+}
+.room-card:active {
+  transform: scale(0.98);
 }
 .room-card-banner {
   position: relative;
-  height: 120px;
+  height: 80px;
   background: #111111;
   background-size: cover;
   background-position: center;
+  flex-shrink: 0;
 }
 .room-card-banner::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, var(--bg-card) 5%, rgba(23, 26, 41, 0.25) 100%);
+  background: linear-gradient(0deg, var(--bg-card) 10%, rgba(0, 0, 0, 0.4) 100%);
 }
 .room-live-pill {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 7px;
+  left: 7px;
   z-index: 2;
-  padding: 3px 8px;
-  border-radius: 99px;
-  background: rgba(255, 62, 128, 0.9);
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #00e676;
+  color: #000;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 8px rgba(0, 230, 118, 0.4);
 }
 .room-card-body {
-  padding: 12px 14px 14px;
+  padding: 8px 10px 10px;
   position: relative;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
 }
 .room-card-title {
   font-weight: 700;
-  font-size: 0.95rem;
-  margin-bottom: 4px;
+  font-size: 0.86rem;
+  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: #fff;
 }
 .room-card-sub {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -841,13 +884,20 @@ button {
   align-items: center;
 }
 .avatar-stack span {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: var(--bg-elevated);
-  border: 2px solid var(--bg-card);
+  border: 1.5px solid var(--bg-card);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  margin-left: -5px;
+}
+.avatar-stack span:first-child {
+  margin-left: 0;
+}
   justify-content: center;
   font-size: 0.8rem;
   margin-left: -6px;
@@ -2676,7 +2726,15 @@ body.keyboard-open .chat-input-row {
   background: #00e676;
   box-shadow: 0 4px 14px rgba(0, 230, 118, 0.35);
 }
+.pfolder-tab.active .pfolder-ico {
+  stroke: #000000;
+}
+.pfolder-ico,
 .pfolder-icon {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  flex-shrink: 0;
   font-size: 0.95rem;
 }
 
@@ -3219,6 +3277,15 @@ body.keyboard-open .chat-input-row {
     border-bottom-color: #00e676;
     background: rgba(0, 230, 118, 0.08);
   }
+  .m-rtab-ico {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    flex-shrink: 0;
+  }
+  .m-rtab.active .m-rtab-ico {
+    stroke: #00e676;
+  }
   .sidebar-tabs {
     display: none;
   }
@@ -3299,6 +3366,235 @@ body.keyboard-open .chat-input-row {
     left: 12px;
     max-width: none;
   }
+}
+
+/* ================= MOBILE LANDSCAPE / АЛЬБОМНЫЙ РЕЖИМ ================= */
+@media (orientation: landscape) and (max-height: 580px), (max-width: 950px) and (orientation: landscape) and (max-height: 600px) {
+  body:has(#view-room.active) .topbar,
+  body.in-room-view .topbar {
+    display: none !important;
+  }
+  body:has(#view-room.active) .app-shell,
+  body.in-room-view .app-shell {
+    height: 100vh !important;
+    height: 100dvh !important;
+  }
+  body:has(#view-room.active) .view-container,
+  body.in-room-view .view-container {
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+  .room-layout {
+    flex-direction: row !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+  .room-stage {
+    flex: 1 1 65% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: #000000 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+  .room-topbar {
+    display: none !important;
+  }
+  .player-wrapper {
+    flex: 1 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    aspect-ratio: auto !important;
+    width: 100% !important;
+    background: #000000 !important;
+  }
+  .player-wrapper video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+  }
+  .mobile-room-tabs {
+    display: none !important;
+  }
+  .room-layout.mobile-tab-z01 .z01-panel {
+    display: none !important;
+  }
+  .room-sidebar,
+  .room-layout.mobile-tab-z01 .room-sidebar {
+    display: flex !important;
+    flex: 0 0 320px !important;
+    width: 320px !important;
+    max-width: 40vw !important;
+    min-width: 250px !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    border-left: 1px solid var(--border-subtle) !important;
+    border-top: none !important;
+    flex-direction: column !important;
+    background: var(--bg-elevated) !important;
+    z-index: 30 !important;
+    overflow: hidden !important;
+  }
+  .sidebar-tabs {
+    display: none !important;
+  }
+  .rtab-content {
+    flex: 1 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    display: none !important;
+    overflow: hidden !important;
+  }
+  #rtab-chat {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    height: 100% !important;
+  }
+  .chat-messages {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding: 6px 8px !important;
+  }
+  .chat-reactions-strip {
+    padding: 2px 6px !important;
+    gap: 4px !important;
+  }
+  .chat-reactions-strip .emoji-btn {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0.85rem !important;
+  }
+  .chat-input-row {
+    padding: 5px 8px !important;
+    padding-bottom: max(5px, env(safe-area-inset-bottom, 5px)) !important;
+  }
+  .chat-input-row input {
+    height: 34px !important;
+    font-size: 0.82rem !important;
+  }
+  .chat-bubble {
+    padding: 5px 9px !important;
+    font-size: 0.82rem !important;
+  }
+}
+
+body.mobile-landscape:has(#view-room.active) .topbar,
+body.mobile-landscape.in-room-view .topbar {
+  display: none !important;
+}
+body.mobile-landscape:has(#view-room.active) .app-shell,
+body.mobile-landscape.in-room-view .app-shell {
+  height: 100vh !important;
+  height: 100dvh !important;
+}
+body.mobile-landscape:has(#view-room.active) .view-container,
+body.mobile-landscape.in-room-view .view-container {
+  height: 100% !important;
+  max-height: 100% !important;
+}
+body.mobile-landscape .room-layout {
+  flex-direction: row !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  width: 100% !important;
+  overflow: hidden !important;
+}
+body.mobile-landscape .room-stage {
+  flex: 1 1 65% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #000000 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+body.mobile-landscape .room-topbar {
+  display: none !important;
+}
+body.mobile-landscape .player-wrapper {
+  flex: 1 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  aspect-ratio: auto !important;
+  width: 100% !important;
+  background: #000000 !important;
+}
+body.mobile-landscape .player-wrapper video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+body.mobile-landscape .mobile-room-tabs {
+  display: none !important;
+}
+body.mobile-landscape .room-layout.mobile-tab-z01 .z01-panel {
+  display: none !important;
+}
+body.mobile-landscape .room-sidebar,
+body.mobile-landscape .room-layout.mobile-tab-z01 .room-sidebar {
+  display: flex !important;
+  flex: 0 0 320px !important;
+  width: 320px !important;
+  max-width: 40vw !important;
+  min-width: 250px !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  border-left: 1px solid var(--border-subtle) !important;
+  border-top: none !important;
+  flex-direction: column !important;
+  background: var(--bg-elevated) !important;
+  z-index: 30 !important;
+  overflow: hidden !important;
+}
+body.mobile-landscape .sidebar-tabs {
+  display: none !important;
+}
+body.mobile-landscape .rtab-content {
+  flex: 1 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: none !important;
+  overflow: hidden !important;
+}
+body.mobile-landscape #rtab-chat {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  height: 100% !important;
+}
+body.mobile-landscape .chat-messages {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  padding: 6px 8px !important;
+}
+body.mobile-landscape .chat-reactions-strip {
+  padding: 2px 6px !important;
+  gap: 4px !important;
+}
+body.mobile-landscape .chat-reactions-strip .emoji-btn {
+  width: 24px !important;
+  height: 24px !important;
+  font-size: 0.85rem !important;
+}
+body.mobile-landscape .chat-input-row {
+  padding: 5px 8px !important;
+  padding-bottom: max(5px, env(safe-area-inset-bottom, 5px)) !important;
+}
+body.mobile-landscape .chat-input-row input {
+  height: 34px !important;
+  font-size: 0.82rem !important;
+}
+body.mobile-landscape .chat-bubble {
+  padding: 5px 9px !important;
+  font-size: 0.82rem !important;
 }
 
 /* ================= SMART TV / TV REMOTE OSD & REMOTE DECK ================= */

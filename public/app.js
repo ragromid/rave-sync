@@ -4419,6 +4419,25 @@
     btn.addEventListener('click', () => setMobileRoomTab(btn.dataset.mrtab));
   });
 
+  // Mobile Landscape auto-switch to Chat
+  function checkMobileOrientation() {
+    const isLandscape = window.innerWidth > window.innerHeight && window.innerHeight <= 600;
+    if (isLandscape) {
+      document.body.classList.add('mobile-landscape');
+      // If currently viewing room, immediately switch to Chat tab
+      if (state.room || $('view-room')?.classList.contains('active')) {
+        setMobileRoomTab('chat');
+      }
+    } else {
+      document.body.classList.remove('mobile-landscape');
+    }
+  }
+  window.addEventListener('resize', checkMobileOrientation);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(checkMobileOrientation, 60);
+    setTimeout(checkMobileOrientation, 220);
+  });
+
   // Desktop Sidebar tabs (💬 Чат | 👥 Зрители | 💌 Друзья | ⚙️ Опции)
   document.querySelectorAll('.side-tab').forEach(tab => {
     tab.addEventListener('click', () => {
