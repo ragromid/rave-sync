@@ -2831,6 +2831,20 @@ body.keyboard-open .chat-input-row {
   transform: translateX(20px);
 }
 
+.audio-boost-btn {
+  flex: 1;
+  text-align: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+}
+.audio-boost-btn.active {
+  background: #00e676;
+  color: #000000;
+  border-color: #00e676;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0, 230, 118, 0.35);
+}
+
 /* Proxy Mode Selector in Settings */
 .proxy-select-grid {
   display: flex;

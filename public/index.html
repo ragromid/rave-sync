@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261107_oulo_5" />
+  <link rel="stylesheet" href="/styles.css?v=20261107_oulo_7" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -899,6 +899,22 @@
 
           <div class="pfolder-card" style="margin-top:14px;">
             <div class="pfolder-card-header">
+              <span class="pfolder-card-icon">🔊</span>
+              <div>
+                <div class="pfolder-card-title">Громкость и усилитель звука</div>
+                <div class="pfolder-card-sub">Аппаратное усиление тихих дорожек и диалогов фильмов до 250%</div>
+              </div>
+            </div>
+            <div style="margin-top:12px; display:flex; gap:8px;">
+              <button type="button" class="pill-btn tiny audio-boost-btn" data-boost="1">100%</button>
+              <button type="button" class="pill-btn tiny audio-boost-btn" data-boost="1.5">150%</button>
+              <button type="button" class="pill-btn tiny audio-boost-btn active" data-boost="2">200% (Громко)</button>
+              <button type="button" class="pill-btn tiny audio-boost-btn" data-boost="2.5">250% (Макс)</button>
+            </div>
+          </div>
+
+          <div class="pfolder-card" style="margin-top:14px;">
+            <div class="pfolder-card-header">
               <span class="pfolder-card-icon">🔄</span>
               <div>
                 <div class="pfolder-card-title">Синхронизация совместного просмотра</div>
@@ -1252,6 +1268,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261107_oulo_5"></script>
+  <script src="/app.js?v=20261107_oulo_7"></script>
 </body>
 </html>

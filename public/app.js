@@ -449,22 +449,29 @@
 
       const now = audioCtx.currentTime;
       const osc = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      osc.type = 'sine';
+      osc.type = 'triangle';
+      osc2.type = 'sine';
       if (kind === 'invite') {
         osc.frequency.setValueAtTime(587.33, now); // D5
         osc.frequency.setValueAtTime(880, now + 0.11); // A5
+        osc2.frequency.setValueAtTime(1174.66, now + 0.11); // D6
       } else {
         osc.frequency.setValueAtTime(659.25, now); // E5
         osc.frequency.setValueAtTime(783.99, now + 0.08); // G5
+        osc2.frequency.setValueAtTime(1318.5, now + 0.08); // E6
       }
       gain.gain.setValueAtTime(0.001, now);
-      gain.gain.exponentialRampToValueAtTime(0.14, now + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+      gain.gain.exponentialRampToValueAtTime(0.55, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
       osc.connect(gain);
+      osc2.connect(gain);
       gain.connect(audioCtx.destination);
       osc.start(now);
-      osc.stop(now + 0.3);
+      osc2.start(now);
+      osc.stop(now + 0.35);
+      osc2.stop(now + 0.35);
     } catch {}
   }
 
@@ -885,13 +892,26 @@
 
   function updateProfilePlaybackUI() {
     const grid = $('profileProxyGrid');
-    if (!grid) return;
-    grid.querySelectorAll('.proxy-opt-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.pmode === state.proxyMode);
-    });
+    if (grid) {
+      grid.querySelectorAll('.proxy-opt-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.pmode === state.proxyMode);
+      });
+    }
     const syncToggle = $('profileSyncToggle');
     if (syncToggle) syncToggle.checked = state.autoSync !== false;
+
+    document.querySelectorAll('.audio-boost-btn').forEach(btn => {
+      const val = parseFloat(btn.dataset.boost);
+      btn.classList.toggle('active', Math.abs(val - currentVolumeMultiplier) < 0.05);
+    });
   }
+
+  document.querySelectorAll('.audio-boost-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = parseFloat(btn.dataset.boost);
+      adjustTvVolume(target - currentVolumeMultiplier);
+    });
+  });
 
   $('profileProxyGrid')?.addEventListener('click', (e) => {
     const btn = e.target.closest('.proxy-opt-btn');
@@ -2544,15 +2564,24 @@
     // Remote volume / mute control (e.g. from Phone TV Remote to Smart TV)
     if (!isHeartbeat && (data.action === 'volume' || data.action === 'mute')) {
       if (typeof data.volume === 'number') {
-        mainVideo.volume = Math.max(0, Math.min(1, data.volume));
+        const nextMultiplier = Math.max(0, Math.min(2.5, data.volume));
+        currentVolumeMultiplier = nextMultiplier;
+        localStorage.setItem('oulo_volume_multiplier', String(currentVolumeMultiplier));
+        mainVideo.volume = Math.min(1, nextMultiplier);
+        if (typeof audioBoostGain !== 'undefined' && audioBoostGain && audioBoostCtx) {
+          if (audioBoostCtx.state === 'suspended') audioBoostCtx.resume().catch(() => {});
+          audioBoostGain.gain.setTargetAtTime(nextMultiplier, audioBoostCtx.currentTime, 0.05);
+        }
       }
       if (typeof data.muted === 'boolean') {
         mainVideo.muted = data.muted;
         $('unmuteSyncBtn').classList.toggle('hidden', !mainVideo.muted);
       }
-      const volPct = mainVideo.muted ? 'Без звука' : `${Math.round(mainVideo.volume * 100)}%`;
-      showTvCenterFeedback(mainVideo.muted ? '🔇' : '🔊', `Громкость: ${volPct}`);
+      const pct = Math.round((currentVolumeMultiplier ?? 1) * 100);
+      const boostLabel = (currentVolumeMultiplier ?? 1) > 1 ? ' (Усиление)' : '';
+      showTvCenterFeedback(mainVideo.muted ? '🔇' : ((currentVolumeMultiplier ?? 1) > 1 ? '📢' : '🔊'), mainVideo.muted ? 'Без звука' : `Громкость ${pct}%${boostLabel}`);
       updateTvOsdUi();
+      updateProfilePlaybackUI();
     }
 
     if (isHeartbeat) {
@@ -2667,8 +2696,9 @@
     if ($('tvPlayPauseIcon')) $('tvPlayPauseIcon').textContent = isPaused ? '▶️' : '⏸️';
     if ($('tvPlayPauseLabel')) $('tvPlayPauseLabel').textContent = isPaused ? 'Плей' : 'Пауза';
 
-    const volPct = mainVideo.muted ? 'Выкл' : `${Math.round((mainVideo.volume ?? 1) * 100)}%`;
-    if ($('tvMuteIcon')) $('tvMuteIcon').textContent = (mainVideo.muted || mainVideo.volume === 0) ? '🔇' : '🔊';
+    const effectiveVol = (typeof currentVolumeMultiplier !== 'undefined' && currentVolumeMultiplier !== null) ? currentVolumeMultiplier : (mainVideo.volume ?? 1);
+    const volPct = mainVideo.muted ? 'Выкл' : `${Math.round(effectiveVol * 100)}%`;
+    if ($('tvMuteIcon')) $('tvMuteIcon').textContent = (mainVideo.muted || effectiveVol === 0) ? '🔇' : (effectiveVol > 1 ? '📢' : '🔊');
     if ($('tvVolumeLabel')) $('tvVolumeLabel').textContent = volPct;
 
     // Also update Remote Deck modal if open
@@ -2744,25 +2774,99 @@
     emitPlayerSync('seek', { currentTime: nextTime, playing: !mainVideo.paused });
   }
 
+  // ================= DYNAMIC AUDIO BOOSTER (UP TO 250% LOUDNESS) =================
+  let audioBoostCtx = null;
+  let audioBoostSource = null;
+  let audioBoostGain = null;
+  let audioBoostCompressor = null;
+  let currentVolumeMultiplier = parseFloat(localStorage.getItem('oulo_volume_multiplier') || '1.8'); // 180% boost by default!
+
+  function initAudioBooster() {
+    if (audioBoostGain) return;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      audioBoostCtx = new AudioCtx();
+      audioBoostSource = audioBoostCtx.createMediaElementSource(mainVideo);
+      audioBoostGain = audioBoostCtx.createGain();
+
+      // Professional limiter compressor to prevent distortion or clipping when sound is boosted up to 250%
+      audioBoostCompressor = audioBoostCtx.createDynamicsCompressor();
+      audioBoostCompressor.threshold.setValueAtTime(-4, audioBoostCtx.currentTime);
+      audioBoostCompressor.knee.setValueAtTime(8, audioBoostCtx.currentTime);
+      audioBoostCompressor.ratio.setValueAtTime(14, audioBoostCtx.currentTime);
+      audioBoostCompressor.attack.setValueAtTime(0.002, audioBoostCtx.currentTime);
+      audioBoostCompressor.release.setValueAtTime(0.2, audioBoostCtx.currentTime);
+
+      audioBoostGain.gain.setValueAtTime(currentVolumeMultiplier, audioBoostCtx.currentTime);
+
+      audioBoostSource.connect(audioBoostGain);
+      audioBoostGain.connect(audioBoostCompressor);
+      audioBoostCompressor.connect(audioBoostCtx.destination);
+    } catch (e) {
+      console.warn('AudioBooster init fallback:', e);
+    }
+  }
+
+  function ensureAudioBoosterActive() {
+    if (!audioBoostGain) initAudioBooster();
+    if (audioBoostCtx && audioBoostCtx.state === 'suspended') {
+      audioBoostCtx.resume().catch(() => {});
+    }
+  }
+
+  document.addEventListener('click', ensureAudioBoosterActive, { passive: true });
+  document.addEventListener('touchstart', ensureAudioBoosterActive, { passive: true });
+  mainVideo.addEventListener('play', ensureAudioBoosterActive);
+
   function adjustTvVolume(delta) {
     wakeTvOsd();
-    const nextVol = Math.max(0, Math.min(1, Math.round(((mainVideo.volume ?? 1) + delta) * 10) / 10));
-    mainVideo.muted = nextVol === 0;
-    mainVideo.volume = nextVol;
+    ensureAudioBoosterActive();
+    let nextVol = Math.round((currentVolumeMultiplier + delta) * 10) / 10;
+    nextVol = Math.max(0, Math.min(2.5, nextVol));
+    currentVolumeMultiplier = nextVol;
+    localStorage.setItem('oulo_volume_multiplier', String(currentVolumeMultiplier));
+
+    if (nextVol === 0) {
+      mainVideo.muted = true;
+    } else {
+      mainVideo.muted = false;
+      mainVideo.volume = Math.min(1, nextVol);
+      if (audioBoostGain && audioBoostCtx) {
+        if (audioBoostCtx.state === 'suspended') audioBoostCtx.resume().catch(() => {});
+        audioBoostGain.gain.setTargetAtTime(nextVol, audioBoostCtx.currentTime, 0.05);
+      }
+    }
+
     if (!mainVideo.muted) $('unmuteSyncBtn').classList.add('hidden');
-    showTvCenterFeedback(nextVol === 0 ? '🔇' : '🔊', `Громкость ${Math.round(nextVol * 100)}%`);
+    const pct = Math.round(nextVol * 100);
+    const boostLabel = nextVol > 1 ? ' (Усиление)' : '';
+    showTvCenterFeedback(nextVol === 0 ? '🔇' : (nextVol > 1 ? '📢' : '🔊'), nextVol === 0 ? 'Без звука' : `Громкость ${pct}%${boostLabel}`);
     updateTvOsdUi();
+    updateProfilePlaybackUI();
     emitPlayerSync('remote', { remoteCmd: 'volume', volume: nextVol, muted: mainVideo.muted });
   }
 
   function toggleTvMute() {
     wakeTvOsd();
+    ensureAudioBoosterActive();
     mainVideo.muted = !mainVideo.muted;
-    if (!mainVideo.muted && mainVideo.volume === 0) mainVideo.volume = 0.8;
-    if (!mainVideo.muted) $('unmuteSyncBtn').classList.add('hidden');
-    showTvCenterFeedback(mainVideo.muted ? '🔇' : '🔊', mainVideo.muted ? 'Без звука' : `Звук ${Math.round(mainVideo.volume * 100)}%`);
+    if (!mainVideo.muted && currentVolumeMultiplier === 0) {
+      currentVolumeMultiplier = 1.0;
+      localStorage.setItem('oulo_volume_multiplier', '1.0');
+    }
+    if (!mainVideo.muted) {
+      mainVideo.volume = Math.min(1, currentVolumeMultiplier);
+      if (audioBoostGain && audioBoostCtx) {
+        audioBoostGain.gain.setTargetAtTime(currentVolumeMultiplier, audioBoostCtx.currentTime, 0.05);
+      }
+      $('unmuteSyncBtn').classList.add('hidden');
+    }
+    const pct = Math.round(currentVolumeMultiplier * 100);
+    showTvCenterFeedback(mainVideo.muted ? '🔇' : '🔊', mainVideo.muted ? 'Без звука' : `Звук ${pct}%`);
     updateTvOsdUi();
-    emitPlayerSync('remote', { remoteCmd: 'mute', volume: mainVideo.volume, muted: mainVideo.muted });
+    updateProfilePlaybackUI();
+    emitPlayerSync('remote', { remoteCmd: 'mute', volume: currentVolumeMultiplier, muted: mainVideo.muted });
   }
 
   function switchTvEpisode(deltaIdx) {
