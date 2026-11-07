@@ -2602,6 +2602,45 @@
     }
   });
 
+  // Mobile Landscape Mode Handlers
+  async function toggleLandscapeMode() {
+    const isAlreadyLandscape = window.innerWidth > window.innerHeight;
+    if (isAlreadyLandscape) {
+      state.landscapeCinema = !state.landscapeCinema;
+      document.body.classList.toggle('landscape-cinema', state.landscapeCinema);
+      showToast(state.landscapeCinema ? '📺 Кинотеатр на весь экран' : '💬 Разделённый экран с чатом');
+      return;
+    }
+
+    state.forceLandscape = !state.forceLandscape;
+    document.body.classList.toggle('force-landscape', state.forceLandscape);
+
+    if (screen.orientation && screen.orientation.lock) {
+      try {
+        if (state.forceLandscape) {
+          await screen.orientation.lock('landscape').catch(() => {});
+        } else if (screen.orientation.unlock) {
+          screen.orientation.unlock().catch(() => {});
+        }
+      } catch (_) {}
+    }
+
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 100);
+
+    showToast(state.forceLandscape ? '📱 Альбомный режим включён' : '📱 Портретный режим');
+  }
+
+  $('roomLandscapeBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleLandscapeMode();
+  });
+  $('playerLandscapeBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleLandscapeMode();
+  });
+
   // Timeline click/scrub
   $('tvTimelineBar')?.addEventListener('click', (e) => {
     e.stopPropagation();
