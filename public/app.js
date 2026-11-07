@@ -96,16 +96,23 @@
       const vvH = vv ? vv.height : windowH;
       const offsetTop = vv ? vv.offsetTop : 0;
 
-      // Keyboard overlap at the bottom of the screen
+      // Lock scroll position at 0,0 to prevent Safari scrolling viewport into empty space
+      if (offsetTop > 0 || window.scrollY > 0) {
+        window.scrollTo(0, 0);
+      }
+
       const keyboardOverlap = Math.max(0, Math.round(windowH - (offsetTop + vvH)));
+      const isKeyboardOpen = keyboardOverlap > 60;
 
-      document.documentElement.style.setProperty('--keyboard-inset', `${keyboardOverlap}px`);
       document.documentElement.style.setProperty('--app-height', `${Math.round(vvH)}px`);
+      document.body.classList.toggle('keyboard-open', isKeyboardOpen);
 
-      if (keyboardOverlap > 80) {
+      if (isKeyboardOpen) {
         if (state.currentView === 'room') {
           const chatMsgs = $('chatMessages');
           if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight;
+          const rDMs = $('roomDmMessages');
+          if (rDMs) rDMs.scrollTop = rDMs.scrollHeight;
         } else if (state.currentView === 'friends') {
           const fDMs = $('dmMessages');
           if (fDMs) fDMs.scrollTop = fDMs.scrollHeight;
@@ -118,10 +125,92 @@
       window.visualViewport.addEventListener('scroll', update);
     }
     window.addEventListener('resize', update);
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 0) window.scrollTo(0, 0);
+    });
     window.addEventListener('orientationchange', () => setTimeout(update, 200));
     update();
   }
   setupMobileViewport();
+
+  // Helper functions for contenteditable and input fields
+  function getChatInputValue(elOrId) {
+    const el = typeof elOrId === 'string' ? $(elOrId) : elOrId;
+    if (!el) return '';
+    if (el.isContentEditable) {
+      return (el.innerText || el.textContent || '').trim();
+    }
+    return (el.value || '').trim();
+  }
+
+  function setChatInputValue(elOrId, val) {
+    const el = typeof elOrId === 'string' ? $(elOrId) : elOrId;
+    if (!el) return;
+    if (el.isContentEditable) {
+      el.innerText = val || '';
+    } else {
+      el.value = val || '';
+    }
+  }
+
+  function clearChatInput(elOrId) {
+    const el = typeof elOrId === 'string' ? $(elOrId) : elOrId;
+    if (!el) return;
+    if (el.isContentEditable) {
+      el.innerHTML = '';
+      el.innerText = '';
+    } else {
+      el.value = '';
+    }
+  }
+
+  function focusChatInput(elOrId) {
+    const el = typeof elOrId === 'string' ? $(elOrId) : elOrId;
+    if (!el) return;
+    el.focus();
+    if (el.isContentEditable && window.getSelection && document.createRange) {
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        range.collapse(false);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } catch (_) {}
+    }
+  }
+
+  function attachChatInputHandlers(inputId, sendBtnId, sendFn) {
+    const input = $(inputId);
+    const btn = $(sendBtnId);
+
+    if (input) {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendFn();
+        }
+      });
+      if (input.isContentEditable) {
+        input.addEventListener('paste', (e) => {
+          e.preventDefault();
+          const text = (e.clipboardData || window.clipboardData)?.getData('text/plain') || '';
+          document.execCommand('insertText', false, text);
+        });
+      }
+    }
+
+    if (btn) {
+      btn.addEventListener('pointerdown', (e) => {
+        // Crucial for iOS: prevent input from losing focus / keyboard from retracting on send click
+        e.preventDefault();
+      });
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        sendFn();
+      });
+    }
+  }
 
   async function api(path, options = {}) {
     const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
@@ -530,6 +619,7 @@
   function switchView(viewName) {
     state.currentView = viewName;
     document.body.classList.toggle('in-room-view', viewName === 'room');
+    if (viewName !== 'friends') document.body.classList.remove('in-friends-chat');
     document.querySelectorAll('.view-page').forEach(p => p.classList.remove('active'));
     const target = $(`view-${viewName}`);
     if (target) target.classList.add('active');
@@ -3159,8 +3249,7 @@
     bar.querySelectorAll('[data-clear-edit]').forEach(btn => {
       btn.onclick = () => {
         c.editingMsg = null;
-        const inp = $(c.inputId);
-        if (inp) inp.value = '';
+        clearChatInput(c.inputId);
         renderComposerBar(target);
       };
     });
@@ -3191,7 +3280,7 @@
       hasPhoto: !!(msg.hasPhoto || msg.hasImage || msg.imageUrl)
     };
     renderComposerBar(target);
-    $(c.inputId)?.focus();
+    focusChatInput(c.inputId);
   }
 
   function setComposerEdit(target, msg, friendId = null) {
@@ -3200,11 +3289,8 @@
     c.replyTo = null;
     c.editingMsg = { id: msg.id, text: msg.text || '', friendId };
     renderComposerBar(target);
-    const inp = $(c.inputId);
-    if (inp) {
-      inp.value = msg.text || '';
-      inp.focus();
-    }
+    setChatInputValue(c.inputId, msg.text || '');
+    focusChatInput(c.inputId);
   }
 
   document.querySelectorAll('.attach-photo-btn').forEach(btn => {
@@ -3882,13 +3968,13 @@
   async function sendActiveRoomChat() {
     if (!state.room) return;
     const input = $('chatInput');
-    const text = input ? input.value.trim() : '';
+    const text = getChatInputValue(input);
     const comp = composers.room;
 
     // Handle Edit Mode in Room Chat
     if (comp.editingMsg) {
       const editId = comp.editingMsg.id;
-      if (input) input.value = '';
+      clearChatInput(input);
       comp.editingMsg = null;
       renderComposerBar('room');
       if (!text) return;
@@ -3915,10 +4001,8 @@
       replyTo: comp.replyTo || null
     };
 
-    if (input) {
-      input.value = '';
-      input.focus();
-    }
+    clearChatInput(input);
+    focusChatInput(input);
     comp.imageUrl = '';
     comp.viewOnce = false;
     comp.replyTo = null;
@@ -3935,16 +4019,7 @@
     }
   }
 
-  $('chatInput')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      sendActiveRoomChat();
-    }
-  });
-  $('chatSendBtn')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    sendActiveRoomChat();
-  });
+  attachChatInputHandlers('chatInput', 'chatSendBtn', sendActiveRoomChat);
 
   // Mobile Room Quick Switcher (💬 Чат | 🎬 Серии | 👥 Зрители | 💌 Друзья | ⚙️ Опции)
   function setMobileRoomTab(tabName) {
@@ -4377,7 +4452,7 @@
         refreshMessageGrouping(box);
         box.scrollTop = box.scrollHeight;
       }
-      $('dmInput')?.focus();
+      focusChatInput('dmInput');
     } catch (e) {
       box.innerHTML = `<div style="text-align:center;color:var(--danger);padding:20px;">${esc(e.message)}</div>`;
     }
@@ -4391,13 +4466,13 @@
   async function submitDirectMessageForm(friendId, inputId, composerKey) {
     if (!friendId) return;
     const input = $(inputId);
-    const text = input ? input.value.trim() : '';
+    const text = getChatInputValue(input);
     const comp = composers[composerKey];
 
     // Handle Edit Mode in Direct Messages
     if (comp && comp.editingMsg) {
       const editId = comp.editingMsg.id;
-      if (input) input.value = '';
+      clearChatInput(input);
       comp.editingMsg = null;
       renderComposerBar(composerKey);
       if (!text) return;
@@ -4425,10 +4500,8 @@
       replyTo: comp?.replyTo || null
     };
 
-    if (input) {
-      input.value = '';
-      input.focus();
-    }
+    clearChatInput(input);
+    focusChatInput(input);
     if (comp) {
       comp.imageUrl = '';
       comp.viewOnce = false;
@@ -4447,14 +4520,7 @@
     }
   }
 
-  $('dmInput')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      submitDirectMessageForm(activeDmFriendId, 'dmInput', 'dm');
-    }
-  });
-  $('dmSendBtn')?.addEventListener('click', (e) => {
-    e.preventDefault();
+  attachChatInputHandlers('dmInput', 'dmSendBtn', () => {
     submitDirectMessageForm(activeDmFriendId, 'dmInput', 'dm');
   });
 
@@ -4519,7 +4585,7 @@
       });
       refreshMessageGrouping(box);
       box.scrollTop = box.scrollHeight;
-      $('roomDmInput')?.focus();
+      focusChatInput('roomDmInput');
     } catch {}
   }
 
@@ -4530,14 +4596,7 @@
     renderRoomDmFriendsList();
   });
 
-  $('roomDmInput')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      submitDirectMessageForm(roomActiveDmFriendId, 'roomDmInput', 'roomDm');
-    }
-  });
-  $('roomDmSendBtn')?.addEventListener('click', (e) => {
-    e.preventDefault();
+  attachChatInputHandlers('roomDmInput', 'roomDmSendBtn', () => {
     submitDirectMessageForm(roomActiveDmFriendId, 'roomDmInput', 'roomDm');
   });
 

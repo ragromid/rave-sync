@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261106b" />
+  <link rel="stylesheet" href="/styles.css?v=20261107_ios_fix" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -232,7 +232,7 @@
                 <div id="dmComposerBar" class="composer-bar hidden"></div>
                 <div id="dmForm" class="chat-input-row">
                   <button type="button" class="attach-photo-btn" data-chat-target="dm" title="Прикрепить фото (обычное или одноразовое)">📷</button>
-                  <input type="text" id="dmInput" placeholder="Написать другу..." enterkeyhint="send" inputmode="text" autocomplete="off" autocorrect="on" autocapitalize="sentences" spellcheck="true" />
+                  <div id="dmInput" class="chat-input-field" contenteditable="true" role="textbox" aria-multiline="false" spellcheck="true" autocapitalize="sentences" data-placeholder="Написать другу..."></div>
                   <button type="button" id="dmSendBtn" class="send-btn" title="Отправить">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                   </button>
@@ -443,7 +443,7 @@
                 </div>
                 <div id="chatForm" class="chat-input-row">
                   <button type="button" class="attach-photo-btn" data-chat-target="room" title="Прикрепить фото (обычное или одноразовое)">📷</button>
-                  <input type="text" id="chatInput" placeholder="Написать в комнату..." enterkeyhint="send" inputmode="text" autocomplete="off" autocorrect="on" autocapitalize="sentences" spellcheck="true" />
+                  <div id="chatInput" class="chat-input-field" contenteditable="true" role="textbox" aria-multiline="false" spellcheck="true" autocapitalize="sentences" data-placeholder="Написать в комнату..."></div>
                   <button type="button" id="chatSendBtn" class="send-btn" title="Отправить">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                   </button>
@@ -468,7 +468,7 @@
                   <div id="roomDmComposerBar" class="composer-bar hidden"></div>
                   <div id="roomDmForm" class="chat-input-row">
                     <button type="button" class="attach-photo-btn" data-chat-target="roomDm" title="Прикрепить фото (обычное или одноразовое)">📷</button>
-                    <input type="text" id="roomDmInput" placeholder="Личное сообщение другу..." enterkeyhint="send" inputmode="text" autocomplete="off" autocorrect="on" autocapitalize="sentences" spellcheck="true" />
+                    <div id="roomDmInput" class="chat-input-field" contenteditable="true" role="textbox" aria-multiline="false" spellcheck="true" autocapitalize="sentences" data-placeholder="Личное сообщение другу..."></div>
                     <button type="button" id="roomDmSendBtn" class="send-btn" title="Отправить">
                       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                     </button>
@@ -924,6 +924,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261107_messenger_kb"></script>
+  <script src="/app.js?v=20261107_ios_fix"></script>
 </body>
 </html>

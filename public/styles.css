@@ -1361,18 +1361,45 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 12px;
+  padding: 8px 12px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
   border-top: 1px solid var(--border-subtle);
   background: var(--bg-main);
+  flex-shrink: 0;
+  z-index: 20;
 }
-.chat-input-row input {
+body.keyboard-open .chat-input-row {
+  padding-bottom: 8px;
+}
+.chat-input-row input,
+.chat-input-field {
   flex: 1;
-  height: 38px;
-  padding: 0 14px;
+  min-height: 38px;
+  max-height: 96px;
+  padding: 8px 14px;
   border-radius: 99px;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  font-size: 0.86rem;
+  color: var(--text-main);
+  font-size: 16px;
+  line-height: 1.35;
+  overflow-y: auto;
+  outline: none;
+  user-select: text;
+  -webkit-user-select: text;
+  white-space: pre-wrap;
+  word-break: break-word;
+  box-sizing: border-box;
+}
+.chat-input-field:focus,
+.chat-input-row input:focus {
+  border-color: var(--accent);
+}
+.chat-input-field:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  pointer-events: none;
+  display: block;
 }
 .send-btn {
   width: 38px;
@@ -2804,18 +2831,24 @@ button {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding-bottom: var(--keyboard-inset, 0px);
-    transition: padding-bottom 0.12s ease-out;
+    padding-bottom: 0 !important;
   }
   /* Friends View & Private Chat on Mobile */
   body.in-friends-chat .nav-rail,
-  body:has(.friends-layout.chat-open) .nav-rail {
+  body.in-room-view .nav-rail,
+  body:has(.friends-layout.chat-open) .nav-rail,
+  body:has(#view-room.active) .nav-rail {
     display: none !important;
   }
   .friends-view-page {
     height: 100% !important;
     max-height: 100% !important;
     padding: 0 !important;
+    overflow: hidden !important;
+  }
+  .friends-layout {
+    height: 100% !important;
+    max-height: 100% !important;
     overflow: hidden !important;
   }
   .friends-list-pane {
@@ -2836,8 +2869,7 @@ button {
     height: 100% !important;
     max-height: 100% !important;
     overflow: hidden !important;
-    padding-bottom: var(--keyboard-inset, 0px);
-    transition: padding-bottom 0.12s ease-out;
+    padding-bottom: 0 !important;
   }
   .dm-back-btn {
     display: inline-flex;
