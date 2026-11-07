@@ -1015,6 +1015,37 @@ app.post('/api/z01/resolve', async (req, res) => {
 });
 
 // ================= HDREZKA API ROUTES =================
+app.get('/api/rezka/resolve-by-title', async (req, res) => {
+  try {
+    const { title = '', orig_title = '', year = '' } = req.query;
+    const query = title || orig_title;
+    if (!query) return res.status(400).json({ error: 'Параметр title обязателен' });
+
+    let items = await rezka.search(query);
+    if (!items.length && orig_title && orig_title !== title) {
+      items = await rezka.search(orig_title);
+    }
+    if (!items.length) {
+      return res.status(404).json({ error: 'Фильм или сериал не найден на HDRezka' });
+    }
+
+    let best = items[0];
+    if (year) {
+      const yrNum = parseInt(year, 10);
+      const matchYr = items.find(it => it.year === yrNum);
+      if (matchYr) best = matchYr;
+    }
+
+    const details = await rezka.getDetails(best.url);
+    res.json({
+      match: best,
+      details
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Ошибка поиска по названию на HDRezka' });
+  }
+});
+
 app.get('/api/rezka/search', async (req, res) => {
   try {
     const { q = '' } = req.query;

@@ -52,6 +52,8 @@ const jar = new CookieJar();
 const searchCache = new Map();
 const detailsCache = new Map();
 const episodesCache = new Map();
+const idToUrlMap = new Map();
+const visitedPages = new Set();
 
 function getCached(map, key, ttl = 5 * 60 * 1000) {
   const item = map.get(key);
@@ -290,6 +292,7 @@ async function search(query, domain = DEFAULT_MIRROR) {
     }
 
     if (id) {
+      idToUrlMap.set(String(id), itemUrl);
       items.push({
         id,
         title,
@@ -312,7 +315,11 @@ async function search(query, domain = DEFAULT_MIRROR) {
 async function getDetails(idOrUrl, domain = DEFAULT_MIRROR) {
   let targetUrl = idOrUrl;
   if (!/^https?:\/\//i.test(targetUrl)) {
-    targetUrl = `${domain}/films/fiction/${idOrUrl}.html`; // fallback format
+    if (idToUrlMap.has(String(idOrUrl))) {
+      targetUrl = idToUrlMap.get(String(idOrUrl));
+    } else {
+      targetUrl = `${domain}/films/fiction/${idOrUrl}.html`; // fallback format
+    }
   }
 
   const cacheKey = `details:${targetUrl}`;
@@ -326,6 +333,9 @@ async function getDetails(idOrUrl, domain = DEFAULT_MIRROR) {
   const idMatch = targetUrl.match(/\/(\d+)-/) || html.match(/sof\.tv\.initCDN(?:Movies|Series)Events\((\d+)/);
   const id = idMatch ? idMatch[1] : null;
   if (!id) throw new Error('Не удалось определить ID медиа на HDRezka');
+
+  idToUrlMap.set(String(id), targetUrl);
+  visitedPages.add(targetUrl);
 
   // Title & Poster
   const titleMatch = html.match(/<h1[^>]*itemprop="name"[^>]*>([^<]+)<\/h1>/i) || html.match(/<title>([^<]+)<\/title>/i);
@@ -443,7 +453,24 @@ async function getEpisodes(id, translatorId, refererUrl = `${DEFAULT_MIRROR}/`, 
 async function getStream({ id, translatorId, season = null, episode = null, isMovie = false, refererUrl = null, domain = DEFAULT_MIRROR }) {
   if (!id) throw new Error('Missing ID for stream resolution');
   const tId = translatorId || '0';
-  const ref = refererUrl || `${domain}/films/fiction/${id}.html`;
+  let ref = refererUrl || idToUrlMap.get(String(id));
+
+  if (!ref || !ref.includes('://')) {
+    try {
+      const d = await getDetails(id, domain);
+      if (d && d.url) ref = d.url;
+    } catch {
+      ref = `${domain}/films/fiction/${id}.html`;
+    }
+  }
+
+  // Ensure page has been visited in current session so HDRezka sets proper session cookies
+  if (ref && /^https?:\/\//i.test(ref) && !visitedPages.has(ref)) {
+    try {
+      await rezkaFetch(ref);
+      visitedPages.add(ref);
+    } catch {}
+  }
 
   let body = '';
   if (isMovie || (!season && !episode)) {
@@ -453,7 +480,7 @@ async function getStream({ id, translatorId, season = null, episode = null, isMo
   }
 
   const url = `${domain}/ajax/get_cdn_series/?t=${Date.now()}`;
-  const res = await rezkaFetch(url, {
+  let res = await rezkaFetch(url, {
     method: 'POST',
     headers: {
       'Referer': ref,
@@ -463,7 +490,25 @@ async function getStream({ id, translatorId, season = null, episode = null, isMo
     body
   });
 
-  const json = await res.json().catch(() => ({}));
+  let json = await res.json().catch(() => ({}));
+  if (!json.success && json.message && json.message.includes('сессии')) {
+    // If session expired, refresh target page and retry once
+    try {
+      await rezkaFetch(ref);
+      visitedPages.add(ref);
+      res = await rezkaFetch(url, {
+        method: 'POST',
+        headers: {
+          'Referer': ref,
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        body
+      });
+      json = await res.json().catch(() => ({}));
+    } catch {}
+  }
+
   if (!json.success) {
     throw new Error(json.message || 'Не удалось получить видеопоток от HDRezka');
   }

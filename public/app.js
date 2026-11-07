@@ -1251,6 +1251,16 @@
     await loadZ01ForMovieInRoom(state.selectedMovie, true);
   });
 
+  const modalRezkaBtn = $('modalWatchRezkaBtn');
+  if (modalRezkaBtn) {
+    modalRezkaBtn.addEventListener('click', () => {
+      if (!state.selectedMovie) return;
+      const m = state.selectedMovie;
+      $('movieModal').classList.add('hidden');
+      openRezkaModal(m.title || m.name || '');
+    });
+  }
+
   $('modalBookmarkBtn').addEventListener('click', async () => {
     if (!(await ensureAuthenticated()) || !state.selectedMovie) return;
     try {
@@ -1481,6 +1491,13 @@
     const customTitle = $('customLinkTitle').value.trim() || 'Видео по ссылке';
     if (!rawUrl) return;
 
+    if (/rezka/i.test(rawUrl)) {
+      $('customLinkModal').classList.add('hidden');
+      $('customLinkUrl').value = '';
+      openRezkaModal(rawUrl);
+      return;
+    }
+
     const ytId = extractYouTubeId(rawUrl);
     const isHls = /\.m3u8(\?|$)/i.test(rawUrl);
     const media = {
@@ -1518,6 +1535,314 @@
     }
   });
 
+  // ================= HDREZKA UI & PLAYER INTEGRATION =================
+  state.rezka = {
+    details: null,
+    activeTranslatorId: '',
+    seasons: [],
+    activeSeason: 1,
+    episodes: [],
+    activeEpisode: 1,
+    loading: false
+  };
+
+  function setRezkaLoading(isLoading, text = 'Загрузка данных HDRezka...') {
+    state.rezka.loading = isLoading;
+    const spinner = $('rezkaLoadingSpinner');
+    const loadingText = $('rezkaLoadingText');
+    if (spinner) {
+      if (isLoading) spinner.classList.remove('hidden');
+      else spinner.classList.add('hidden');
+    }
+    if (loadingText && text) loadingText.textContent = text;
+  }
+
+  function openRezkaModal(initialQuery = '') {
+    const modal = $('rezkaModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+
+    const roomSettingsModal = $('roomSettingsModal');
+    if (roomSettingsModal) roomSettingsModal.classList.add('hidden');
+
+    $('rezkaSearchResults').classList.remove('hidden');
+    $('rezkaMediaDetails').classList.add('hidden');
+    setRezkaLoading(false);
+
+    const input = $('rezkaSearchInput');
+    if (initialQuery) {
+      input.value = initialQuery;
+      if (/^https?:\/\//i.test(initialQuery) || /rezka/i.test(initialQuery)) {
+        loadRezkaDetails(initialQuery);
+      } else {
+        performRezkaSearch(initialQuery);
+      }
+    } else {
+      input.focus();
+    }
+  }
+
+  async function performRezkaSearch(query) {
+    const q = String(query || '').trim();
+    if (!q) return;
+    setRezkaLoading(true, `Поиск «${q}» на HDRezka...`);
+    const resultsContainer = $('rezkaSearchResults');
+    resultsContainer.innerHTML = '';
+
+    try {
+      const data = await api(`/api/rezka/search?q=${encodeURIComponent(q)}`);
+      setRezkaLoading(false);
+      const items = data.results || [];
+      if (!items.length) {
+        resultsContainer.innerHTML = `<div class="p-4 text-center text-secondary">Ничего не найдено по запросу «${esc(q)}». Попробуйте другое название.</div>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'rezka-item-card';
+        const typeLabel = item.type === 'series' ? 'Сериал' : (item.type === 'cartoon' ? 'Мультфильм' : (item.type === 'anime' ? 'Аниме' : 'Фильм'));
+        card.innerHTML = `
+          <div class="rezka-item-info">
+            <div class="rezka-item-title">${esc(item.title)}</div>
+            <div class="rezka-item-sub">${esc([item.origTitle, item.year].filter(Boolean).join(' • '))}</div>
+          </div>
+          <span class="rezka-item-badge">${esc(typeLabel)}</span>
+        `;
+        card.addEventListener('click', () => loadRezkaDetails(item.url || item.id));
+        resultsContainer.appendChild(card);
+      });
+    } catch (e) {
+      setRezkaLoading(false);
+      resultsContainer.innerHTML = `<div class="p-4 text-center text-danger">Ошибка поиска: ${esc(e.message)}</div>`;
+    }
+  }
+
+  async function loadRezkaDetails(idOrUrl) {
+    setRezkaLoading(true, 'Загружаем озвучки и список серий...');
+    try {
+      const data = await api(`/api/rezka/details?url=${encodeURIComponent(idOrUrl)}`);
+      setRezkaLoading(false);
+      state.rezka.details = data;
+
+      $('rezkaSearchResults').classList.add('hidden');
+      $('rezkaMediaDetails').classList.remove('hidden');
+
+      // Populate Meta
+      $('rezkaDetailTitle').textContent = data.title;
+      $('rezkaDetailOrig').textContent = data.origTitle || '';
+      $('rezkaDetailPoster').src = data.poster || '';
+      $('rezkaDetailPoster').style.display = data.poster ? 'block' : 'none';
+      $('rezkaDetailType').textContent = data.isSeries ? 'Сериал' : 'Фильм';
+      $('rezkaDetailYear').textContent = data.year || '';
+
+      // Populate Translators
+      const translators = data.translators || [];
+      state.rezka.translators = translators;
+      const defaultTr = translators.find(t => t.isDefault) || translators[0];
+      state.rezka.activeTranslatorId = defaultTr ? defaultTr.id : '0';
+      renderRezkaTranslators();
+
+      // Populate Series Episodes/Seasons if series
+      if (data.isSeries) {
+        $('rezkaSeasonsSection').classList.remove('hidden');
+        $('rezkaEpisodesSection').classList.remove('hidden');
+        state.rezka.seasons = data.seasons || [];
+        state.rezka.episodes = data.episodes || [];
+        state.rezka.activeSeason = data.seasons[0]?.season || 1;
+        state.rezka.activeEpisode = data.episodes[0]?.episode || 1;
+        renderRezkaSeasons();
+        renderRezkaEpisodes();
+      } else {
+        $('rezkaSeasonsSection').classList.add('hidden');
+        $('rezkaEpisodesSection').classList.add('hidden');
+      }
+    } catch (e) {
+      setRezkaLoading(false);
+      showToast(`Ошибка загрузки HDRezka: ${e.message}`);
+    }
+  }
+
+  function renderRezkaTranslators() {
+    const list = $('rezkaTranslatorsList');
+    if (!list) return;
+    list.innerHTML = '';
+    state.rezka.translators.forEach(tr => {
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = `rezka-pill ${tr.id === state.rezka.activeTranslatorId ? 'active' : ''}`;
+      pill.textContent = tr.name;
+      pill.addEventListener('click', async () => {
+        state.rezka.activeTranslatorId = tr.id;
+        renderRezkaTranslators();
+        if (state.rezka.details?.isSeries) {
+          setRezkaLoading(true, `Загрузка озвучки «${tr.name}»...`);
+          try {
+            const epData = await api(`/api/rezka/episodes?id=${state.rezka.details.id}&translator_id=${tr.id}&url=${encodeURIComponent(state.rezka.details.url)}`);
+            state.rezka.seasons = epData.seasons || [];
+            state.rezka.episodes = epData.episodes || [];
+            renderRezkaSeasons();
+            renderRezkaEpisodes();
+          } catch (e) {
+            showToast(`Ошибка смены озвучки: ${e.message}`);
+          } finally {
+            setRezkaLoading(false);
+          }
+        }
+      });
+      list.appendChild(pill);
+    });
+  }
+
+  function renderRezkaSeasons() {
+    const list = $('rezkaSeasonsList');
+    if (!list) return;
+    list.innerHTML = '';
+    state.rezka.seasons.forEach(s => {
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = `rezka-pill ${s.season == state.rezka.activeSeason ? 'active' : ''}`;
+      pill.textContent = s.title;
+      pill.addEventListener('click', () => {
+        state.rezka.activeSeason = s.season;
+        renderRezkaSeasons();
+        renderRezkaEpisodes();
+      });
+      list.appendChild(pill);
+    });
+  }
+
+  function renderRezkaEpisodes() {
+    const grid = $('rezkaEpisodesGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    const currentSeasonEps = state.rezka.episodes.filter(ep => ep.season == state.rezka.activeSeason);
+    const epsToShow = currentSeasonEps.length ? currentSeasonEps : state.rezka.episodes;
+
+    epsToShow.forEach(ep => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `rezka-ep-btn ${ep.episode == state.rezka.activeEpisode ? 'active' : ''}`;
+      btn.textContent = `${ep.episode} сер.`;
+      btn.title = ep.name || `${ep.episode} серия`;
+      btn.addEventListener('click', () => {
+        state.rezka.activeEpisode = ep.episode;
+        renderRezkaEpisodes();
+        startRezkaPlayback();
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  async function startRezkaPlayback() {
+    const details = state.rezka.details;
+    if (!details) return;
+
+    setRezkaLoading(true, 'Получаем видеопоток HDRezka (1080p Ultra)...');
+    try {
+      const q = new URLSearchParams();
+      q.set('id', details.id);
+      q.set('translator_id', state.rezka.activeTranslatorId || details.defaultTranslatorId || '0');
+      q.set('url', details.url);
+      if (details.isSeries) {
+        q.set('season', state.rezka.activeSeason);
+        q.set('episode', state.rezka.activeEpisode);
+        q.set('is_movie', 'false');
+      } else {
+        q.set('is_movie', 'true');
+      }
+
+      const streamRes = await api(`/api/rezka/stream?${q.toString()}`);
+      setRezkaLoading(false);
+
+      const activeTr = state.rezka.translators.find(t => t.id === state.rezka.activeTranslatorId);
+      const title = details.isSeries
+        ? `${details.title} (S${state.rezka.activeSeason} E${state.rezka.activeEpisode})`
+        : details.title;
+
+      const media = {
+        type: 'z01',
+        title,
+        poster: details.poster || '',
+        balancerKey: 'hdrezka',
+        balancerName: `HDRezka (${streamRes.primaryQuality || '1080p'})`,
+        season: details.isSeries ? parseInt(state.rezka.activeSeason, 10) : 0,
+        episode: details.isSeries ? parseInt(state.rezka.activeEpisode, 10) : 0,
+        voiceName: activeTr ? activeTr.name : 'Оригинал / Дубляж',
+        quality: streamRes.primaryQuality || '1080p',
+        rawUrl: streamRes.recommendedUrl,
+        proxyUrl: streamRes.recommendedUrl,
+        recommendedUrl: streamRes.recommendedUrl,
+        streamUrl: streamRes.recommendedUrl,
+        streamType: 'mp4',
+        subtitles: streamRes.subtitles || []
+      };
+
+      $('rezkaModal').classList.add('hidden');
+
+      if (state.room) {
+        switchView('room');
+        socket.emit('room:set_media', { media });
+        if (!socket.connected) {
+          api(`/api/rooms/${encodeURIComponent(state.room.code)}/sync`, {
+            method: 'POST',
+            body: JSON.stringify({ media })
+          }).catch(() => {});
+          loadMediaIntoPlayer(media, { playing: true, currentTime: 0 });
+        }
+      } else {
+        const res = await api('/api/rooms', {
+          method: 'POST',
+          body: JSON.stringify({ name: title, isPublic: true, media })
+        });
+        await joinRoomByCode(res.room.code);
+      }
+      showToast(`⚡ HDRezka запущена: ${title}`);
+    } catch (e) {
+      setRezkaLoading(false);
+      showToast(`Ошибка HDRezka: ${e.message}`);
+    }
+  }
+
+  // Bind Rezka UI buttons
+  const openRezkaRoomBtn = $('openRezkaFromRoomBtn');
+  if (openRezkaRoomBtn) openRezkaRoomBtn.addEventListener('click', () => openRezkaModal());
+
+  const settingsRezkaBtn = $('settingsOpenRezkaBtn');
+  if (settingsRezkaBtn) settingsRezkaBtn.addEventListener('click', () => openRezkaModal());
+
+  const rezkaSearchBtn = $('rezkaSearchBtn');
+  if (rezkaSearchBtn) {
+    rezkaSearchBtn.addEventListener('click', () => {
+      performRezkaSearch($('rezkaSearchInput').value);
+    });
+  }
+
+  const rezkaInput = $('rezkaSearchInput');
+  if (rezkaInput) {
+    rezkaInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        performRezkaSearch(rezkaInput.value);
+      }
+    });
+  }
+
+  const rezkaBackBtn = $('rezkaBackToSearchBtn');
+  if (rezkaBackBtn) {
+    rezkaBackBtn.addEventListener('click', () => {
+      $('rezkaMediaDetails').classList.add('hidden');
+      $('rezkaSearchResults').classList.remove('hidden');
+    });
+  }
+
+  const rezkaPlayBtn = $('rezkaPlayBtn');
+  if (rezkaPlayBtn) {
+    rezkaPlayBtn.addEventListener('click', () => {
+      startRezkaPlayback();
+    });
+  }
+
   // ================= Z01 ONLINE ENGINE IN ROOM =================
   async function loadZ01ForMovieInRoom(movie, autoBroadcastFirstStream = false) {
     if (!movie) return;
@@ -1550,6 +1875,15 @@
       state.z01.uid = data.uid || '';
       state.z01.sources = data.sources || [];
 
+      // Add HDRezka at the top of available sources
+      state.z01.sources.unshift({
+        key: 'hdrezka',
+        name: 'HDRezka ⚡',
+        fullName: 'HDRezka (1080p Ultra)',
+        badge: '1080p',
+        show: true
+      });
+
       const shownSources = state.z01.sources.filter(s => s.show);
       const firstSource = shownSources[0] || state.z01.sources[0];
       if (!firstSource) {
@@ -1569,6 +1903,10 @@
   }
 
   async function selectZ01Balancer(sourceKey, autoPlay = true) {
+    if (sourceKey === 'hdrezka') {
+      openRezkaModal(state.z01.movie?.title || state.z01.movie?.name || '');
+      return;
+    }
     const src = state.z01.sources.find(s => s.key === sourceKey);
     if (!src) return;
 
