@@ -1208,7 +1208,7 @@
   }
 
   $('heroWatchPartyBtn').addEventListener('click', () => {
-    if (state.heroMovie) startRoomWithMovie(state.heroMovie, true);
+    if (state.heroMovie) openMovieModal(state.heroMovie);
   });
   $('heroDetailsBtn').addEventListener('click', () => {
     if (state.heroMovie) openMovieModal(state.heroMovie);
@@ -1226,15 +1226,7 @@
                    (state.bookmarks || []).find(x => String(x.id) === String(movieId)) ||
                    (state.history || []).map(h => h.movie).find(x => String(x?.id) === String(movieId));
       if (!item) return;
-
-      const isPlayClick = !!e.target.closest('.poster-play-hover, .poster-play-circle');
-      if (isPlayClick) {
-        e.preventDefault();
-        e.stopPropagation();
-        startRoomWithMovie(item, true);
-      } else {
-        openMovieModal(item);
-      }
+      openMovieModal(item);
     });
   }
 
@@ -1262,23 +1254,11 @@
           <img src="${esc(posterUrl)}" loading="lazy" alt="${esc(item.title)}" />
           ${item.vote_average ? `<span class="poster-rating">★ ${esc(item.vote_average)}</span>` : ''}
           <span class="poster-type">${item.type === 'tv' ? 'Сериал' : 'Фильм'}</span>
-          <div class="poster-play-hover" data-action="play" title="Смотреть фильм сразу">
-            <div class="poster-play-circle">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            </div>
-          </div>
         </div>
         <div class="poster-title">${esc(item.title)}</div>
         <div class="poster-sub">${esc(item.year || '')}</div>
       `;
-      card.addEventListener('click', (e) => {
-        const isPlayHover = !!e.target.closest('.poster-play-hover, .poster-play-circle');
-        if (isPlayHover) {
-          e.preventDefault();
-          e.stopPropagation();
-          startRoomWithMovie(item, true);
-          return;
-        }
+      card.addEventListener('click', () => {
         openMovieModal(item);
       });
       card.addEventListener('keydown', (e) => {
