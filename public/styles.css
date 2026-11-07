@@ -1366,14 +1366,14 @@ button {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
   border-top: 1px solid var(--border-subtle);
   background: var(--bg-main);
   flex-shrink: 0;
   z-index: 20;
 }
 body.keyboard-open .chat-input-row {
-  padding-bottom: 8px;
+  padding-bottom: 55px !important;
 }
 .chat-input-row input,
 .chat-input-field {
@@ -2907,7 +2907,7 @@ body.keyboard-open .chat-input-row {
   }
   body.keyboard-open .chat-input-row {
     padding: 6px 10px !important;
-    padding-bottom: 8px !important;
+    padding-bottom: 55px !important;
   }
 
   .reaction-strip {
