@@ -246,28 +246,74 @@ function parseSubtitles(subStr) {
   return subs;
 }
 
-/**
- * Search movies & series on HDRezka
- */
-async function search(query, domain = DEFAULT_MIRROR) {
-  const q = String(query || '').trim();
-  if (!q) return [];
+const TMDB_MIRRORS = ['https://apitmdb.cub.red/3', 'https://api.themoviedb.org/3'];
+const TMDB_KEY = '4ef0d7355d9ffb5151e987764708ce96';
 
-  const cacheKey = `${domain}:search:${q.toLowerCase()}`;
-  const cached = getCached(searchCache, cacheKey);
-  if (cached) return cached;
+async function getAlternativeTitles(query) {
+  for (const base of TMDB_MIRRORS) {
+    try {
+      const u = `${base}/search/multi?api_key=${TMDB_KEY}&language=ru-RU&query=${encodeURIComponent(query)}&page=1`;
+      const res = await fetch(u, { signal: AbortSignal.timeout(4000) });
+      const json = await res.json();
+      if (Array.isArray(json.results) && json.results.length > 0) {
+        const top = json.results[0];
+        const titles = [
+          top.title || top.name,
+          top.original_title || top.original_name
+        ].filter(Boolean);
+        return [...new Set(titles)];
+      }
+    } catch {}
+  }
+  return [];
+}
 
-  const url = `${domain}/engine/ajax/search.php?q=${encodeURIComponent(q)}`;
-  const res = await rezkaFetch(url, {
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest'
+function parseSearchPageHtml(html) {
+  const results = [];
+  const itemRegex = /<div class="b-content__inline_item"[^>]*data-id="(\d+)"[^>]*>([\s\S]*?)<\/div>\s*<\/div>/gi;
+  let m;
+  while ((m = itemRegex.exec(html)) !== null) {
+    const id = m[1];
+    const body = m[2];
+
+    const linkMatch = body.match(/<div class="b-content__inline_item-link">\s*<a[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/i);
+    if (!linkMatch) continue;
+
+    const url = linkMatch[1];
+    const title = linkMatch[2].trim();
+
+    const posterMatch = body.match(/<img[^>]*src="([^"]+)"/i);
+    const poster = posterMatch ? posterMatch[1] : '';
+
+    let year = null;
+    let origTitle = '';
+    const miscMatch = body.match(/<div class="misc">([^<]+)<\/div>/i) || body.match(/<div>([^<]+)<\/div>/i);
+    if (miscMatch) {
+      const extra = miscMatch[1].trim();
+      const yrMatch = extra.match(/\b(19\d{2}|20\d{2})\b/);
+      if (yrMatch) year = parseInt(yrMatch[1], 10);
+      const parts = extra.split(',').map(s => s.trim());
+      if (parts.length > 0 && !/^\d{4}/.test(parts[0])) {
+        origTitle = parts[0];
+      }
     }
-  });
 
-  const html = await res.text();
+    const ratingMatch = body.match(/<span class="rating">[\s\S]*?<i>([^<]+)<\/i>/i);
+    const rating = ratingMatch ? ratingMatch[1].trim() : null;
+
+    let type = 'movie';
+    if (url.includes('/series/')) type = 'series';
+    else if (url.includes('/cartoons/')) type = 'cartoon';
+    else if (url.includes('/animation/')) type = 'anime';
+
+    results.push({ id, title, origTitle, year, type, rating, poster, url });
+  }
+  return results;
+}
+
+function parseAjaxSearchHtml(html) {
   const items = [];
   const regex = /<li[^>]*>\s*<a href="([^"]+)">\s*<span class="enty">([^<]+)<\/span>\s*([^<]*?)(?:<span class="rating">[\s\S]*?<i>([^<]+)<\/i>)?\s*<\/a>\s*<\/li>/gi;
-
   let m;
   while ((m = regex.exec(html)) !== null) {
     const itemUrl = m[1];
@@ -292,7 +338,6 @@ async function search(query, domain = DEFAULT_MIRROR) {
     }
 
     if (id) {
-      idToUrlMap.set(String(id), itemUrl);
       items.push({
         id,
         title,
@@ -300,8 +345,78 @@ async function search(query, domain = DEFAULT_MIRROR) {
         year,
         type,
         rating,
+        poster: '',
         url: itemUrl
       });
+    }
+  }
+  return items;
+}
+
+async function searchOnce(q, domain = DEFAULT_MIRROR) {
+  const items = [];
+  const seenIds = new Set();
+
+  // 1. Full search page (rich results, full catalog)
+  try {
+    const pageUrl = `${domain}/search/?do=search&subaction=search&q=${encodeURIComponent(q)}`;
+    const pageRes = await rezkaFetch(pageUrl);
+    const pageHtml = await pageRes.text();
+    const pageItems = parseSearchPageHtml(pageHtml);
+    for (const item of pageItems) {
+      if (!seenIds.has(item.id)) {
+        seenIds.add(item.id);
+        idToUrlMap.set(String(item.id), item.url);
+        items.push(item);
+      }
+    }
+  } catch {}
+
+  // 2. Ajax quick search
+  try {
+    const ajaxUrl = `${domain}/engine/ajax/search.php?q=${encodeURIComponent(q)}`;
+    const ajaxRes = await rezkaFetch(ajaxUrl, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    const ajaxHtml = await ajaxRes.text();
+    const ajaxItems = parseAjaxSearchHtml(ajaxHtml);
+    for (const item of ajaxItems) {
+      if (!seenIds.has(item.id)) {
+        seenIds.add(item.id);
+        idToUrlMap.set(String(item.id), item.url);
+        items.push(item);
+      }
+    }
+  } catch {}
+
+  return items;
+}
+
+/**
+ * Search movies & series on HDRezka (hybrid full search + ajax + TMDB language fallback)
+ */
+async function search(query, domain = DEFAULT_MIRROR) {
+  const q = String(query || '').trim();
+  if (!q) return [];
+
+  const cacheKey = `${domain}:search:${q.toLowerCase()}`;
+  const cached = getCached(searchCache, cacheKey);
+  if (cached) return cached;
+
+  let items = await searchOnce(q, domain);
+
+  // If very few or no results, try TMDB language bridging (Russian <-> English title)
+  if (items.length < 2) {
+    const altTitles = await getAlternativeTitles(q);
+    for (const alt of altTitles) {
+      if (alt.toLowerCase() === q.toLowerCase()) continue;
+      const altItems = await searchOnce(alt, domain);
+      for (const it of altItems) {
+        if (!items.some(x => x.id === it.id)) {
+          items.push(it);
+        }
+      }
+      if (items.length >= 4) break;
     }
   }
 

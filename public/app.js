@@ -1843,6 +1843,43 @@
     });
   }
 
+  function updateZ01RezkaHero() {
+    const heroTitle = $('z01RezkaHeroTitle');
+    const heroSub = $('z01RezkaHeroSub');
+    const media = state.room?.media;
+    if (media && media.balancerKey === 'hdrezka') {
+      if (heroTitle) heroTitle.textContent = `HDRezka: ${media.title || 'Видео'}`;
+      if (heroSub) heroSub.textContent = `Озвучка: ${media.voiceName || 'Стандартная'} • ${media.quality || '1080p Ultra'}`;
+    } else if (media && media.title) {
+      if (heroTitle) heroTitle.textContent = `HDRezka: ${media.title}`;
+      if (heroSub) heroSub.textContent = 'Нажмите, чтобы открыть озвучки и серии на HDRezka';
+    } else {
+      if (heroTitle) heroTitle.textContent = 'HDRezka: Озвучки и серии';
+      if (heroSub) heroSub.textContent = 'Нажмите, чтобы выбрать студию перевода или серию';
+    }
+  }
+
+  const z01RezkaHeroBtn = $('z01RezkaHeroBtn');
+  if (z01RezkaHeroBtn) {
+    z01RezkaHeroBtn.addEventListener('click', () => {
+      const activeMovie = state.room?.media?.movie || state.z01?.movie;
+      const title = activeMovie?.title || activeMovie?.name || state.room?.media?.title || '';
+      openRezkaModal(title);
+    });
+  }
+
+  const z01RezkaSearchBtn = $('z01RezkaSearchBtn');
+  if (z01RezkaSearchBtn) {
+    z01RezkaSearchBtn.addEventListener('click', () => {
+      openRezkaModal('');
+      const input = $('rezkaSearchInput');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+    });
+  }
+
   // ================= Z01 ONLINE ENGINE IN ROOM =================
   async function loadZ01ForMovieInRoom(movie, autoBroadcastFirstStream = false) {
     if (!movie) return;
@@ -2080,6 +2117,7 @@
   }
 
   function renderZ01Panel() {
+    updateZ01RezkaHero();
     const segBox = $('z01Segments');
     const dropGrid = $('z01DropdownGrid');
     const epStrip = $('z01EpisodesStrip');
@@ -4471,6 +4509,7 @@
     if (tabName === 'z01') {
       layout?.classList.add('mobile-tab-z01');
       $('z01Panel')?.classList.remove('hidden');
+      updateZ01RezkaHero();
     } else {
       layout?.classList.remove('mobile-tab-z01');
       const validTabs = ['chat', 'users', 'dms', 'options'];

@@ -3518,3 +3518,83 @@ body.tv-cinema-mode .player-wrapper {
   padding: 30px 10px;
   color: var(--text-muted);
 }
+
+/* HDRezka Hero Banner in Series Tab */
+.z01-rezka-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.12), rgba(255, 87, 34, 0.06));
+  border: 1px solid rgba(255, 152, 0, 0.28);
+  border-radius: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+.z01-rezka-hero:hover {
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.18), rgba(255, 87, 34, 0.1));
+  border-color: rgba(255, 152, 0, 0.45);
+}
+.z01-rezka-hero-left {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.z01-rezka-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.rezka-pill-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ff9800, #ff5722);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 8px;
+  letter-spacing: 0.02em;
+}
+.rezka-quality-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffb74d;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.z01-rezka-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.z01-rezka-sub {
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.z01-rezka-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .z01-rezka-hero {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+  .z01-rezka-actions {
+    justify-content: flex-end;
+  }
+}
