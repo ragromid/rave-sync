@@ -271,7 +271,7 @@
 
   function setAvatarElement(el, u, fallbackEmoji = '🦊') {
     if (!el) return;
-    el.style.background = (u && u.color) || '#7c5cff';
+    el.style.background = (u && u.color) || '#00e676';
     if (u && u.avatarUrl) {
       el.innerHTML = `<img class="avatar-img" src="${esc(u.avatarUrl)}" alt="" />`;
     } else {
@@ -531,13 +531,13 @@
         triggerAppNotification({
           title: 'Звук и уведомления в Safari включены! 🔔',
           body: 'На iPhone системные уведомления на экран блокировки работают, если нажать «Поделиться ⬆️ → На экран Домой 📲»',
-          user: state.user || { avatar: '🍏', color: '#7c5cff' }
+          user: state.user || { avatar: '🍏', color: '#00e676' }
         });
       } else {
         triggerAppNotification({
           title: 'Встроенные уведомления включены! 🔔',
           body: 'Вы будете получать всплывающие карточки и звуковой сигнал при новых сообщениях.',
-          user: state.user || { avatar: '🔔', color: '#7c5cff' }
+          user: state.user || { avatar: '🔔', color: '#00e676' }
         });
       }
       return;
@@ -551,7 +551,7 @@
         triggerAppNotification({
           title: 'Уведомления включены! 🔔',
           body: 'Теперь вы будете получать сообщения от друзей и приглашения в комнаты как в Telegram.',
-          user: state.user || { avatar: '🔔', color: '#7c5cff' },
+          user: state.user || { avatar: '🔔', color: '#00e676' },
           forceSystem: true
         });
       } else if (perm === 'denied') {
@@ -573,7 +573,7 @@
       triggerAppNotification({
         title: 'Проверка уведомлений 🔔',
         body: 'Уведомления и звук oulo работают отлично!',
-        user: state.user || { avatar: '🔔', color: '#7c5cff' },
+        user: state.user || { avatar: '🔔', color: '#00e676' },
         forceSystem: true
       });
     }
@@ -586,7 +586,7 @@
     const card = document.createElement('div');
     card.className = 'tg-notif-card';
     const avHtml = avatarInnerHtml(user, '🔔');
-    const avBg = (user && user.color) || '#7c5cff';
+    const avBg = (user && user.color) || '#00e676';
     card.innerHTML = `
       <div class="avatar-circle" style="background:${esc(avBg)};width:38px;height:38px;font-size:1.1rem;flex-shrink:0;">${avHtml}</div>
       <div class="tg-notif-body">
@@ -742,7 +742,7 @@
       $('headerUserName').textContent = state.user.displayName;
     } else {
       $('headerUserAvatar').textContent = '👤';
-      $('headerUserAvatar').style.background = '#7c5cff';
+      $('headerUserAvatar').style.background = '#00e676';
       $('headerUserName').textContent = 'Войти';
     }
   }
@@ -857,7 +857,7 @@
       triggerAppNotification({
         title: 'Проверка уведомлений 🔔',
         body: 'Уведомления и звук oulo работают отлично!',
-        user: state.user || { avatar: '🔔', color: '#7c5cff' },
+        user: state.user || { avatar: '🔔', color: '#00e676' },
         forceSystem: true
       });
       showToast('Тестовое уведомление отправлено!');
@@ -929,7 +929,7 @@
         b.classList.toggle('selected', b.dataset.av === state.user.avatar);
       });
       document.querySelectorAll('#profileColorPicker .color-swatch').forEach(sw => {
-        sw.classList.toggle('selected', sw.dataset.color === (state.user.color || '#7c5cff'));
+        sw.classList.toggle('selected', sw.dataset.color === (state.user.color || '#00e676'));
       });
 
       populateProfileStats(state.user);
@@ -1053,7 +1053,7 @@
     const displayName = $('profileDisplayName').value.trim();
     const bio = $('profileBio').value.trim();
     const avatar = document.querySelector('#profileAvatarPicker .av-pick.selected')?.dataset.av || state.user.avatar;
-    const color = document.querySelector('#profileColorPicker .color-swatch.selected')?.dataset.color || state.user.color || '#7c5cff';
+    const color = document.querySelector('#profileColorPicker .color-swatch.selected')?.dataset.color || state.user.color || '#00e676';
     const payload = { displayName, bio, avatar, color };
     if (pendingAvatarUrl !== null) {
       payload.avatarUrl = pendingAvatarUrl;
@@ -3793,7 +3793,7 @@
     let html = '';
 
     if (showAuthor && !isOwn) {
-      html += `<div class="chat-author" style="color:${esc(u.color || '#64d2ff')}">${esc(u.displayName || 'Гость')}</div>`;
+      html += `<div class="chat-author" style="color:${esc(u.color || '#00e676')}">${esc(u.displayName || 'Гость')}</div>`;
     }
 
     if (msg.replyTo && msg.replyTo.id) {
@@ -3989,7 +3989,7 @@
     });
 
     el.innerHTML = `
-      <div class="chat-av" style="background:${esc(u?.color || '#7c5cff')}">${avatarInnerHtml(u)}</div>
+      <div class="chat-av" style="background:${esc(u?.color || '#00e676')}">${avatarInnerHtml(u)}</div>
       <div class="chat-msg-body">
         <div class="chat-bubble">
           ${buildRichBubbleInner(msg, { showAuthor: contextType === 'room', isOwn, contextType })}
@@ -4250,7 +4250,7 @@
       row.style.cursor = 'pointer';
       row.innerHTML = `
         <div class="user-row-left">
-          <div class="avatar-circle" style="background:${esc(p.color || '#7c5cff')}">${avatarInnerHtml(p)}</div>
+          <div class="avatar-circle" style="background:${esc(p.color || '#00e676')}">${avatarInnerHtml(p)}</div>
           <div>
             <div class="user-row-name">${esc(p.displayName)} ${isHost ? '👑' : ''}</div>
             <div class="user-row-sub">@${esc(p.username)} ${p.inVoice ? '· 🎙️ В голосе' : ''}</div>

@@ -13,17 +13,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg-main: #090a0f;
-      --bg-elevated: #12141f;
-      --bg-card: #171a29;
+      --bg-main: #000000;
+      --bg-elevated: #0a0a0a;
+      --bg-card: #121212;
       --border: rgba(255, 255, 255, 0.09);
-      --accent: #7c5cff;
-      --accent-pink: #ff3e80;
-      --accent-cyan: #5ce1e6;
-      --text-main: #f4f6fb;
-      --text-muted: #8f96b2;
-      --success: #2ee59d;
-      --danger: #ff4d6a;
+      --accent: #00e676;
+      --accent-pink: #00e676;
+      --accent-cyan: #00e676;
+      --text-main: #ffffff;
+      --text-muted: #888888;
+      --success: #00e676;
+      --danger: #ffffff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -420,7 +420,7 @@
           const roomTxt = u.currentRoom ? ` · 🍿 Комната #${u.currentRoom.code}` : '';
           card.innerHTML = `
             <div class="u-left">
-              <div class="u-av" style="background:${esc(u.color || '#7c5cff')}">${avHtml}</div>
+              <div class="u-av" style="background:${esc(u.color || '#00e676')}">${avHtml}</div>
               <div>
                 <div class="u-name">
                   <span class="dot ${u.online ? 'online' : ''}"></span>
