@@ -1804,7 +1804,7 @@
     };
 
     // 1. Balancer segment
-    addSegment('source', 'Источник Z01', activeSrc ? activeSrc.name : 'Выбрать', activeSrc?.badge || '');
+    addSegment('source', 'Источник', activeSrc ? activeSrc.name : 'Выбрать', activeSrc?.badge || '');
 
     // 2. Season segment (if series)
     if (seasons.length > 1) {

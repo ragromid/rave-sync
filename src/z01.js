@@ -425,39 +425,42 @@ async function getZ01Sources(movie) {
   const uid = 'rave' + crypto.randomBytes(4).toString('hex');
   const params = buildZ01Params(enrichedMovie, uid);
 
-  const eventsUrl = `${Z01_MAIN}/lite/events?life=true&${params.toString()}`;
-  const evRes = await fetch(eventsUrl, {
-    headers: { 'User-Agent': UA },
-    signal: AbortSignal.timeout(12000)
-  });
-  const evJson = await evRes.json();
-
   let onlineList = [];
+  try {
+    const eventsUrl = `${Z01_MAIN}/lite/events?life=true&${params.toString()}`;
+    const evRes = await fetch(eventsUrl, {
+      headers: { 'User-Agent': UA },
+      signal: AbortSignal.timeout(12000)
+    });
+    const evJson = await evRes.json();
 
-  if (evJson && evJson.life && evJson.memkey) {
-    const memkey = evJson.memkey;
-    for (let attempt = 0; attempt < 6; attempt++) {
-      await new Promise(r => setTimeout(r, attempt === 0 ? 900 : 1000));
-      try {
-        const lifeUrl = `${Z01_MAIN}/lifeevents?memkey=${encodeURIComponent(memkey)}&${params.toString()}`;
-        const lifeRes = await fetch(lifeUrl, {
-          headers: { 'User-Agent': UA },
-          signal: AbortSignal.timeout(5000)
-        });
-        const lifeJson = await lifeRes.json();
-        if (Array.isArray(lifeJson.online)) {
-          onlineList = lifeJson.online;
-        }
-        const shownCount = onlineList.filter(x => x.show).length;
-        if (lifeJson.ready || (shownCount >= 4 && attempt >= 1) || (shownCount >= 1 && attempt >= 3)) {
-          break;
-        }
-      } catch {}
+    if (evJson && evJson.life && evJson.memkey) {
+      const memkey = evJson.memkey;
+      for (let attempt = 0; attempt < 6; attempt++) {
+        await new Promise(r => setTimeout(r, attempt === 0 ? 900 : 1000));
+        try {
+          const lifeUrl = `${Z01_MAIN}/lifeevents?memkey=${encodeURIComponent(memkey)}&${params.toString()}`;
+          const lifeRes = await fetch(lifeUrl, {
+            headers: { 'User-Agent': UA },
+            signal: AbortSignal.timeout(5000)
+          });
+          const lifeJson = await lifeRes.json();
+          if (Array.isArray(lifeJson.online)) {
+            onlineList = lifeJson.online;
+          }
+          const shownCount = onlineList.filter(x => x.show).length;
+          if (lifeJson.ready || (shownCount >= 4 && attempt >= 1) || (shownCount >= 1 && attempt >= 3)) {
+            break;
+          }
+        } catch {}
+      }
+    } else if (Array.isArray(evJson)) {
+      onlineList = evJson;
+    } else if (evJson && Array.isArray(evJson.online)) {
+      onlineList = evJson.online;
     }
-  } else if (Array.isArray(evJson)) {
-    onlineList = evJson;
-  } else if (evJson && Array.isArray(evJson.online)) {
-    onlineList = evJson.online;
+  } catch (err) {
+    console.warn('[Z01] Upstream events query error:', err.message);
   }
 
   const isSerial = enrichedMovie.serial === 1 || enrichedMovie.type === 'tv' || !!enrichedMovie.name;
@@ -1058,7 +1061,7 @@ async function resolveZ01Stream({ url, method, headers, qualities, subtitles, ui
 
   // Pick highest quality by default if qualities map is provided
   if (Object.keys(finalQualities).length > 0) {
-    const qOrder = ['2160p', '1440p', '1080p', '1080p Ultra', '720p', '480p', '360p'];
+    const qOrder = ['2160p', '1440p', '1080p', '720p', '480p', '360p'];
     for (const pref of qOrder) {
       if (finalQualities[pref]) {
         finalUrl = finalQualities[pref];
