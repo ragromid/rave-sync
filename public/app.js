@@ -90,6 +90,8 @@
 
   // ================= UNIFIED MOBILE KEYBOARD & VIEWPORT HANDLER =================
   function setupMobileViewport() {
+    let isTyping = false;
+
     function update() {
       const vv = window.visualViewport;
       const windowH = window.innerHeight;
@@ -97,7 +99,7 @@
       const offsetTop = vv ? Math.round(vv.offsetTop) : 0;
 
       const keyboardOverlap = Math.max(0, Math.round(windowH - (offsetTop + vvH)));
-      const isKeyboardOpen = keyboardOverlap > 60 || (windowH - vvH > 100);
+      const isKeyboardOpen = isTyping || keyboardOverlap > 50 || (windowH - vvH > 80);
 
       document.documentElement.style.setProperty('--app-height', `${vvH}px`);
       document.documentElement.style.setProperty('--app-top', `${offsetTop}px`);
@@ -121,6 +123,35 @@
         }
       }
     }
+
+    document.addEventListener('focusin', (e) => {
+      const target = e.target;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        if (target.classList.contains('chat-input-field') || target.id === 'chatInput' || target.id === 'roomDmInput' || target.id === 'dmInput') {
+          isTyping = true;
+          document.body.classList.add('keyboard-open');
+          setTimeout(() => {
+            update();
+            const chatMsgs = $('chatMessages');
+            if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight;
+          }, 120);
+        }
+      }
+    });
+
+    document.addEventListener('focusout', (e) => {
+      const target = e.target;
+      if (target && (target.classList.contains('chat-input-field') || target.id === 'chatInput' || target.id === 'roomDmInput' || target.id === 'dmInput')) {
+        setTimeout(() => {
+          const active = document.activeElement;
+          if (!active || (!active.classList?.contains('chat-input-field') && active.id !== 'chatInput' && active.id !== 'roomDmInput' && active.id !== 'dmInput')) {
+            isTyping = false;
+            document.body.classList.remove('keyboard-open');
+            update();
+          }
+        }, 120);
+      }
+    });
 
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', update);
@@ -1802,8 +1833,52 @@
       segBox.appendChild(seg);
     };
 
-    // 1. Balancer segment
-    addSegment('source', 'Источник', activeSrc ? activeSrc.name : 'Выбрать', activeSrc?.badge || '');
+    // 1. Sources: Источник Z01 and HDRezka side-by-side
+    const z01Sources = sources.filter(s => s.key !== 'hdrezka');
+    const rezkaSource = sources.find(s => s.key === 'hdrezka');
+    const isRezkaActive = activeSourceKey === 'hdrezka';
+    const activeZ01 = z01Sources.find(s => s.key === activeSourceKey) || z01Sources[0];
+
+    // 1A. Balancer Z01 segment
+    const z01Seg = document.createElement('div');
+    z01Seg.className = `z01-seg ${!isRezkaActive ? 'active' : ''} ${openDropdown === 'source' ? 'open' : ''}`;
+    z01Seg.innerHTML = `
+      <span class="z01-seg-label">Источник Z01</span>
+      <div class="z01-seg-val">
+        ${activeZ01?.badge ? `<span class="z01-tag">${esc(activeZ01.badge)}</span>` : ''}
+        <span>${esc(activeZ01 ? activeZ01.name : 'Z01')}</span>
+      </div>
+    `;
+    z01Seg.addEventListener('click', () => {
+      if (isRezkaActive) {
+        state.z01.openDropdown = '';
+        if (activeZ01) selectZ01Balancer(activeZ01.key, true);
+      } else {
+        state.z01.openDropdown = state.z01.openDropdown === 'source' ? '' : 'source';
+        renderZ01Panel();
+      }
+    });
+    segBox.appendChild(z01Seg);
+
+    // 1B. HDRezka segment (shown side-by-side right next to Источник Z01)
+    if (rezkaSource) {
+      const rezkaSeg = document.createElement('div');
+      rezkaSeg.className = `z01-seg ${isRezkaActive ? 'active' : ''}`;
+      rezkaSeg.innerHTML = `
+        <span class="z01-seg-label">HDRezka</span>
+        <div class="z01-seg-val">
+          <span class="z01-tag">${esc(rezkaSource.badge || 'FHD')}</span>
+          <span>HDRezka</span>
+        </div>
+      `;
+      rezkaSeg.addEventListener('click', () => {
+        if (!isRezkaActive) {
+          state.z01.openDropdown = '';
+          selectZ01Balancer('hdrezka', true);
+        }
+      });
+      segBox.appendChild(rezkaSeg);
+    }
 
     // 2. Season segment (if series)
     if (seasons.length > 1) {
@@ -1830,7 +1905,7 @@
     // Populate Dropdown Grid if open
     if (openDropdown === 'source') {
       dropGrid.classList.remove('hidden');
-      sources.forEach(s => {
+      z01Sources.forEach(s => {
         const btn = document.createElement('button');
         btn.className = `z01-opt ${s.key === activeSourceKey ? 'active' : ''}`;
         btn.innerHTML = `
@@ -2600,45 +2675,6 @@
       const firstBtn = panel.querySelector('button');
       if (firstBtn) firstBtn.focus();
     }
-  });
-
-  // Mobile Landscape Mode Handlers
-  async function toggleLandscapeMode() {
-    const isAlreadyLandscape = window.innerWidth > window.innerHeight;
-    if (isAlreadyLandscape) {
-      state.landscapeCinema = !state.landscapeCinema;
-      document.body.classList.toggle('landscape-cinema', state.landscapeCinema);
-      showToast(state.landscapeCinema ? '📺 Кинотеатр на весь экран' : '💬 Разделённый экран с чатом');
-      return;
-    }
-
-    state.forceLandscape = !state.forceLandscape;
-    document.body.classList.toggle('force-landscape', state.forceLandscape);
-
-    if (screen.orientation && screen.orientation.lock) {
-      try {
-        if (state.forceLandscape) {
-          await screen.orientation.lock('landscape').catch(() => {});
-        } else if (screen.orientation.unlock) {
-          screen.orientation.unlock().catch(() => {});
-        }
-      } catch (_) {}
-    }
-
-    setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
-    }, 100);
-
-    showToast(state.forceLandscape ? '📱 Альбомный режим включён' : '📱 Портретный режим');
-  }
-
-  $('roomLandscapeBtn')?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleLandscapeMode();
-  });
-  $('playerLandscapeBtn')?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleLandscapeMode();
   });
 
   // Timeline click/scrub

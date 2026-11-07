@@ -1159,9 +1159,14 @@ button {
 .z01-seg:hover {
   border-color: rgba(255, 255, 255, 0.25);
 }
-.z01-seg.open {
+.z01-seg.open,
+.z01-seg.active {
   background: rgba(124, 92, 255, 0.18);
   border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(124, 92, 255, 0.25);
+}
+.z01-seg.active .z01-seg-label {
+  color: var(--accent-cyan);
 }
 .z01-seg-label {
   font-size: 0.66rem;
@@ -2877,37 +2882,56 @@ body.keyboard-open .chat-input-row {
   }
 
   /* When typing on mobile phone: smoothly compact player so chat is spacious and unblocked */
-  body.keyboard-open .player-wrapper {
-    max-height: 85px !important;
-    height: 85px !important;
+  body.keyboard-open .player-wrapper,
+  .room-layout:has(#chatInput:focus) .player-wrapper,
+  .room-layout:has(.chat-input-field:focus) .player-wrapper {
+    max-height: 70px !important;
+    height: 70px !important;
     aspect-ratio: auto !important;
     flex-shrink: 0 !important;
   }
-  body.keyboard-open .player-wrapper video {
+  body.keyboard-open .player-wrapper video,
+  .room-layout:has(#chatInput:focus) .player-wrapper video,
+  .room-layout:has(.chat-input-field:focus) .player-wrapper video {
     object-fit: cover !important;
   }
-  body.keyboard-open .player-controls-bottom {
+  body.keyboard-open .player-controls-bottom,
+  .room-layout:has(#chatInput:focus) .player-controls-bottom,
+  .room-layout:has(.chat-input-field:focus) .player-controls-bottom {
     display: none !important;
   }
-  body.keyboard-open .chat-reactions-strip {
+  body.keyboard-open .chat-reactions-strip,
+  .room-sidebar:has(#chatInput:focus) .chat-reactions-strip,
+  .room-sidebar:has(.chat-input-field:focus) .chat-reactions-strip {
     display: none !important;
   }
-  body.keyboard-open .room-topbar {
+  body.keyboard-open .room-topbar,
+  .room-layout:has(#chatInput:focus) .room-topbar,
+  .room-layout:has(.chat-input-field:focus) .room-topbar {
     min-height: 38px !important;
     padding: 4px 10px !important;
   }
-  body.keyboard-open .mobile-room-tabs {
+  body.keyboard-open .mobile-room-tabs,
+  .room-layout:has(#chatInput:focus) .mobile-room-tabs,
+  .room-layout:has(.chat-input-field:focus) .mobile-room-tabs {
     height: 32px !important;
     min-height: 32px !important;
   }
-  body.keyboard-open .m-rtab {
+  body.keyboard-open .m-rtab,
+  .room-layout:has(#chatInput:focus) .m-rtab,
+  .room-layout:has(.chat-input-field:focus) .m-rtab {
     height: 32px !important;
     font-size: 0.72rem !important;
     padding: 0 6px !important;
   }
-  body.keyboard-open .chat-input-row {
+  .chat-input-row {
+    padding: 8px 12px !important;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px)) !important;
+  }
+  body.keyboard-open .chat-input-row,
+  .chat-input-row:focus-within {
     padding: 6px 10px !important;
-    padding-bottom: 55px !important;
+    padding-bottom: 75px !important;
   }
 
   .reaction-strip {
@@ -3040,196 +3064,6 @@ body.keyboard-open .chat-input-row {
     left: 12px;
     max-width: none;
   }
-}
-
-/* ================= MOBILE LANDSCAPE / АЛЬБОМНЫЙ РЕЖИМ ================= */
-
-.player-floating-btn.landscape-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(15, 18, 28, 0.72);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  border-radius: 99px;
-  padding: 5px 10px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  z-index: 15;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.player-floating-btn.landscape-btn:active,
-.player-floating-btn.landscape-btn:hover {
-  background: rgba(124, 92, 255, 0.85);
-  border-color: rgba(124, 92, 255, 0.5);
-  transform: scale(1.04);
-}
-
-/* 1. Phone rotated into landscape physically */
-@media (orientation: landscape) and (max-height: 550px) {
-  .room-layout {
-    flex-direction: row !important;
-    height: 100% !important;
-    max-height: 100% !important;
-    width: 100% !important;
-    overflow: hidden !important;
-  }
-  .room-stage {
-    flex: 1 1 65% !important;
-    height: 100% !important;
-    max-height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    background: #000 !important;
-    min-width: 0 !important;
-    overflow: hidden !important;
-  }
-  .room-topbar {
-    display: none !important;
-  }
-  .player-wrapper {
-    flex: 1 !important;
-    height: 100% !important;
-    max-height: 100% !important;
-    aspect-ratio: auto !important;
-    width: 100% !important;
-    background: #000 !important;
-  }
-  .player-wrapper video {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
-  }
-  .mobile-room-tabs {
-    display: none !important;
-  }
-  .room-sidebar {
-    flex: 0 0 320px !important;
-    width: 320px !important;
-    height: 100% !important;
-    max-height: 100% !important;
-    border-left: 1px solid var(--border-subtle) !important;
-    border-top: none !important;
-    display: flex !important;
-    flex-direction: column !important;
-    background: var(--bg-surface) !important;
-    z-index: 30 !important;
-    overflow: hidden !important;
-  }
-  .sidebar-tabs {
-    display: flex !important;
-    height: 38px !important;
-    min-height: 38px !important;
-    background: var(--bg-main) !important;
-    border-bottom: 1px solid var(--border-subtle) !important;
-  }
-  .side-tab {
-    flex: 1 !important;
-    padding: 0 6px !important;
-    font-size: 0.74rem !important;
-    height: 38px !important;
-  }
-  .rtab-content {
-    flex: 1 !important;
-    height: calc(100% - 38px) !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-  }
-  .chat-messages {
-    flex: 1 !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
-    padding: 8px 10px !important;
-  }
-  .chat-reactions-strip {
-    padding: 2px 6px !important;
-    gap: 4px !important;
-  }
-  .chat-reactions-strip .emoji-btn {
-    width: 26px !important;
-    height: 26px !important;
-    font-size: 0.9rem !important;
-  }
-  .chat-input-row {
-    padding: 6px 10px !important;
-    padding-bottom: max(6px, env(safe-area-inset-bottom, 6px)) !important;
-  }
-  body.landscape-cinema .room-sidebar {
-    display: none !important;
-  }
-  body.landscape-cinema .room-stage {
-    flex: 1 1 100% !important;
-    width: 100% !important;
-  }
-}
-
-/* 2. Force landscape mode via button toggle (even if portrait orientation lock is enabled on iOS) */
-body.force-landscape {
-  overflow: hidden !important;
-}
-body.force-landscape .app-shell {
-  width: 100vh !important;
-  height: 100vw !important;
-  position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) rotate(90deg) !important;
-  transform-origin: center center !important;
-  overflow: hidden !important;
-}
-body.force-landscape .room-layout {
-  flex-direction: row !important;
-  height: 100% !important;
-  width: 100% !important;
-}
-body.force-landscape .room-stage {
-  flex: 1 1 65% !important;
-  height: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-  background: #000 !important;
-  overflow: hidden !important;
-}
-body.force-landscape .room-topbar {
-  display: none !important;
-}
-body.force-landscape .player-wrapper {
-  flex: 1 !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  aspect-ratio: auto !important;
-}
-body.force-landscape .player-wrapper video {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
-}
-body.force-landscape .mobile-room-tabs {
-  display: none !important;
-}
-body.force-landscape .room-sidebar {
-  flex: 0 0 320px !important;
-  width: 320px !important;
-  height: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-  background: var(--bg-surface) !important;
-}
-body.force-landscape .sidebar-tabs {
-  display: flex !important;
-}
-body.force-landscape.landscape-cinema .room-sidebar {
-  display: none !important;
-}
-body.force-landscape.landscape-cinema .room-stage {
-  flex: 1 1 100% !important;
-  width: 100% !important;
 }
 
 /* ================= SMART TV / TV REMOTE OSD & REMOTE DECK ================= */
