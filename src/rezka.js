@@ -217,7 +217,7 @@ function parseStreamQualities(rawStreams) {
   for (const part of parts) {
     const match = part.trim().match(/^\[([^\]]+)\](.*)$/);
     if (match) {
-      const q = match[1].trim();
+      const q = match[1].replace(/<[^>]+>/g, '').trim();
       const urls = match[2].trim().split(' or ');
       qualities[q] = urls[urls.length - 1]; // Highest reliability mirror
     } else if (part.trim().startsWith('http')) {
@@ -520,22 +520,26 @@ async function getStream({ id, translatorId, season = null, episode = null, isMo
   // Recommended URL: prefer 1080p -> 720p -> 480p -> 360p -> first
   const order = ['1080p Ultra', '1080p', '720p', '480p', '360p', 'auto'];
   let primaryUrl = '';
+  let primaryQuality = 'HD';
   for (const q of order) {
     if (qualities[q]) {
       primaryUrl = qualities[q];
+      primaryQuality = q;
       break;
     }
   }
   if (!primaryUrl) {
     primaryUrl = Object.values(qualities)[0] || '';
+    primaryQuality = Object.keys(qualities)[0] || 'HD';
   }
 
   return {
     success: true,
     primaryUrl,
+    primaryQuality,
     qualities,
     subtitles,
-    qualityLabel: json.quality || Object.keys(qualities)[0] || 'HD',
+    qualityLabel: json.quality || primaryQuality,
     headers: {
       'Referer': `${domain}/`,
       'User-Agent': UA
