@@ -270,85 +270,86 @@ async function getAlternativeTitles(query) {
 
 function parseSearchPageHtml(html) {
   const results = [];
-  const itemRegex = /<div class="b-content__inline_item"[^>]*data-id="(\d+)"[^>]*>([\s\S]*?)<\/div>\s*<\/div>/gi;
-  let m;
-  while ((m = itemRegex.exec(html)) !== null) {
-    const id = m[1];
-    const body = m[2];
+  const itemBlocks = html.split('<div class="b-content__inline_item"');
+  for (let i = 1; i < itemBlocks.length; i++) {
+    const block = itemBlocks[i];
+    const idMatch = block.match(/data-id="(\d+)"/);
+    const dataUrlMatch = block.match(/data-url="([^"]+)"/);
+    const linkMatch = block.match(/<div class="b-content__inline_item-link">\s*<a[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/i);
+    if (!idMatch || (!dataUrlMatch && !linkMatch)) continue;
 
-    const linkMatch = body.match(/<div class="b-content__inline_item-link">\s*<a[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/i);
-    if (!linkMatch) continue;
+    const id = idMatch[1];
+    const url = (dataUrlMatch ? dataUrlMatch[1] : linkMatch[1]).trim();
+    const title = linkMatch ? linkMatch[2].trim() : '';
 
-    const url = linkMatch[1];
-    const title = linkMatch[2].trim();
-
-    const posterMatch = body.match(/<img[^>]*src="([^"]+)"/i);
+    const posterMatch = block.match(/<img[^>]*src="([^"]+)"/i);
     const poster = posterMatch ? posterMatch[1] : '';
 
+    const linkDivMatch = block.match(/<div class="b-content__inline_item-link">[\s\S]*?<div>([^<]+)<\/div>/i);
+    const extra = linkDivMatch ? linkDivMatch[1].trim() : '';
+
     let year = null;
+    const yrMatch = extra.match(/\b(19\d\d|20\d\d)\b/) || url.match(/-(\d{4})\.html/);
+    if (yrMatch) year = parseInt(yrMatch[1], 10);
+
+    const entityMatch = block.match(/<i class="entity">([^<]+)<\/i>/i);
+    const entity = entityMatch ? entityMatch[1].trim().toLowerCase() : '';
+
+    const isSeries = url.includes('/series/') || entity.includes('сериал');
+    const isAnime = url.includes('/animation/') || entity.includes('аниме');
+    const isCartoon = url.includes('/cartoons/') || entity.includes('мульт');
+    const type = isSeries ? 'series' : (isAnime ? 'anime' : (isCartoon ? 'cartoon' : 'movie'));
+
     let origTitle = '';
-    const miscMatch = body.match(/<div class="misc">([^<]+)<\/div>/i) || body.match(/<div>([^<]+)<\/div>/i);
-    if (miscMatch) {
-      const extra = miscMatch[1].trim();
-      const yrMatch = extra.match(/\b(19\d{2}|20\d{2})\b/);
-      if (yrMatch) year = parseInt(yrMatch[1], 10);
-      const parts = extra.split(',').map(s => s.trim());
-      if (parts.length > 0 && !/^\d{4}/.test(parts[0])) {
-        origTitle = parts[0];
-      }
+    const parts = extra.split(',').map(s => s.trim()).filter(s => !/^\d{4}$/.test(s));
+    if (parts.length > 0 && !/^\d{4}/.test(parts[0])) {
+      origTitle = parts[0];
     }
 
-    const ratingMatch = body.match(/<span class="rating">[\s\S]*?<i>([^<]+)<\/i>/i);
+    const ratingMatch = block.match(/<span class="rating">[\s\S]*?<i>([^<]+)<\/i>/i);
     const rating = ratingMatch ? ratingMatch[1].trim() : null;
 
-    let type = 'movie';
-    if (url.includes('/series/')) type = 'series';
-    else if (url.includes('/cartoons/')) type = 'cartoon';
-    else if (url.includes('/animation/')) type = 'anime';
-
-    results.push({ id, title, origTitle, year, type, rating, poster, url });
+    results.push({ id, title, origTitle, year, type, isSeries, rating, poster, url });
   }
   return results;
 }
 
 function parseAjaxSearchHtml(html) {
   const items = [];
-  const regex = /<li[^>]*>\s*<a href="([^"]+)">\s*<span class="enty">([^<]+)<\/span>\s*([^<]*?)(?:<span class="rating">[\s\S]*?<i>([^<]+)<\/i>)?\s*<\/a>\s*<\/li>/gi;
-  let m;
-  while ((m = regex.exec(html)) !== null) {
-    const itemUrl = m[1];
-    const title = m[2].trim();
-    const extra = m[3].replace(/[()]/g, '').trim();
-    const rating = m[4] ? m[4].trim() : null;
+  const liMatches = html.matchAll(/<li[^>]*>\s*<a\s+href="([^"]+)">([\s\S]*?)<\/a>\s*<\/li>/gi);
+  for (const m of liMatches) {
+    const url = m[1];
+    const inner = m[2];
 
-    const idMatch = itemUrl.match(/\/(\d+)-[^/]+\.html/);
+    const idMatch = url.match(/\/(\d+)-[^/]+\.html/);
     const id = idMatch ? idMatch[1] : null;
+    if (!id) continue;
+
+    const entyMatch = inner.match(/<span class="enty">([^<]+)<\/span>/i);
+    const title = entyMatch ? entyMatch[1].trim() : '';
+
+    const parenMatch = inner.match(/\(([^)]+)\)/);
+    const parenText = parenMatch ? parenMatch[1].trim() : '';
 
     let year = null;
+    const yrMatch = parenText.match(/\b(19\d\d|20\d\d)\b/) || url.match(/-(\d{4})\.html/);
+    if (yrMatch) year = parseInt(yrMatch[1], 10);
+
+    const isSeries = url.includes('/series/') || /сериал/i.test(parenText);
+    const isAnime = url.includes('/animation/') || /аниме/i.test(parenText);
+    const isCartoon = url.includes('/cartoons/') || /мультфильм/i.test(parenText);
+    const type = isSeries ? 'series' : (isAnime ? 'anime' : (isCartoon ? 'cartoon' : 'movie'));
+
     let origTitle = '';
-    let type = itemUrl.includes('/series/') ? 'series' : (itemUrl.includes('/cartoons/') ? 'cartoon' : (itemUrl.includes('/animation/') ? 'anime' : 'movie'));
-
-    if (extra) {
-      const parts = extra.split(',').map(s => s.trim());
-      const yrMatch = extra.match(/\b(19\d{2}|20\d{2})\b/);
-      if (yrMatch) year = parseInt(yrMatch[1], 10);
-      if (parts.length > 0 && !/^\d{4}/.test(parts[0])) {
-        origTitle = parts[0];
-      }
+    if (parenText) {
+      const parts = parenText.split(',').map(s => s.trim()).filter(s => !/сериал|мультфильм|аниме/i.test(s) && !/^\d{4}$/.test(s));
+      if (parts.length > 0) origTitle = parts[0];
     }
 
-    if (id) {
-      items.push({
-        id,
-        title,
-        origTitle,
-        year,
-        type,
-        rating,
-        poster: '',
-        url: itemUrl
-      });
-    }
+    const ratingMatch = inner.match(/<span class="rating">[\s\S]*?<i>([^<]+)<\/i>/i);
+    const rating = ratingMatch ? ratingMatch[1].trim() : null;
+
+    items.push({ id, title, origTitle, year, type, isSeries, rating, poster: '', url });
   }
   return items;
 }
@@ -392,21 +393,97 @@ async function searchOnce(q, domain = DEFAULT_MIRROR) {
   return items;
 }
 
+function cleanTitle(s) {
+  return String(s || '').toLowerCase().replace(/[^a-zа-я0-9\s]/gi, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function scoreMatch(item, movie) {
+  let score = 0;
+  const targetTitleRu = cleanTitle(movie.title || movie.name);
+  const targetTitleEn = cleanTitle(movie.original_title);
+  const itemTitleRu = cleanTitle(item.title);
+  const itemTitleEn = cleanTitle(item.origTitle);
+
+  const targetYear = parseInt(movie.year || (movie.release_date || '').slice(0, 4), 10);
+  const isTargetSeries = !!(movie.serial === 1 || movie.type === 'tv' || movie.number_of_seasons > 0);
+
+  // 1. Series vs Movie type match (high weight)
+  if (isTargetSeries === !!item.isSeries) {
+    score += 50;
+  } else {
+    score -= 40;
+  }
+
+  // 2. Year match (CRITICAL for distinguishing remakes and different films with identical titles)
+  if (targetYear && item.year) {
+    const diff = Math.abs(item.year - targetYear);
+    if (diff === 0) {
+      score += 150; // Exact year match
+    } else if (diff === 1) {
+      score += 60;  // 1 year difference (festival premiere vs release date)
+    } else if (diff === 2) {
+      score += 15;
+    } else {
+      score -= 90;  // Completely different year
+    }
+  } else if (targetYear && !item.year) {
+    score -= 10;
+  }
+
+  // 3. Title match
+  const exactRu = targetTitleRu && itemTitleRu === targetTitleRu;
+  const exactEn = targetTitleEn && itemTitleEn === targetTitleEn;
+
+  if (exactRu || exactEn) {
+    score += 100;
+  } else if (itemTitleRu.startsWith(targetTitleRu) || (targetTitleEn && itemTitleEn.startsWith(targetTitleEn))) {
+    score += 40;
+  } else if (itemTitleRu.includes(targetTitleRu) || (targetTitleEn && itemTitleEn.includes(targetTitleEn))) {
+    score += 20;
+  }
+
+  return score;
+}
+
+function findBestMatch(items, movie) {
+  if (!Array.isArray(items) || !items.length) return null;
+  if (!movie) return items[0];
+
+  const scored = items.map(item => ({ item, score: scoreMatch(item, movie) }));
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0].item;
+}
+
 /**
- * Search movies & series on HDRezka (hybrid full search + ajax + TMDB language fallback)
+ * Search movies & series on HDRezka (hybrid full search + ajax + year targeting + TMDB language fallback)
  */
-async function search(query, domain = DEFAULT_MIRROR) {
+async function search(query, domain = DEFAULT_MIRROR, targetYear = null) {
   const q = String(query || '').trim();
   if (!q) return [];
 
-  const cacheKey = `${domain}:search:${q.toLowerCase()}`;
+  const parsedYear = targetYear ? parseInt(targetYear, 10) : null;
+  const cacheKey = `${domain}:search:${q.toLowerCase()}:${parsedYear || 'any'}`;
   const cached = getCached(searchCache, cacheKey);
   if (cached) return cached;
 
   let items = await searchOnce(q, domain);
 
-  // If very few or no results, try TMDB language bridging (Russian <-> English title)
-  if (items.length < 2) {
+  // If a specific year is requested, check if we found any match with that year (or +-1 year)
+  const hasYearMatch = parsedYear && items.some(it => it.year && Math.abs(it.year - parsedYear) <= 1);
+
+  // If no year match, search directly with the year appended: e.g. "Нюрнберг 2023", "Дюна 1984"
+  if (parsedYear && !hasYearMatch) {
+    const yearItems = await searchOnce(`${q} ${parsedYear}`, domain);
+    for (const it of yearItems) {
+      if (!items.some(x => x.id === it.id)) {
+        items.push(it);
+      }
+    }
+  }
+
+  // Fallback: TMDB alternative titles (Russian <-> English)
+  const stillNeedsFallback = !items.length || (parsedYear && !items.some(it => it.year && Math.abs(it.year - parsedYear) <= 1));
+  if (stillNeedsFallback) {
     const altTitles = await getAlternativeTitles(q);
     for (const alt of altTitles) {
       if (alt.toLowerCase() === q.toLowerCase()) continue;
@@ -416,7 +493,15 @@ async function search(query, domain = DEFAULT_MIRROR) {
           items.push(it);
         }
       }
-      if (items.length >= 4) break;
+      if (parsedYear && !items.some(it => it.year && Math.abs(it.year - parsedYear) <= 1)) {
+        const altYearItems = await searchOnce(`${alt} ${parsedYear}`, domain);
+        for (const it of altYearItems) {
+          if (!items.some(x => x.id === it.id)) {
+            items.push(it);
+          }
+        }
+      }
+      if (items.some(it => parsedYear && it.year && Math.abs(it.year - parsedYear) <= 1)) break;
     }
   }
 
@@ -667,6 +752,7 @@ async function getStream({ id, translatorId, season = null, episode = null, isMo
 
 module.exports = {
   search,
+  findBestMatch,
   getDetails,
   getEpisodes,
   getStream,

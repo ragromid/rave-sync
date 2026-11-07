@@ -604,10 +604,16 @@ async function handleRezkaBalancerQuery({ url, movie, prevSeasons = [], prevVoic
 
     if (pathname === 'details' || url === 'rezka://details') {
       const q = movie?.title || movie?.name || movie?.original_title || '';
-      const items = await rezka.search(q);
+      const targetYear = parseInt(movie?.year || (movie?.release_date || '').slice(0, 4), 10) || null;
+
+      let items = await rezka.search(q, undefined, targetYear);
+      if (!items.length && movie?.original_title && movie.original_title !== q) {
+        items = await rezka.search(movie.original_title, undefined, targetYear);
+      }
+
       if (!items.length) {
         return {
-          error: `«${q}» не найден в HDRezka. Выберите другой источник.`,
+          error: `«${q}»${targetYear ? ` (${targetYear})` : ''} не найден в HDRezka. Выберите другой источник.`,
           videos: [],
           seasons: [],
           voices: [],
@@ -615,15 +621,7 @@ async function handleRezkaBalancerQuery({ url, movie, prevSeasons = [], prevVoic
         };
       }
 
-      let best = items[0];
-      if (movie && (movie.year || movie.release_date)) {
-        const yr = parseInt(movie.year || (movie.release_date || '').slice(0, 4), 10);
-        if (yr) {
-          const matchYr = items.find(it => it.year === yr);
-          if (matchYr) best = matchYr;
-        }
-      }
-
+      const best = (rezka.findBestMatch ? rezka.findBestMatch(items, movie) : null) || items[0];
       const details = await rezka.getDetails(best.url);
       const translators = details.translators || [];
       const defaultTr = translators.find(t => t.isDefault) || translators[0] || { id: '0', name: 'Стандартная' };

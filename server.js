@@ -1017,24 +1017,26 @@ app.post('/api/z01/resolve', async (req, res) => {
 // ================= HDREZKA API ROUTES =================
 app.get('/api/rezka/resolve-by-title', async (req, res) => {
   try {
-    const { title = '', orig_title = '', year = '' } = req.query;
+    const { title = '', orig_title = '', year = '', serial = '' } = req.query;
     const query = title || orig_title;
     if (!query) return res.status(400).json({ error: 'Параметр title обязателен' });
 
-    let items = await rezka.search(query);
+    const yrNum = year ? parseInt(year, 10) : null;
+    let items = await rezka.search(query, undefined, yrNum);
     if (!items.length && orig_title && orig_title !== title) {
-      items = await rezka.search(orig_title);
+      items = await rezka.search(orig_title, undefined, yrNum);
     }
     if (!items.length) {
       return res.status(404).json({ error: 'Фильм или сериал не найден на HDRezka' });
     }
 
-    let best = items[0];
-    if (year) {
-      const yrNum = parseInt(year, 10);
-      const matchYr = items.find(it => it.year === yrNum);
-      if (matchYr) best = matchYr;
-    }
+    const mockMovie = {
+      title,
+      original_title: orig_title,
+      year: yrNum,
+      serial: serial === '1' || serial === 'true' ? 1 : 0
+    };
+    const best = (rezka.findBestMatch ? rezka.findBestMatch(items, mockMovie) : null) || items[0];
 
     const details = await rezka.getDetails(best.url);
     res.json({
