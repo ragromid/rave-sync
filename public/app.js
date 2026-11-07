@@ -1,12 +1,12 @@
 (() => {
   'use strict';
 
-  // Canonical Domain & HTTPS Redirect (always use https://rave-sync.duckdns.org)
+  // Canonical Domain & HTTPS Redirect (always use https://oulo.duckdns.org)
   if (typeof window !== 'undefined' && window.location) {
     const host = window.location.hostname;
     const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(host) || host === '130.61.47.155';
-    if ((isIp && host !== '127.0.0.1' && host !== 'localhost') || (host === 'rave-sync.duckdns.org' && window.location.protocol === 'http:')) {
-      const target = 'https://rave-sync.duckdns.org' + window.location.pathname + window.location.search + window.location.hash;
+    if ((isIp && host !== '127.0.0.1' && host !== 'localhost') || (host === 'oulo.duckdns.org' && window.location.protocol === 'http:') || host === 'rave-sync.duckdns.org') {
+      const target = 'https://oulo.duckdns.org' + window.location.pathname + window.location.search + window.location.hash;
       window.location.replace(target);
       return;
     }

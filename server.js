@@ -29,8 +29,8 @@ const io = new Server(server, {
 
 app.use(express.json({ limit: '5mb' }));
 
-// Canonical Domain Redirect (redirect raw IP to https://rave-sync.duckdns.org)
-const CANONICAL_DOMAIN = process.env.CANONICAL_DOMAIN || 'rave-sync.duckdns.org';
+// Canonical Domain Redirect (redirect raw IP to https://oulo.duckdns.org)
+const CANONICAL_DOMAIN = process.env.CANONICAL_DOMAIN || 'oulo.duckdns.org';
 app.use((req, res, next) => {
   const rawHost = String(req.headers.host || '').trim().toLowerCase();
   const hostname = rawHost.split(':')[0];
