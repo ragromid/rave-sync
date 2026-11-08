@@ -644,7 +644,18 @@ async function handleRezkaBalancerQuery({ url, movie, prevSeasons = [], prevVoic
 
       const best = (rezka.findBestMatch ? rezka.findBestMatch(items, movie) : null) || items[0];
       const details = await rezka.getDetails(best.url);
-      const translators = details.translators || [];
+      const translators = (details.translators || []).filter(t => !t.isPremium);
+
+      if (!translators.length || details.isPremiumOnly) {
+        return {
+          error: `«${q}» на HDRezka доступен только по платной Premium-подписке (заставки-пустышки заблокированы). Пожалуйста, выберите другой плеер выше (Collaps, Ashdi, CDNMovies, Rutube и др.).`,
+          videos: [],
+          seasons: [],
+          voices: [],
+          similars: []
+        };
+      }
+
       const defaultTr = translators.find(t => t.isDefault) || translators[0] || { id: '0', name: 'Стандартная' };
 
       const voices = translators.map((t, idx) => ({
@@ -721,8 +732,9 @@ async function handleRezkaBalancerQuery({ url, movie, prevSeasons = [], prevVoic
       if (!voices.length && movieUrl) {
         try {
           const details = await rezka.getDetails(movieUrl);
-          if (details.translators?.length) {
-            voices = details.translators.map((t, idx) => ({
+          const freeTranslators = (details.translators || []).filter(t => !t.isPremium);
+          if (freeTranslators.length) {
+            voices = freeTranslators.map((t, idx) => ({
               index: idx,
               title: t.name,
               rawTitle: t.name,

@@ -555,22 +555,26 @@ async function getDetails(idOrUrl, domain = DEFAULT_MIRROR) {
   const ulMatch = html.match(/<ul[^>]*id="translators-list"[^>]*>([\s\S]*?)<\/ul>/i);
   const searchBlock = ulMatch ? ulMatch[1] : html;
 
-  const tagRegex = /<(?:li|a)\b([^>]*\bdata-translator_id=["']?(\d+)["']?[^>]*)>([\s\S]*?)<\/(?:li|a)>/gi;
-  let trm;
-  while ((trm = tagRegex.exec(searchBlock)) !== null) {
-    const attrStr = trm[1];
-    const trId = trm[2];
-    const innerHtml = trm[3];
+  // Split or match by <li> tags
+  const liMatches = searchBlock.match(/<li\b[^>]*>[\s\S]*?<\/li>/gi) || [];
+  for (const liHtml of liMatches) {
+    const trIdMatch = liHtml.match(/data-translator_id=["']?(\d+)["']?/i);
+    if (!trIdMatch) continue;
+    const trId = trIdMatch[1];
 
-    const titleAttrMatch = attrStr.match(/\btitle=["']([^"']+)["']/i);
-    let name = titleAttrMatch ? titleAttrMatch[1].trim() : '';
+    // Determine translator title
+    const titleMatch = liHtml.match(/\btitle=["']([^"']+)["']/i);
+    let name = titleMatch ? titleMatch[1].trim() : '';
     if (!name) {
-      name = innerHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      name = liHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     }
+    name = name.replace(/\s+/g, ' ').trim();
 
-    const isActive = /\bclass=["'][^"']*\bactive\b[^"']*["']/i.test(attrStr) || /\bclass=["'][^"']*\bactive\b[^"']*["']/i.test(trm[0]);
-    const isPremium = /\bb-prem_translator\b|\bprem_translator\b|data-premium=["']?1["']?/i.test(attrStr) ||
-                      /\bb-prem_translator\b|\bprem_translator\b/i.test(trm[0]);
+    const isActive = /\bclass=["'][^"']*\bactive\b[^"']*["']/i.test(liHtml);
+    const isPremium = /\bb-prem_translator\b|\bprem_translator\b|data-premium=["']?1["']?/i.test(liHtml) ||
+                      /prem-icon/i.test(liHtml) ||
+                      /b-tophead-prem/i.test(liHtml) ||
+                      /pjs-prem/i.test(liHtml);
 
     if (!translatorsMap.has(trId)) {
       translatorsMap.set(trId, {
@@ -587,25 +591,59 @@ async function getDetails(idOrUrl, domain = DEFAULT_MIRROR) {
     }
   }
 
-  let translators = Array.from(translatorsMap.values());
+  // Fallback to any stand-alone <a> tags with data-translator_id if <li> wasn't matched
+  if (!translatorsMap.size) {
+    const tagRegex = /<(?:li|a)\b([^>]*\bdata-translator_id=["']?(\d+)["']?[^>]*)>([\s\S]*?)<\/(?:li|a)>/gi;
+    let trm;
+    while ((trm = tagRegex.exec(searchBlock)) !== null) {
+      const attrStr = trm[1];
+      const trId = trm[2];
+      const innerHtml = trm[3];
+
+      const titleAttrMatch = attrStr.match(/\btitle=["']([^"']+)["']/i);
+      let name = titleAttrMatch ? titleAttrMatch[1].trim() : '';
+      if (!name) {
+        name = innerHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      }
+
+      const isActive = /\bclass=["'][^"']*\bactive\b[^"']*["']/i.test(attrStr) || /\bclass=["'][^"']*\bactive\b[^"']*["']/i.test(trm[0]);
+      const isPremium = /\bb-prem_translator\b|\bprem_translator\b|data-premium=["']?1["']?/i.test(attrStr) ||
+                        /\bb-prem_translator\b|\bprem_translator\b/i.test(trm[0]) ||
+                        /prem-icon/i.test(innerHtml) ||
+                        /pjs-prem/i.test(innerHtml);
+
+      if (!translatorsMap.has(trId)) {
+        translatorsMap.set(trId, { id: trId, name, isDefault: isActive, isPremium });
+      } else {
+        const existing = translatorsMap.get(trId);
+        if (isActive) existing.isDefault = true;
+        if (isPremium) existing.isPremium = true;
+        if (!existing.name && name) existing.name = name;
+      }
+    }
+  }
+
+  let allTranslators = Array.from(translatorsMap.values());
 
   // If no multiple translators list, check default single translator from init
-  if (!translators.length) {
+  if (!allTranslators.length) {
     const singleMatch = html.match(/sof\.tv\.initCDN(?:Movies|Series)Events\(\d+,\s*(\d+)/);
     if (singleMatch) {
-      translators.push({
+      const isPagePremiumOnly = /id="b-post__prem_holder"[^>]*style="display:\s*block/i.test(html) ||
+                                /class="b-content__round_prem_label"/i.test(html);
+      allTranslators.push({
         id: singleMatch[1],
         name: 'Оригинал / Дубляж',
         isDefault: true,
-        isPremium: false
+        isPremium: isPagePremiumOnly
       });
     }
   }
 
   // Filter out HDRezka premium stub translators (which play a 1-minute "Buy Premium" stub video instead of actual content)
-  const freeTranslators = translators.filter(t => !t.isPremium);
-  // Only fallback to premium if there are literally zero free translators
-  translators = freeTranslators.length > 0 ? freeTranslators : translators;
+  const freeTranslators = allTranslators.filter(t => !t.isPremium);
+  // NEVER fallback to premium stub translators!
+  let translators = freeTranslators;
 
   // Ensure at least one is active/default among the valid translators
   if (translators.length > 0 && !translators.some(t => t.isDefault)) {
@@ -613,12 +651,12 @@ async function getDetails(idOrUrl, domain = DEFAULT_MIRROR) {
   }
 
   // Default translator
-  const defaultTranslator = translators.find(t => t.isDefault) || translators[0] || { id: '0', name: 'Стандартная' };
+  const defaultTranslator = translators.find(t => t.isDefault) || translators[0] || null;
 
   let seasons = [];
   let episodes = [];
 
-  if (isSeries) {
+  if (isSeries && defaultTranslator) {
     const epData = await getEpisodes(id, defaultTranslator.id, targetUrl, domain);
     seasons = epData.seasons || [];
     episodes = epData.episodes || [];
@@ -632,7 +670,8 @@ async function getDetails(idOrUrl, domain = DEFAULT_MIRROR) {
     isSeries,
     url: targetUrl,
     translators,
-    defaultTranslatorId: defaultTranslator.id,
+    defaultTranslatorId: defaultTranslator ? defaultTranslator.id : null,
+    isPremiumOnly: allTranslators.length > 0 && freeTranslators.length === 0,
     seasons,
     episodes
   };
@@ -751,12 +790,26 @@ async function getStream({ id, translatorId, season = null, episode = null, isMo
     throw new Error(json.message || 'Не удалось получить видеопоток от HDRezka');
   }
 
+  // Reject HDRezka Premium promo stub videos (1-minute teaser "Перевод доступен только для Premium")
+  if (json.premium_content === 1 || json.premium_content === '1' || json.premium === 1 || json.premium === true) {
+    throw new Error('Этот перевод доступен только по платной подписке HDRezka Premium (минутная заглушка заблокирована). Пожалуйста, выберите другую озвучку.');
+  }
+
   const rawUrl = json.url || '';
-  const qualities = parseStreamQualities(rawUrl);
+  const rawQualities = parseStreamQualities(rawUrl);
   const subtitles = parseSubtitles(json.subtitle || '');
 
-  // Strictly omit 1080p Ultra as requested by user (only 1080p or lower)
-  delete qualities['1080p Ultra'];
+  // Filter out any premium stub qualities or teasers (e.g. zrkms.mp4, Ultra, 2K, 4K)
+  const qualities = {};
+  for (const [q, u] of Object.entries(rawQualities)) {
+    if (!u) continue;
+    if (u.includes('zrkms.mp4') || /Ultra|2K|4K/i.test(q)) continue;
+    qualities[q] = u;
+  }
+
+  if (Object.keys(qualities).length === 0) {
+    throw new Error('Для данного перевода доступны только платные Premium-потоки HDRezka. Пожалуйста, выберите другую озвучку.');
+  }
 
   // Recommended URL: prefer 1080p -> 720p -> 480p -> 360p
   const order = ['1080p', '720p', '480p', '360p', 'auto'];
