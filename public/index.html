@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_21" />
+  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_22" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -607,19 +607,27 @@
         <p id="modalOverview" class="movie-overview"></p>
         <div class="movie-modal-actions">
           <button id="modalPlayInCurrentRoomBtn" class="btn primary full hidden">
-            <span>▶️ Включить в этой комнате</span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <span>Включить в этой комнате</span>
           </button>
           <button id="modalAddToQueueBtn" class="btn glass full hidden">
-            <span>📋 В очередь комнаты</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <span>В очередь комнаты</span>
           </button>
           <button id="modalStartPublicRoomBtn" class="btn primary full">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            <span>▶️ Смотреть фильм</span>
+            <span id="modalStartPublicRoomLabel">Смотреть фильм</span>
           </button>
-          <button id="modalStartPrivateRoomBtn" class="btn glass full">
-            <span>🔒 Приватная комната (По ссылке)</span>
-          </button>
-          <button id="modalBookmarkBtn" class="btn glass icon-only" title="В закладки">🔖</button>
+          <div class="movie-modal-secondary-row">
+            <button id="modalStartPrivateRoomBtn" class="btn glass flex-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>Приватная комната</span>
+            </button>
+            <button id="modalBookmarkBtn" class="btn glass" title="В закладки">
+              <svg id="modalBookmarkIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span id="modalBookmarkLabel">В закладки</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1302,6 +1310,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261109_oulo_21"></script>
+  <script src="/app.js?v=20261109_oulo_22"></script>
 </body>
 </html>

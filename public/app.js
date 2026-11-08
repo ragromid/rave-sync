@@ -1432,11 +1432,12 @@
         $('modalOrigTitle').textContent = movie.original_title && movie.original_title !== movie.title ? movie.original_title : '';
       }
       if ($('modalOverview')) $('modalOverview').textContent = movie.overview || 'Описание скоро появится.';
+      if ($('modalStartPublicRoomLabel')) {
+        $('modalStartPublicRoomLabel').textContent = movie.type === 'tv' ? 'Смотреть сериал' : 'Смотреть фильм';
+      }
 
       const isBookmarked = Array.isArray(state.bookmarks) && state.bookmarks.some(m => String(m.id) === String(movie.id));
-      if ($('modalBookmarkBtn')) {
-        $('modalBookmarkBtn').textContent = isBookmarked ? '✅ В закладках' : '🔖 В закладки';
-      }
+      updateModalBookmarkUi(isBookmarked);
 
       if ($('modalPlayInCurrentRoomBtn')) {
         $('modalPlayInCurrentRoomBtn').classList.toggle('hidden', !state.room);
@@ -1493,6 +1494,15 @@
     $('movieModal').classList.add('hidden');
   });
 
+  function updateModalBookmarkUi(isBookmarked) {
+    const btn = $('modalBookmarkBtn');
+    const lbl = $('modalBookmarkLabel');
+    const ico = $('modalBookmarkIcon');
+    if (btn) btn.classList.toggle('bookmarked', !!isBookmarked);
+    if (lbl) lbl.textContent = isBookmarked ? 'В закладках' : 'В закладки';
+    if (ico) ico.setAttribute('fill', isBookmarked ? 'currentColor' : 'none');
+  }
+
   $('modalBookmarkBtn').addEventListener('click', async () => {
     if (!(await ensureAuthenticated()) || !state.selectedMovie) return;
     try {
@@ -1501,7 +1511,7 @@
         body: JSON.stringify({ movie: state.selectedMovie })
       });
       state.bookmarks = res.bookmarks || [];
-      $('modalBookmarkBtn').textContent = res.added ? '✅ В закладках' : '🔖 В закладки';
+      updateModalBookmarkUi(res.added);
       showToast(res.added ? 'Добавлено в закладки' : 'Удалено из закладок');
     } catch (e) {
       showToast(e.message);

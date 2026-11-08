@@ -2644,7 +2644,26 @@ body.keyboard-open .chat-input-row {
 .movie-modal-actions {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 10px;
+}
+.movie-modal-actions .btn {
+  height: 44px;
+  border-radius: 11px;
+  font-size: 0.9rem;
+}
+.movie-modal-secondary-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.movie-modal-secondary-row .flex-1 {
+  flex: 1;
+}
+#modalBookmarkBtn.bookmarked {
+  border-color: rgba(0, 230, 118, 0.5);
+  color: #00e676;
+  background: rgba(0, 230, 118, 0.1);
 }
 
 /* Auth Form */
