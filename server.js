@@ -264,6 +264,7 @@ function serializeRoom(room, brief = false) {
     code: room.code,
     name: room.name,
     isPublic: room.isPublic,
+    creatorId: room.creatorId || room.hostId,
     hostId: room.hostId,
     hostOnlyControl: !!room.hostOnlyControl,
     createdAt: room.createdAt,
@@ -1649,11 +1650,13 @@ app.post('/api/rooms/:code/sync', authMiddleware, (req, res) => {
         }
       }
     }
-    if (settings && room.hostId === req.user.id) {
+    if (settings && (room.hostId === req.user.id || room.creatorId === req.user.id)) {
       if (typeof settings.isPublic === 'boolean') room.isPublic = settings.isPublic;
       if (typeof settings.hostOnlyControl === 'boolean') room.hostOnlyControl = settings.hostOnlyControl;
       if (typeof settings.name === 'string' && settings.name.trim()) room.name = settings.name.trim().slice(0, 60);
       stateChangedImmediate = true;
+      io.to(room.code).emit('room:state', serializeRoom(room, false));
+      broadcastPublicRooms();
     }
     if (stateChangedImmediate) {
       persistRoomsToDb(true);
@@ -2147,7 +2150,7 @@ io.on('connection', (socket) => {
     const meta = socketMeta.get(socket.id);
     if (!meta || !meta.roomCode || !currentUser) return;
     const room = rooms.get(meta.roomCode);
-    if (!room || room.hostId !== currentUser.id) return;
+    if (!room || (room.hostId !== currentUser.id && room.creatorId !== currentUser.id)) return;
 
     if (typeof isPublic === 'boolean') room.isPublic = isPublic;
     if (typeof hostOnlyControl === 'boolean') room.hostOnlyControl = hostOnlyControl;

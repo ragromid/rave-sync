@@ -1832,17 +1832,44 @@
 
   $('createCustomRoomBtn').addEventListener('click', async () => {
     if (!(await ensureAuthenticated())) return;
+    if ($('createRoomNameInput')) {
+      $('createRoomNameInput').value = `Комната ${state.user.displayName}`;
+    }
+    $('createRoomModal')?.classList.remove('hidden');
+    $('createRoomNameInput')?.focus();
+  });
+
+  $('createRoomPrivacySwitch')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.proxy-opt-btn');
+    if (!btn) return;
+    $('createRoomPrivacySwitch').querySelectorAll('.proxy-opt-btn').forEach(b => b.classList.toggle('active', b === btn));
+  });
+
+  $('createRoomControlSwitch')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.proxy-opt-btn');
+    if (!btn) return;
+    $('createRoomControlSwitch').querySelectorAll('.proxy-opt-btn').forEach(b => b.classList.toggle('active', b === btn));
+  });
+
+  $('createRoomForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!(await ensureAuthenticated())) return;
+    const name = ($('createRoomNameInput')?.value || '').trim() || `Комната ${state.user.displayName}`;
+    const isPublic = $('createRoomPrivacySwitch')?.querySelector('.proxy-opt-btn.active')?.dataset.pub !== 'false';
+    const hostOnlyControl = $('createRoomControlSwitch')?.querySelector('.proxy-opt-btn.active')?.dataset.hostonly === 'true';
+    $('createRoomModal')?.classList.add('hidden');
     try {
       const res = await api('/api/rooms', {
         method: 'POST',
         body: JSON.stringify({
-          name: `Комната ${state.user.displayName}`,
-          isPublic: true
+          name,
+          isPublic,
+          hostOnlyControl
         })
       });
       await joinRoomByCode(res.room.code);
-    } catch (e) {
-      showToast(e.message);
+    } catch (err) {
+      showToast(err.message);
     }
   });
 
@@ -4704,10 +4731,20 @@
     const room = state.room;
     if ($('settingsRoomCode')) $('settingsRoomCode').textContent = `#${room.code}`;
     if ($('settingsModalRoomTitle')) $('settingsModalRoomTitle').textContent = room.name || 'Комната';
+    if ($('settingsRoomNameInput')) $('settingsRoomNameInput').value = room.name || '';
 
-    const isHost = state.user && room.hostId === state.user.id;
+    const isHost = state.user && (room.hostId === state.user.id || room.creatorId === state.user.id);
     const hostGroup = $('settingsHostGroup');
     if (hostGroup) hostGroup.style.display = isHost ? 'flex' : 'none';
+
+    const hostOnlyToggle = $('settingsHostOnlyToggle');
+    if (hostOnlyToggle) hostOnlyToggle.checked = !!room.hostOnlyControl;
+    const hostOnlySub = $('settingsHostOnlySub');
+    if (hostOnlySub) {
+      hostOnlySub.textContent = room.hostOnlyControl
+        ? 'Только создатель ставит паузу и меняет видео'
+        : 'Зрители могут ставить паузу и менять видео';
+    }
 
     const privBadge = $('settingsModalPrivacyBadge');
     if (privBadge) {
@@ -4794,6 +4831,47 @@
     updateVoiceSettingsUi();
   });
   $('settingsTogglePrivacyBtn')?.addEventListener('click', toggleRoomPrivacy);
+  $('settingsSaveRoomNameBtn')?.addEventListener('click', () => {
+    if (!state.room) return;
+    const nextName = ($('settingsRoomNameInput')?.value || '').trim();
+    if (!nextName) return;
+    state.room.name = nextName;
+    if ($('roomTitleText')) $('roomTitleText').textContent = nextName;
+    if ($('settingsModalRoomTitle')) $('settingsModalRoomTitle').textContent = nextName;
+    socket.emit('room:settings', { name: nextName });
+    if (!socket.connected) {
+      api(`/api/rooms/${encodeURIComponent(state.room.code)}/sync`, {
+        method: 'POST',
+        body: JSON.stringify({ settings: { name: nextName } })
+      }).catch(() => {});
+    }
+    showToast('Название комнаты сохранено');
+  });
+  $('settingsRoomNameInput')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('settingsSaveRoomNameBtn')?.click();
+    }
+  });
+  $('settingsHostOnlyToggle')?.addEventListener('change', (e) => {
+    if (!state.room) return;
+    const hostOnly = !!e.target.checked;
+    state.room.hostOnlyControl = hostOnly;
+    const hostOnlySub = $('settingsHostOnlySub');
+    if (hostOnlySub) {
+      hostOnlySub.textContent = hostOnly
+        ? 'Только создатель ставит паузу и меняет видео'
+        : 'Зрители могут ставить паузу и менять видео';
+    }
+    socket.emit('room:settings', { hostOnlyControl: hostOnly });
+    if (!socket.connected) {
+      api(`/api/rooms/${encodeURIComponent(state.room.code)}/sync`, {
+        method: 'POST',
+        body: JSON.stringify({ settings: { hostOnlyControl: hostOnly } })
+      }).catch(() => {});
+    }
+    showToast(hostOnly ? 'Управление плеером: только создатель' : 'Управление плеером: все зрители');
+  });
   $('settingsResyncBtn')?.addEventListener('click', () => {
     closeModal('roomSettingsModal');
     $('resyncPlayerBtn')?.click();
