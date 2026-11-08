@@ -943,7 +943,7 @@
   }
 
   function switchProfileFolder(target) {
-    const mapped = (target === 'notifications' || target === 'playback') ? 'settings' : 'profile';
+    const mapped = (target === 'settings' || target === 'notifications' || target === 'playback') ? 'settings' : 'profile';
     document.querySelectorAll('.pfolder-tab').forEach(t => {
       t.classList.toggle('active', t.dataset.ptab === mapped);
     });
