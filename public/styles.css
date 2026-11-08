@@ -633,8 +633,8 @@ button {
   align-items: center;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 8px;
-  margin-bottom: 16px;
+  padding: 12px 14px 18px;
+  margin: -12px -14px 6px;
   scrollbar-width: none;
 }
 .category-bar::-webkit-scrollbar {
@@ -815,7 +815,8 @@ button {
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding: 10px 12px 16px;
+  margin: -10px -12px -8px;
   scrollbar-width: none;
 }
 .rooms-horizontal::-webkit-scrollbar {
@@ -1373,7 +1374,8 @@ button {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 6px;
+  padding: 8px 10px 12px;
+  margin: -8px -10px -6px;
 }
 .ep-btn {
   min-width: 74px;
