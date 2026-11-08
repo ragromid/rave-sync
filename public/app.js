@@ -2099,20 +2099,28 @@
         })
       });
 
-      state.z01.qualities = resolved.proxiedQualities || {};
-      const qKeys = Object.keys(state.z01.qualities);
+      const rawQualities = resolved.proxiedQualities || {};
+      const sortedQKeys = sortQualityKeys(Object.keys(rawQualities));
+      const sortedQualities = {};
+      sortedQKeys.forEach(k => { sortedQualities[k] = rawQualities[k]; });
+      state.z01.qualities = sortedQualities;
+
       const prefQuality = localStorage.getItem('oulo_preferred_quality') || '';
-      const matchedQ = (prefQuality && qKeys.find(k => k === prefQuality)) || qKeys[0] || item.quality || 'Auto';
+      const matchedQ = (prefQuality && sortedQKeys.find(k => k.toLowerCase() === prefQuality.toLowerCase())) || sortedQKeys[0] || item.quality || 'Auto';
       state.z01.activeQuality = matchedQ;
+      const needsProxy = resolved.recommendedUrl === resolved.proxyUrl;
       if (state.z01.qualities[matchedQ]) {
         resolved.url = state.z01.qualities[matchedQ].raw || resolved.url;
         resolved.proxyUrl = state.z01.qualities[matchedQ].proxy || resolved.proxyUrl;
-        resolved.recommendedUrl = state.proxyMode === 'off' ? resolved.url : (resolved.proxyUrl || resolved.recommendedUrl);
+        resolved.recommendedUrl = state.proxyMode === 'off'
+          ? resolved.url
+          : (needsProxy ? (resolved.proxyUrl || resolved.url) : resolved.url);
       }
       renderZ01Panel();
 
       const activeSource = state.z01.sources.find(s => s.key === state.z01.activeSourceKey);
       const streamUrl = pickStreamUrl(resolved);
+      const isHlsResolved = /\.m3u8(\?|$)/i.test(resolved.url || '') || String(resolved.url || '').includes('manifest.m3u8');
 
       const newMedia = {
         type: 'z01',
@@ -2126,11 +2134,13 @@
         episode: item.episode || 0,
         voiceName: item.voice_name || (state.z01.voices[state.z01.activeVoiceIdx]?.title) || '',
         quality: state.z01.activeQuality,
+        qualities: state.z01.qualities,
+        needsProxy,
         rawUrl: resolved.url,
         proxyUrl: resolved.proxyUrl,
         recommendedUrl: resolved.recommendedUrl,
         streamUrl,
-        streamType: resolved.streamType || 'hls',
+        streamType: isHlsResolved ? 'hls' : (resolved.streamType || 'hls'),
         subtitles: resolved.subtitles || []
       };
 
@@ -2167,6 +2177,22 @@
     } catch (e) {
       setPlayerOverlay(true, false, `Ошибка потока: ${e.message}. Попробуйте другой источник Z01.`);
     }
+  }
+
+  function sortQualityKeys(keys) {
+    const rank = (k) => {
+      const s = String(k || '').toLowerCase();
+      if (s.includes('2160') || s.includes('4k')) return 2160;
+      if (s.includes('1440') || s.includes('2k')) return 1440;
+      if (s.includes('1080') || s.includes('fhd')) return 1080;
+      if (s.includes('720') || s.includes('hd')) return 720;
+      if (s.includes('480')) return 480;
+      if (s.includes('360')) return 360;
+      if (s.includes('240')) return 240;
+      if (s.includes('auto') || s.includes('авто')) return 1;
+      return parseInt(s, 10) || 0;
+    };
+    return [...keys].sort((a, b) => rank(b) - rank(a));
   }
 
   function pickStreamUrl(mediaOrResolved) {
@@ -2344,12 +2370,31 @@
           state.z01.activeQuality = qk;
           state.z01.openDropdown = '';
           const qObj = qualities[qk];
-          if (qObj && state.room && state.room.media) {
-            const currentTime = $('mainVideo').currentTime || 0;
-            state.room.media.rawUrl = qObj.raw;
-            state.room.media.proxyUrl = qObj.proxy;
-            state.room.media.streamUrl = state.proxyMode === 'off' ? qObj.raw : qObj.proxy;
-            loadMediaIntoPlayer(state.room.media, { playing: !$('mainVideo').paused, currentTime });
+          if (qObj) {
+            if (typeof qObj.hlsLevel === 'number' && state.hls) {
+              state.hls.currentLevel = qObj.hlsLevel;
+              state.hls.nextLevel = qObj.hlsLevel;
+              if (state.room && state.room.media) state.room.media.quality = qk;
+              showToast(`Качество: ${qk}`);
+            } else if (qObj.raw && state.room && state.room.media) {
+              const video = $('mainVideo');
+              const currentTime = video.currentTime || 0;
+              const wasPlaying = !video.paused;
+              const needsProxy = state.room.media.needsProxy !== undefined
+                ? state.room.media.needsProxy
+                : (state.room.media.recommendedUrl === state.room.media.proxyUrl);
+              const nextRecommended = needsProxy ? (qObj.proxy || qObj.raw) : qObj.raw;
+              const isHlsUrl = /\.m3u8(\?|$)/i.test(qObj.raw) || String(qObj.raw).includes('manifest.m3u8');
+
+              state.room.media.rawUrl = qObj.raw;
+              state.room.media.proxyUrl = qObj.proxy;
+              state.room.media.recommendedUrl = nextRecommended;
+              state.room.media.quality = qk;
+              state.room.media.streamType = isHlsUrl ? 'hls' : 'mp4';
+              state.room.media.streamUrl = pickStreamUrl(state.room.media);
+              loadMediaIntoPlayer(state.room.media, { playing: wasPlaying, currentTime });
+              showToast(`Качество: ${qk}`);
+            }
           }
           renderZ01Panel();
         };
@@ -2461,6 +2506,12 @@
     video.controls = window.innerWidth <= 900;
     state.justLoadedMediaUntil = Date.now() + 2600;
 
+    if (media.qualities && Object.keys(media.qualities).length > 0 && (!state.z01.qualities || Object.keys(state.z01.qualities).length === 0)) {
+      state.z01.qualities = media.qualities;
+      state.z01.activeQuality = media.quality || Object.keys(media.qualities)[0] || '';
+      renderZ01Panel();
+    }
+
     const epTag = media.season && media.episode ? ` · Сезон ${media.season}, Серия ${media.episode}` : '';
     const balTag = media.balancerName ? ` [${media.balancerName}]` : '';
     const voiceTag = media.voiceName ? ` · ${media.voiceName}` : '';
@@ -2530,7 +2581,32 @@
       state.hls = hls;
       hls.loadSource(streamUrl);
       hls.attachMedia(video);
-      hls.on(window.Hls.Events.MANIFEST_PARSED, onLoaded);
+      hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
+        const existingQKeys = Object.keys(state.z01.qualities || {});
+        const hasUrlMap = existingQKeys.length > 1 && state.z01.qualities[existingQKeys[0]]?.raw;
+        if (!hasUrlMap && Array.isArray(hls.levels) && hls.levels.length > 1) {
+          const levelMap = {};
+          hls.levels.forEach((lvl, idx) => {
+            const h = lvl.height || (lvl.attrs && parseInt(lvl.attrs.RESOLUTION?.split('x')[1], 10)) || 0;
+            const label = h ? `${h}p` : `Уровень ${idx + 1}`;
+            levelMap[label] = { hlsLevel: idx };
+          });
+          const sortedLabels = sortQualityKeys(Object.keys(levelMap));
+          const orderedMap = {};
+          sortedLabels.forEach(k => { orderedMap[k] = levelMap[k]; });
+          orderedMap['Авто'] = { hlsLevel: -1 };
+          state.z01.qualities = orderedMap;
+
+          const prefQ = localStorage.getItem('oulo_preferred_quality') || '';
+          const matchKey = (prefQ && Object.keys(orderedMap).find(k => k.toLowerCase() === prefQ.toLowerCase())) || sortedLabels[0] || 'Авто';
+          state.z01.activeQuality = matchKey;
+          if (orderedMap[matchKey] && typeof orderedMap[matchKey].hlsLevel === 'number') {
+            hls.currentLevel = orderedMap[matchKey].hlsLevel;
+          }
+          renderZ01Panel();
+        }
+        onLoaded();
+      });
       hls.on(window.Hls.Events.ERROR, (_, data) => {
         if (data.fatal) {
           switch (data.type) {
