@@ -819,7 +819,7 @@ app.post('/api/user/progress', authMiddleware, (req, res) => {
 
 // ================= ADMIN PANEL & USER MANAGEMENT ROUTES =================
 
-const ADMIN_KEY = process.env.ADMIN_KEY || 'admin2026';
+const ADMIN_KEY = process.env.ADMIN_KEY || 'oulo#Admin9482!';
 
 function setAdminCookie(res, key) {
   res.setHeader(
