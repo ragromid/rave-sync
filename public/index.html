@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_17" />
+  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_18" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -295,6 +295,7 @@
 
               <!-- Video Player Container -->
               <div class="player-wrapper" id="playerWrapper">
+                <canvas id="ambientGlowCanvas" class="ambient-glow-canvas" width="32" height="18"></canvas>
                 <video id="mainVideo" playsinline crossorigin="anonymous"></video>
                 <div id="youtubeContainer" class="youtube-container hidden"></div>
 
@@ -312,6 +313,25 @@
 
                 <!-- Sync status badge -->
                 <div id="syncIndicator" class="sync-indicator hidden">Синхронизация...</div>
+
+                <!-- Smart Buffering Wait Banner -->
+                <div id="bufferingWaitBanner" class="buffering-wait-banner hidden">
+                  <span class="buffering-dot"></span>
+                  <span id="bufferingWaitText">Ждём подгрузку у участника...</span>
+                </div>
+
+                <!-- Fullscreen Voice Speakers Overlay -->
+                <div id="voiceSpeakersOverlay" class="voice-speakers-overlay"></div>
+
+                <!-- Skip Intro (+85s) & Auto-Next Episode Floating Controls -->
+                <button id="skipIntroBtn" class="skip-intro-btn hidden" type="button">
+                  ⏭ Пропустить заставку (+85с)
+                </button>
+                <div id="nextEpisodePrompt" class="next-ep-prompt hidden">
+                  <span id="nextEpCountdownText">Следующая серия через 10с</span>
+                  <button type="button" id="playNextEpNowBtn" class="pill-btn tiny accent">Включить ▶️</button>
+                  <button type="button" id="cancelNextEpBtn" class="icon-btn tiny" title="Отмена">✕</button>
+                </div>
 
                 <!-- Unmute & Sync button when browser blocks unmuted autoplay -->
                 <button id="unmuteSyncBtn" class="unmute-sync-btn hidden" type="button">
@@ -412,6 +432,15 @@
                 <div class="z01-top-tools">
                   <div class="z01-top-tools-title">🎞️ Источник и поток</div>
                   <div class="z01-top-tools-actions">
+                    <button type="button" id="toggleAmbientBtn" class="pill-btn tiny ghost active" title="Фоновая подсветка вокруг плеера">
+                      <span>✨ Подсветка</span>
+                    </button>
+                    <button type="button" id="togglePipBtn" class="pill-btn tiny ghost" title="Режим Картинка в картинке (PiP)">
+                      <span>🖼️ PiP</span>
+                    </button>
+                    <button type="button" id="sleepTimerBtn" class="pill-btn tiny ghost" title="Таймер сна">
+                      <span>🌙 Сон</span>
+                    </button>
                     <button type="button" id="toggleProxyStreamBtn" class="pill-btn tiny ghost btn-toggle-proxy" title="Переключить прокси потока (если видео не грузится)">
                       <span>⚡ Прокси: Авто</span>
                     </button>
@@ -488,9 +517,16 @@
                 </div>
               </div>
 
-              <!-- Tab 3: Participants List -->
+              <!-- Tab 3: Participants List & Room Playlist Queue -->
               <div id="rtab-users" class="rtab-content">
                 <div id="roomParticipantsList" class="participants-list"></div>
+                <div class="room-queue-section" id="roomQueueSection">
+                  <div class="room-queue-head">
+                    <span class="room-queue-title">📋 Очередь просмотра (<span id="roomQueueCount">0</span>)</span>
+                    <button type="button" id="addQueueFromCatalogBtn" class="pill-btn tiny accent">+ Добавить</button>
+                  </div>
+                  <div id="roomQueueList" class="room-queue-list"></div>
+                </div>
               </div>
 
               <!-- Tab 4: Room, Stream & TV Control Deck -->
@@ -582,6 +618,9 @@
         <div class="movie-modal-actions">
           <button id="modalPlayInCurrentRoomBtn" class="btn primary full hidden">
             <span>▶️ Включить в этой комнате</span>
+          </button>
+          <button id="modalAddToQueueBtn" class="btn glass full hidden">
+            <span>📋 В очередь комнаты</span>
           </button>
           <button id="modalStartPublicRoomBtn" class="btn primary full">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -685,6 +724,9 @@
               </div>
             </div>
           </div>
+
+          <!-- User Achievement Badges -->
+          <div id="profileBadgesStrip" class="badges-strip"></div>
 
           <!-- User Watch Statistics Grid -->
           <div class="profile-stats-grid" id="profileStatsGrid">
@@ -959,6 +1001,8 @@
         </div>
       </div>
       <p id="ucBio" class="uc-bio"></p>
+      <div id="ucBadgesStrip" class="badges-strip"></div>
+      <div id="ucTasteMatchBox" class="taste-match-box hidden"></div>
       <div class="profile-stats-grid" id="ucStatsGrid"></div>
     </div>
   </div>
@@ -1268,6 +1312,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261109_oulo_17"></script>
+  <script src="/app.js?v=20261109_oulo_18"></script>
 </body>
 </html>

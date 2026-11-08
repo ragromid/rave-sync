@@ -28,6 +28,12 @@ const io = new Server(server, {
 });
 
 app.use(express.json({ limit: '5mb' }));
+app.use((err, req, res, next) => {
+  if (err && (err instanceof SyntaxError || err.type === 'entity.parse.failed')) {
+    return res.status(400).json({ error: 'Некорректный JSON в запросе' });
+  }
+  next(err);
+});
 
 // Canonical Domain Redirect (redirect raw IP to https://oulo.duckdns.org)
 const CANONICAL_DOMAIN = process.env.CANONICAL_DOMAIN || 'oulo.duckdns.org';
@@ -45,6 +51,62 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
   next();
+});
+
+// Dynamic OpenGraph social preview for shared room links (Telegram / Discord / VK)
+const fs = require('fs');
+let cachedIndexHtml = '';
+function getIndexHtmlTemplate() {
+  try {
+    if (!cachedIndexHtml) {
+      cachedIndexHtml = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+    }
+    return cachedIndexHtml;
+  } catch {
+    return '';
+  }
+}
+
+function escapeHtmlAttr(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+app.get('/', (req, res, next) => {
+  const roomCode = String(req.query.room || '').replace(/^#/, '').trim().toUpperCase();
+  if (!roomCode) return next();
+  hydrateRoomsFromDb();
+  const room = rooms.get(roomCode);
+  if (!room) return next();
+  const tpl = getIndexHtmlTemplate();
+  if (!tpl) return next();
+
+  const mediaTitle = room.media?.title || room.name || 'Совместный просмотр';
+  const epTag = room.media?.season && room.media?.episode ? ` (S${room.media.season}E${room.media.episode})` : '';
+  const viewers = Math.max(1, room.participants?.size || 1);
+  const ogTitle = `🍿 ${mediaTitle}${epTag} — Комната #${room.code} в oulo`;
+  const ogDesc = `Сейчас смотрят: ${viewers} чел. Присоединяйтесь к синхронному просмотру в 1 клик!`;
+  const ogImage = room.media?.backdrop || room.media?.poster || '';
+
+  const ogTags = [
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:site_name" content="oulo" />`,
+    `<meta property="og:title" content="${escapeHtmlAttr(ogTitle)}" />`,
+    `<meta property="og:description" content="${escapeHtmlAttr(ogDesc)}" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta name="twitter:title" content="${escapeHtmlAttr(ogTitle)}" />`,
+    `<meta name="twitter:description" content="${escapeHtmlAttr(ogDesc)}" />`,
+    ogImage ? `<meta property="og:image" content="${escapeHtmlAttr(ogImage)}" />` : '',
+    ogImage ? `<meta name="twitter:image" content="${escapeHtmlAttr(ogImage)}" />` : ''
+  ].filter(Boolean).join('\n  ');
+
+  const injected = tpl.replace('</head>', `  ${ogTags}\n</head>`);
+  res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  return res.send(injected);
 });
 
 app.use(express.static(path.join(__dirname, 'public'), {
@@ -89,6 +151,7 @@ function persistRoomsToDb(immediate = true) {
       })),
       media: r.media,
       playback: r.playback,
+      queue: Array.isArray(r.queue) ? r.queue.slice(0, 30) : [],
       messages: (r.messages || []).slice(-30).map(m => ({
         id: m.id,
         system: !!m.system,
@@ -132,6 +195,7 @@ function hydrateRoomsFromDb() {
         participants: pMap,
         media: sr.media || null,
         playback: sr.playback || { playing: false, currentTime: 0, rate: 1, updatedAt: Date.now() },
+        queue: Array.isArray(sr.queue) ? sr.queue : [],
         messages: Array.isArray(sr.messages) ? sr.messages : [],
         viewOnceStore: sr.viewOnceStore || {}
       });
@@ -206,6 +270,7 @@ function serializeRoom(room, brief = false) {
     participantCount: participants.length,
     participants,
     media: room.media,
+    queue: Array.isArray(room.queue) ? room.queue : [],
     playback: {
       ...room.playback,
       currentTime: effectiveTime,
@@ -423,7 +488,45 @@ app.get('/api/users/search', authMiddleware, (req, res) => {
 app.get('/api/users/:id', authMiddleware, (req, res) => {
   const u = db.getUserById(req.params.id);
   if (!u) return res.status(404).json({ error: 'Пользователь не найден' });
-  res.json({ user: u, presence: getUserPresence(u.id) });
+
+  let tasteMatch = null;
+  if (req.user && req.user.id !== u.id) {
+    const myBm = db.getBookmarks(req.user.id) || [];
+    const theirBm = db.getBookmarks(u.id) || [];
+    const myHist = (db.getWatchHistory(req.user.id) || []).map(h => h.movie).filter(Boolean);
+    const theirHist = (db.getWatchHistory(u.id) || []).map(h => h.movie).filter(Boolean);
+
+    const myPool = new Map();
+    [...myBm, ...myHist].forEach(m => { if (m && m.id) myPool.set(String(m.id), m); });
+
+    const theirPool = new Map();
+    [...theirBm, ...theirHist].forEach(m => { if (m && m.id) theirPool.set(String(m.id), m); });
+
+    const sharedMovies = [];
+    for (const [id, movie] of myPool.entries()) {
+      if (theirPool.has(id)) {
+        sharedMovies.push(movie);
+      }
+    }
+
+    const minSize = Math.min(myPool.size, theirPool.size);
+    let matchPercent = 0;
+    if (sharedMovies.length > 0 && minSize > 0) {
+      matchPercent = Math.min(99, Math.round(45 + (sharedMovies.length / Math.max(1, Math.min(minSize, 8))) * 54));
+    } else if (myPool.size > 0 && theirPool.size > 0) {
+      const myTvRatio = Array.from(myPool.values()).filter(m => m.type === 'tv').length / myPool.size;
+      const theirTvRatio = Array.from(theirPool.values()).filter(m => m.type === 'tv').length / theirPool.size;
+      matchPercent = Math.round((1 - Math.abs(myTvRatio - theirTvRatio) * 0.5) * 42);
+    }
+
+    tasteMatch = {
+      matchPercent,
+      sharedMovies: sharedMovies.slice(0, 12),
+      theirBookmarks: theirBm.slice(0, 8)
+    };
+  }
+
+  res.json({ user: u, presence: getUserPresence(u.id), tasteMatch });
 });
 
 // ================= WEB PUSH (VAPID) ROUTES =================
@@ -1380,6 +1483,7 @@ app.post('/api/rooms', authMiddleware, (req, res) => {
       rate: 1,
       updatedAt: Date.now()
     },
+    queue: [],
     messages: [],
     viewOnceStore: {}
   };
@@ -2256,6 +2360,101 @@ io.on('connection', (socket) => {
     });
   });
 
+  socket.on('voice:speaking', ({ speaking }) => {
+    const meta = socketMeta.get(socket.id);
+    if (!meta || !meta.roomCode || !currentUser) return;
+    io.to(meta.roomCode).emit('voice:speaking', {
+      socketId: socket.id,
+      userId: currentUser.id,
+      displayName: currentUser.displayName,
+      avatar: currentUser.avatar,
+      avatarUrl: currentUser.avatarUrl || '',
+      color: currentUser.color || '#00e676',
+      speaking: !!speaking
+    });
+  });
+
+  // Smart Buffering Wait (sync buffering status across room)
+  socket.on('player:buffering', ({ buffering, currentTime }) => {
+    const meta = socketMeta.get(socket.id);
+    if (!meta || !meta.roomCode || !currentUser) return;
+    const room = rooms.get(meta.roomCode);
+    if (!room) return;
+    socket.to(room.code).emit('player:buffering_state', {
+      buffering: !!buffering,
+      currentTime: typeof currentTime === 'number' ? currentTime : 0,
+      user: {
+        id: currentUser.id,
+        displayName: currentUser.displayName,
+        avatar: currentUser.avatar
+      }
+    });
+  });
+
+  // Room Playlist Queue & Voting
+  socket.on('room:queue_add', ({ movie }) => {
+    const meta = socketMeta.get(socket.id);
+    if (!meta || !meta.roomCode || !currentUser || !movie) return;
+    const room = rooms.get(meta.roomCode);
+    if (!room) return;
+    if (!Array.isArray(room.queue)) room.queue = [];
+    if (room.queue.some(q => String(q.movie?.id) === String(movie.id))) {
+      return socket.emit('toast', { type: 'info', text: 'Этот фильм уже в очереди комнаты' });
+    }
+    const item = {
+      id: 'q_' + crypto.randomBytes(4).toString('hex'),
+      movie: {
+        id: movie.id,
+        title: movie.title,
+        original_title: movie.original_title || '',
+        year: movie.year || '',
+        poster: movie.poster || '',
+        backdrop: movie.backdrop || '',
+        type: movie.type || 'movie',
+        vote_average: movie.vote_average || ''
+      },
+      addedBy: {
+        id: currentUser.id,
+        displayName: currentUser.displayName,
+        avatar: currentUser.avatar
+      },
+      votes: [currentUser.id],
+      createdAt: Date.now()
+    };
+    room.queue.push(item);
+    persistRoomsToDb();
+    addSystemMessage(room, `📋 ${currentUser.displayName} добавил(а) в очередь: «${movie.title}»`);
+    io.to(room.code).emit('room:queue_updated', room.queue);
+  });
+
+  socket.on('room:queue_vote', ({ queueId }) => {
+    const meta = socketMeta.get(socket.id);
+    if (!meta || !meta.roomCode || !currentUser || !queueId) return;
+    const room = rooms.get(meta.roomCode);
+    if (!room || !Array.isArray(room.queue)) return;
+    const item = room.queue.find(q => q.id === queueId);
+    if (!item) return;
+    if (!Array.isArray(item.votes)) item.votes = [];
+    const idx = item.votes.indexOf(currentUser.id);
+    if (idx >= 0) item.votes.splice(idx, 1);
+    else item.votes.push(currentUser.id);
+    room.queue.sort((a, b) => (b.votes?.length || 0) - (a.votes?.length || 0) || a.createdAt - b.createdAt);
+    persistRoomsToDb();
+    io.to(room.code).emit('room:queue_updated', room.queue);
+  });
+
+  socket.on('room:queue_remove', ({ queueId }) => {
+    const meta = socketMeta.get(socket.id);
+    if (!meta || !meta.roomCode || !currentUser || !queueId) return;
+    const room = rooms.get(meta.roomCode);
+    if (!room || !Array.isArray(room.queue)) return;
+    const idx = room.queue.findIndex(q => q.id === queueId);
+    if (idx === -1) return;
+    room.queue.splice(idx, 1);
+    persistRoomsToDb();
+    io.to(room.code).emit('room:queue_updated', room.queue);
+  });
+
   socket.on('disconnect', () => {
     leaveCurrentRoom();
     if (currentUser && userSockets.has(currentUser.id)) {
@@ -2293,6 +2492,14 @@ if (!process.env.VERCEL) {
     hydrateRoomsFromDb();
     server.listen(PORT, () => {
       console.log(`Rave x Lampa (Z01) server running at http://localhost:${PORT}`);
+      // Pre-warm catalog feeds in background for instant <50ms homepage loads
+      setTimeout(() => {
+        Promise.allSettled([
+          z01.getCatalogFeed('trending', 1),
+          z01.getCatalogFeed('popular_movies', 1),
+          z01.getCatalogFeed('popular_tv', 1)
+        ]).catch(() => {});
+      }, 1500);
     });
   });
 }

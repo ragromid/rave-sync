@@ -798,6 +798,35 @@
     }
   }
 
+  function computeUserAchievements(st = {}) {
+    const badges = [];
+    const watchHours = (st.watchSeconds || 0) / 3600;
+    const totalWatched = (st.moviesWatched || 0) + (st.episodesWatched || 0) || (st.historyCount || 0);
+    if (totalWatched >= 1 || watchHours >= 0.5) {
+      badges.push({ ico: '🍿', label: totalWatched >= 25 ? 'Киноман (25+)' : 'Зритель oulo' });
+    }
+    if (watchHours >= 10) {
+      badges.push({ ico: '🦉', label: `${Math.floor(watchHours)}ч в кинозале` });
+    }
+    if ((st.roomsCreated || 0) >= 1) {
+      badges.push({ ico: '👑', label: (st.roomsCreated || 0) >= 10 ? 'Топ-хост комнат' : 'Создатель комнат' });
+    }
+    if ((st.messagesSent || 0) >= 15 || (st.reactionsSent || 0) >= 15) {
+      badges.push({ ico: '🔥', label: 'Душа компании' });
+    }
+    if ((st.friendsCount || 0) >= 3) {
+      badges.push({ ico: '🤝', label: 'Киноклуб' });
+    }
+    return badges;
+  }
+
+  function renderBadgesStrip(containerId, st = {}) {
+    const el = $(containerId);
+    if (!el) return;
+    const badges = computeUserAchievements(st);
+    el.innerHTML = badges.map(b => `<span class="ach-badge"><span class="ach-badge-ico">${b.ico}</span><span>${esc(b.label)}</span></span>`).join('');
+  }
+
   function populateProfileStats(user) {
     const st = user?.stats || {};
     $('statWatchTime').textContent = formatWatchTime(st.watchSeconds || 0);
@@ -809,6 +838,7 @@
     const friendsCnt = st.friendsCount ?? state.friends.length ?? 0;
     const bmCnt = st.bookmarksCount ?? state.bookmarks.length ?? 0;
     $('statSocialCount').textContent = `${friendsCnt} / ${bmCnt}`;
+    renderBadgesStrip('profileBadgesStrip', { ...st, friendsCount: friendsCnt, bookmarksCount: bmCnt });
   }
 
   function switchProfileFolder(target) {
@@ -1123,6 +1153,47 @@
       $('ucUsername').textContent = `@${u.username}`;
       $('ucBio').textContent = u.bio || 'Смотрит фильмы в oulo 🍿';
       const st = u.stats || {};
+      renderBadgesStrip('ucBadgesStrip', st);
+
+      const tmBox = $('ucTasteMatchBox');
+      if (tmBox) {
+        const tm = data.tasteMatch;
+        if (tm && (tm.matchPercent > 0 || (tm.theirBookmarks && tm.theirBookmarks.length > 0))) {
+          tmBox.classList.remove('hidden');
+          const sharedList = (tm.sharedMovies && tm.sharedMovies.length > 0) ? tm.sharedMovies : (tm.theirBookmarks || []).slice(0, 6);
+          const sharedLabel = (tm.sharedMovies && tm.sharedMovies.length > 0)
+            ? `Общие фильмы (${tm.sharedMovies.length}):`
+            : 'Избранное пользователя:';
+          tmBox.innerHTML = `
+            <div class="taste-match-header">
+              <span>🎯 Совместимость вкусов</span>
+              <span class="taste-match-pct">${tm.matchPercent || 0}%</span>
+            </div>
+            <div class="taste-match-bar">
+              <div class="taste-match-fill" style="width:${Math.max(6, tm.matchPercent || 0)}%"></div>
+            </div>
+            ${sharedList.length ? `
+              <div style="font-size:0.72rem;color:var(--text-muted);margin-top:8px;">${esc(sharedLabel)}</div>
+              <div class="taste-shared-strip">
+                ${sharedList.map((m, idx) => `<button type="button" class="taste-shared-chip" data-tm-idx="${idx}">🎬 ${esc(m.title)}</button>`).join('')}
+              </div>
+            ` : ''}
+          `;
+          tmBox.querySelectorAll('[data-tm-idx]').forEach(btn => {
+            btn.onclick = () => {
+              const mv = sharedList[Number(btn.dataset.tmIdx)];
+              if (mv) {
+                $('userCardModal').classList.add('hidden');
+                openMovieModal(mv);
+              }
+            };
+          });
+        } else {
+          tmBox.classList.add('hidden');
+          tmBox.innerHTML = '';
+        }
+      }
+
       $('ucStatsGrid').innerHTML = `
         <div class="stat-card"><div class="stat-val">${esc(formatWatchTime(st.watchSeconds || 0))}</div><div class="stat-label">⏱️ В просмотре</div></div>
         <div class="stat-card"><div class="stat-val">${(st.moviesWatched || 0) + (st.episodesWatched || 0)}</div><div class="stat-label">🎬 Просмотрено</div></div>
@@ -1370,6 +1441,9 @@
       if ($('modalPlayInCurrentRoomBtn')) {
         $('modalPlayInCurrentRoomBtn').classList.toggle('hidden', !state.room);
       }
+      if ($('modalAddToQueueBtn')) {
+        $('modalAddToQueueBtn').classList.toggle('hidden', !state.room);
+      }
       $('movieModal').classList.remove('hidden');
 
       // Auto-focus primary Watch button so Smart TV remote OK/Enter immediately starts watching
@@ -1411,6 +1485,12 @@
     $('movieModal').classList.add('hidden');
     switchView('room');
     await loadZ01ForMovieInRoom(state.selectedMovie, true);
+  });
+
+  $('modalAddToQueueBtn')?.addEventListener('click', () => {
+    if (!state.selectedMovie || !state.room) return;
+    socket.emit('room:queue_add', { movie: state.selectedMovie });
+    $('movieModal').classList.add('hidden');
   });
 
   $('modalBookmarkBtn').addEventListener('click', async () => {
@@ -1827,10 +1907,27 @@
       state.z01.activeVoiceIdx = Math.max(0, state.z01.voices.findIndex(v => v.active));
       state.z01.activeVideoIdx = 0;
 
+      // Auto-select user's preferred voice if available
+      const prefVoice = (localStorage.getItem('oulo_preferred_voice') || '').trim().toLowerCase();
+      if (prefVoice) {
+        if (state.z01.voices.length > 1) {
+          const matchVIdx = state.z01.voices.findIndex(v => (v.title || '').toLowerCase().includes(prefVoice));
+          if (matchVIdx >= 0 && matchVIdx !== state.z01.activeVoiceIdx && state.z01.voices[matchVIdx].url) {
+            renderZ01Panel();
+            return queryZ01SubUrl(state.z01.voices[matchVIdx].url, 'voice', matchVIdx);
+          }
+        } else if (state.z01.videos.length > 1 && !state.z01.seasons.length && !state.z01.videos[0]?.episode) {
+          const matchVidIdx = state.z01.videos.findIndex(v => ((v.voice_name || v.title || '').toLowerCase().includes(prefVoice)));
+          if (matchVidIdx >= 0) {
+            state.z01.activeVideoIdx = matchVidIdx;
+          }
+        }
+      }
+
       renderZ01Panel();
 
-      if (autoPlay && state.z01.videos[0]) {
-        await selectZ01VideoItem(0, true);
+      if (autoPlay && state.z01.videos[state.z01.activeVideoIdx]) {
+        await selectZ01VideoItem(state.z01.activeVideoIdx, true);
       } else {
         setPlayerOverlay(false, false, '');
       }
@@ -1891,7 +1988,14 @@
 
       state.z01.qualities = resolved.proxiedQualities || {};
       const qKeys = Object.keys(state.z01.qualities);
-      state.z01.activeQuality = qKeys[0] || item.quality || 'Auto';
+      const prefQuality = localStorage.getItem('oulo_preferred_quality') || '';
+      const matchedQ = (prefQuality && qKeys.find(k => k === prefQuality)) || qKeys[0] || item.quality || 'Auto';
+      state.z01.activeQuality = matchedQ;
+      if (state.z01.qualities[matchedQ]) {
+        resolved.url = state.z01.qualities[matchedQ].raw || resolved.url;
+        resolved.proxyUrl = state.z01.qualities[matchedQ].proxy || resolved.proxyUrl;
+        resolved.recommendedUrl = state.proxyMode === 'off' ? resolved.url : (resolved.proxyUrl || resolved.recommendedUrl);
+      }
       renderZ01Panel();
 
       const activeSource = state.z01.sources.find(s => s.key === state.z01.activeSourceKey);
@@ -2093,7 +2197,10 @@
           <div class="z01-opt-title">${esc(v.title)}</div>
           <div class="z01-opt-note">${esc(v.groupTitle || '')}</div>
         `;
-        btn.onclick = () => queryZ01SubUrl(v.url, 'voice', idx);
+        btn.onclick = () => {
+          if (v.title) localStorage.setItem('oulo_preferred_voice', v.title);
+          queryZ01SubUrl(v.url, 'voice', idx);
+        };
         dropGrid.appendChild(btn);
       });
     } else if (openDropdown === 'movie_voice') {
@@ -2106,6 +2213,8 @@
           <div class="z01-opt-note">${esc(v.quality || '')}</div>
         `;
         btn.onclick = () => {
+          const vName = v.voice_name || v.title || '';
+          if (vName) localStorage.setItem('oulo_preferred_voice', vName);
           state.z01.openDropdown = '';
           selectZ01VideoItem(idx, true);
         };
@@ -2118,6 +2227,7 @@
         btn.className = `z01-opt ${qk === activeQuality ? 'active' : ''}`;
         btn.innerHTML = `<div class="z01-opt-title">${esc(qk)}</div>`;
         btn.onclick = () => {
+          localStorage.setItem('oulo_preferred_quality', qk);
           state.z01.activeQuality = qk;
           state.z01.openDropdown = '';
           const qObj = qualities[qk];
@@ -2320,6 +2430,7 @@
                 hls.loadSource(media.proxyUrl);
               } else {
                 hls.destroy();
+                tryFallbackToNextBalancer();
               }
               break;
           }
@@ -2334,8 +2445,21 @@
           media.streamUrl = media.proxyUrl;
           video.src = media.proxyUrl;
           video.load();
+        } else {
+          tryFallbackToNextBalancer();
         }
       }, { once: true });
+    }
+  }
+
+  function tryFallbackToNextBalancer() {
+    if (!state.z01 || !Array.isArray(state.z01.sources) || !state.z01.sources.length) return;
+    const curSrc = state.z01.sources.find(s => s.key === state.z01.activeSourceKey);
+    if (curSrc) curSrc._tried = true;
+    const nextCandidate = state.z01.sources.find(s => s.show && s.key !== state.z01.activeSourceKey && !s._tried);
+    if (nextCandidate) {
+      showToast(`Поток недоступен, переключаем на ${nextCandidate.name}...`);
+      selectZ01Balancer(nextCandidate.key, true);
     }
   }
 
@@ -3388,6 +3512,7 @@
     renderRoomHeader(room);
     renderRoomParticipants(room.participants || []);
     renderRoomMessages(room.messages || []);
+    renderRoomQueue(room.queue || []);
 
     if (room.media) {
       const streamKey = room.media.streamUrl || room.media.youtubeId || '';
@@ -3424,6 +3549,12 @@
     state.room = room;
     renderRoomHeader(room);
     renderRoomParticipants(room.participants || []);
+    renderRoomQueue(room.queue || []);
+  });
+
+  socket.on('room:queue_updated', (queue) => {
+    if (state.room) state.room.queue = queue || [];
+    renderRoomQueue(queue || []);
   });
 
   socket.on('room:participants', (list) => {
@@ -5348,6 +5479,377 @@
     const audio = document.getElementById(`audio_${socketId}`);
     if (audio) audio.remove();
   });
+
+  // ================= ROOM QUEUE, SKIP INTRO, AUTO-NEXT, AMBIENT GLOW, PIP, SLEEP TIMER, BUFFERING WAIT & VOICE SPEAKERS =================
+  function renderRoomQueue(queue = []) {
+    const countEl = $('roomQueueCount');
+    const listEl = $('roomQueueList');
+    if (countEl) countEl.textContent = queue.length;
+    if (!listEl) return;
+    if (!queue.length) {
+      listEl.innerHTML = '<div style="font-size:0.75rem;color:var(--text-muted);padding:6px 0;">Очередь пуста — добавьте фильмы из каталога</div>';
+      return;
+    }
+    listEl.innerHTML = '';
+    queue.forEach(item => {
+      const m = item.movie || {};
+      const votes = Array.isArray(item.votes) ? item.votes : [];
+      const hasVoted = state.user && votes.includes(state.user.id);
+      const row = document.createElement('div');
+      row.className = 'queue-item-row';
+      row.innerHTML = `
+        <img class="queue-item-poster" src="${esc(m.poster || m.backdrop || '')}" alt="" />
+        <div class="queue-item-info">
+          <div class="queue-item-title">${esc(m.title || 'Фильм')}</div>
+          <div class="queue-item-meta">${esc(m.year || '')}${item.addedBy?.displayName ? ` · от ${esc(item.addedBy.displayName)}` : ''}</div>
+        </div>
+        <div class="queue-item-actions">
+          <button type="button" class="queue-vote-btn ${hasVoted ? 'voted' : ''}" title="Голосовать">👍 ${votes.length}</button>
+          <button type="button" class="pill-btn tiny accent queue-play-btn" title="Включить сейчас">▶️</button>
+          <button type="button" class="pill-btn tiny queue-del-btn" title="Удалить">✕</button>
+        </div>
+      `;
+      row.querySelector('.queue-vote-btn').onclick = () => {
+        socket.emit('room:queue_vote', { itemId: item.id });
+      };
+      row.querySelector('.queue-play-btn').onclick = async () => {
+        socket.emit('room:queue_remove', { itemId: item.id });
+        await loadZ01ForMovieInRoom(m, true);
+      };
+      row.querySelector('.queue-del-btn').onclick = () => {
+        socket.emit('room:queue_remove', { itemId: item.id });
+      };
+      listEl.appendChild(row);
+    });
+  }
+
+  $('addQueueFromCatalogBtn')?.addEventListener('click', () => {
+    switchView('explore');
+    showToast('Выберите фильм в каталоге и нажмите «📋 В очередь комнаты»');
+  });
+
+  // Skip Intro (+85s) & Auto-Next Episode / Queue Prompt
+  let nextEpDismissedForVideo = '';
+
+  function getNextPlayableCandidate() {
+    const videos = state.z01?.videos || [];
+    const curIdx = state.z01?.activeVideoIdx || 0;
+    const isSeries = videos.length > 1 && ((state.z01?.seasons?.length > 0) || videos.some(v => v.episode > 0));
+    if (isSeries && curIdx + 1 < videos.length) {
+      const nextVid = videos[curIdx + 1];
+      const epNum = nextVid.episode || (curIdx + 2);
+      return { type: 'episode', index: curIdx + 1, label: `След. серия (${epNum})` };
+    }
+    const q = state.room?.queue || [];
+    if (q.length > 0 && q[0].movie) {
+      return { type: 'queue', item: q[0], label: `Далее: «${q[0].movie.title}»` };
+    }
+    return null;
+  }
+
+  async function triggerNextPlayable() {
+    $('nextEpisodePrompt')?.classList.add('hidden');
+    const cand = getNextPlayableCandidate();
+    if (!cand) return;
+    if (cand.type === 'episode') {
+      selectZ01VideoItem(cand.index, true);
+    } else if (cand.type === 'queue' && cand.item) {
+      socket.emit('room:queue_remove', { itemId: cand.item.id });
+      await loadZ01ForMovieInRoom(cand.item.movie, true);
+    }
+  }
+
+  $('skipIntroBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    seekTvRelative(85);
+    $('skipIntroBtn')?.classList.add('hidden');
+  });
+
+  $('nextEpPlayNowBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    triggerNextPlayable();
+  });
+
+  $('nextEpCancelBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    nextEpDismissedForVideo = state.loadedStreamKey || 'dismissed';
+    $('nextEpisodePrompt')?.classList.add('hidden');
+  });
+
+  mainVideo.addEventListener('timeupdate', () => {
+    const cur = mainVideo.currentTime || 0;
+    const dur = (mainVideo.duration && isFinite(mainVideo.duration)) ? mainVideo.duration : 0;
+
+    // 1. Skip Intro button: show between 10s and 115s on videos longer than 10 minutes
+    const skipBtn = $('skipIntroBtn');
+    if (skipBtn) {
+      const shouldShowSkip = dur > 600 && cur >= 10 && cur <= 115 && !mainVideo.paused;
+      skipBtn.classList.toggle('hidden', !shouldShowSkip);
+    }
+
+    // 2. Auto-Next Episode / Queue countdown during the last 12 seconds
+    const nextPrompt = $('nextEpisodePrompt');
+    if (nextPrompt) {
+      const rem = dur - cur;
+      const cand = dur > 120 && rem > 0.5 && rem <= 12 ? getNextPlayableCandidate() : null;
+      if (cand && nextEpDismissedForVideo !== (state.loadedStreamKey || 'dismissed')) {
+        nextPrompt.classList.remove('hidden');
+        if ($('nextEpCountdownText')) {
+          $('nextEpCountdownText').textContent = `${cand.label} через ${Math.ceil(rem)}с...`;
+        }
+      } else {
+        nextPrompt.classList.add('hidden');
+      }
+    }
+  });
+
+  mainVideo.addEventListener('ended', () => {
+    if (sleepTimerMode === 'episode') {
+      activateSleepStop();
+      return;
+    }
+    const cand = getNextPlayableCandidate();
+    if (cand && nextEpDismissedForVideo !== (state.loadedStreamKey || 'dismissed')) {
+      triggerNextPlayable();
+    }
+  });
+
+  // Ambient Cinema Glow
+  let ambientEnabled = localStorage.getItem('oulo_ambient_glow') !== 'false';
+  function updateAmbientUi() {
+    const wrapper = $('playerWrapper');
+    const btn = $('toggleAmbientBtn');
+    if (wrapper) wrapper.classList.toggle('ambient-active', ambientEnabled);
+    if (btn) btn.classList.toggle('active', ambientEnabled);
+  }
+  updateAmbientUi();
+
+  $('toggleAmbientBtn')?.addEventListener('click', () => {
+    ambientEnabled = !ambientEnabled;
+    localStorage.setItem('oulo_ambient_glow', ambientEnabled ? 'true' : 'false');
+    updateAmbientUi();
+    showToast(ambientEnabled ? '✨ Фоновая подсветка включена' : 'Фоновая подсветка выключена');
+  });
+
+  setInterval(() => {
+    if (!ambientEnabled || mainVideo.paused || mainVideo.ended || state.currentView !== 'room') return;
+    const canvas = $('ambientGlowCanvas');
+    if (!canvas) return;
+    try {
+      const ctx = canvas.getContext('2d');
+      if (ctx && mainVideo.readyState >= 2) {
+        ctx.drawImage(mainVideo, 0, 0, canvas.width, canvas.height);
+      }
+    } catch {}
+  }, 260);
+
+  // Picture-in-Picture (PiP)
+  $('togglePipBtn')?.addEventListener('click', async () => {
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+      } else if (mainVideo.requestPictureInPicture) {
+        await mainVideo.requestPictureInPicture();
+      } else if (mainVideo.webkitSetPresentationMode) {
+        mainVideo.webkitSetPresentationMode(mainVideo.webkitPresentationMode === 'picture-in-picture' ? 'inline' : 'picture-in-picture');
+      } else {
+        showToast('Режим «Картинка в картинке» не поддерживается браузером');
+      }
+    } catch {
+      showToast('Запустите видео для включения «Картинки в картинке»');
+    }
+  });
+
+  // Sleep Timer (Off -> 30m -> 60m -> End of episode)
+  let sleepTimerMode = 'off'; // 'off' | '30' | '60' | 'episode'
+  let sleepTimeoutId = null;
+
+  function activateSleepStop() {
+    clearTimeout(sleepTimeoutId);
+    sleepTimerMode = 'off';
+    if ($('sleepTimerBtn')) $('sleepTimerBtn').textContent = '🌙 Таймер';
+    if (!mainVideo.paused) mainVideo.pause();
+    if (state.voiceActive) stopVoiceChat();
+    showToast('🌙 Таймер сна сработал — просмотр поставлен на паузу');
+  }
+
+  $('sleepTimerBtn')?.addEventListener('click', () => {
+    clearTimeout(sleepTimeoutId);
+    const modes = ['off', '30', '60', 'episode'];
+    sleepTimerMode = modes[(modes.indexOf(sleepTimerMode) + 1) % modes.length];
+    const btn = $('sleepTimerBtn');
+    if (sleepTimerMode === 'off') {
+      if (btn) btn.textContent = '🌙 Таймер';
+      showToast('Таймер сна выключен');
+    } else if (sleepTimerMode === '30') {
+      if (btn) btn.textContent = '🌙 30 мин';
+      sleepTimeoutId = setTimeout(activateSleepStop, 30 * 60 * 1000);
+      showToast('🌙 Таймер сна: пауза через 30 минут');
+    } else if (sleepTimerMode === '60') {
+      if (btn) btn.textContent = '🌙 60 мин';
+      sleepTimeoutId = setTimeout(activateSleepStop, 60 * 60 * 1000);
+      showToast('🌙 Таймер сна: пауза через 60 минут');
+    } else if (sleepTimerMode === 'episode') {
+      if (btn) btn.textContent = '🌙 До конца';
+      showToast('🌙 Таймер сна: пауза после окончания серии/фильма');
+    }
+  });
+
+  // Mobile Double-Tap Left/Right Edge to Seek (-10s / +10s)
+  let lastPlayerTapTime = 0;
+  let lastPlayerTapSide = '';
+  $('playerWrapper')?.addEventListener('touchend', (e) => {
+    if (e.target.closest('button, input, .tv-player-osd, .skip-intro-btn, .next-ep-prompt')) return;
+    const touch = e.changedTouches?.[0];
+    if (!touch) return;
+    const rect = $('playerWrapper').getBoundingClientRect();
+    const relX = (touch.clientX - rect.left) / Math.max(1, rect.width);
+    const side = relX < 0.32 ? 'left' : (relX > 0.68 ? 'right' : '');
+    if (!side) return;
+
+    const now = Date.now();
+    if (now - lastPlayerTapTime < 310 && lastPlayerTapSide === side) {
+      e.preventDefault();
+      const delta = side === 'left' ? -10 : 10;
+      seekTvRelative(delta);
+      const ind = document.createElement('div');
+      ind.className = `double-tap-indicator ${side}`;
+      ind.textContent = side === 'left' ? '⏪ -10 сек' : '+10 сек ⏩';
+      $('playerWrapper').appendChild(ind);
+      setTimeout(() => ind.remove(), 550);
+      lastPlayerTapTime = 0;
+    } else {
+      lastPlayerTapTime = now;
+      lastPlayerTapSide = side;
+    }
+  }, { passive: false });
+
+  // Smart Buffering Wait Indicator
+  let bufferingDebounceTimer = null;
+  let isCurrentlyBuffering = false;
+  const activeBufferingPeers = new Map();
+
+  function renderBufferingBanner() {
+    const banner = $('bufferingWaitBanner');
+    const txt = $('bufferingWaitText');
+    if (!banner || !txt) return;
+    const names = Array.from(activeBufferingPeers.values());
+    if (names.length === 0) {
+      banner.classList.add('hidden');
+    } else {
+      txt.textContent = `Ждём подгрузку у ${names.join(', ')}...`;
+      banner.classList.remove('hidden');
+    }
+  }
+
+  mainVideo.addEventListener('waiting', () => {
+    if (!state.room || mainVideo.paused) return;
+    clearTimeout(bufferingDebounceTimer);
+    bufferingDebounceTimer = setTimeout(() => {
+      if (!mainVideo.paused && mainVideo.readyState < 3) {
+        isCurrentlyBuffering = true;
+        socket.emit('player:buffering', { buffering: true });
+      }
+    }, 1300);
+  });
+
+  const clearBufferingState = () => {
+    clearTimeout(bufferingDebounceTimer);
+    if (isCurrentlyBuffering) {
+      isCurrentlyBuffering = false;
+      if (state.room) socket.emit('player:buffering', { buffering: false });
+    }
+  };
+  mainVideo.addEventListener('playing', clearBufferingState);
+  mainVideo.addEventListener('canplay', clearBufferingState);
+  mainVideo.addEventListener('pause', clearBufferingState);
+
+  socket.on('player:buffering_state', ({ userId, user, buffering }) => {
+    if (!userId || (state.user && userId === state.user.id)) return;
+    if (buffering && user) {
+      activeBufferingPeers.set(userId, user.displayName || 'зрителя');
+    } else {
+      activeBufferingPeers.delete(userId);
+    }
+    renderBufferingBanner();
+  });
+
+  // Fullscreen Voice Speaking Overlay
+  const activeVoiceSpeakers = new Map();
+  let localVoiceSpeaking = false;
+
+  function renderVoiceSpeakersOverlay() {
+    const box = $('voiceSpeakersOverlay');
+    if (!box) return;
+    if (activeVoiceSpeakers.size === 0) {
+      box.classList.add('hidden');
+      box.innerHTML = '';
+      return;
+    }
+    box.classList.remove('hidden');
+    box.innerHTML = Array.from(activeVoiceSpeakers.values()).map(u => `
+      <div class="voice-speaker-pill">
+        <span class="voice-speaker-av">${avatarInnerHtml(u)}</span>
+        <span>${esc(u.displayName || 'Участник')}</span>
+        <span class="voice-speaker-wave"></span>
+      </div>
+    `).join('');
+  }
+
+  socket.on('voice:speaking', ({ userId, user, speaking }) => {
+    if (!userId) return;
+    if (speaking && user) {
+      activeVoiceSpeakers.set(userId, user);
+    } else {
+      activeVoiceSpeakers.delete(userId);
+    }
+    renderVoiceSpeakersOverlay();
+  });
+
+  // Detect local microphone activity when voice chat is active
+  let localAnalyser = null;
+  let localAnalyserStream = null;
+  setInterval(() => {
+    if (!state.voiceActive || !state.localStream || !state.room) {
+      if (localVoiceSpeaking) {
+        localVoiceSpeaking = false;
+        if (state.user) activeVoiceSpeakers.delete(state.user.id);
+        renderVoiceSpeakersOverlay();
+        socket.emit('voice:speaking', { speaking: false });
+      }
+      return;
+    }
+    try {
+      if (localAnalyserStream !== state.localStream) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          const src = ctx.createMediaStreamSource(state.localStream);
+          localAnalyser = ctx.createAnalyser();
+          localAnalyser.fftSize = 256;
+          src.connect(localAnalyser);
+          localAnalyserStream = state.localStream;
+        }
+      }
+      if (localAnalyser) {
+        const data = new Uint8Array(localAnalyser.frequencyBinCount);
+        localAnalyser.getByteFrequencyData(data);
+        let sum = 0;
+        for (let i = 0; i < data.length; i++) sum += data[i];
+        const avg = sum / data.length;
+        const nowSpeaking = avg > 16;
+        if (nowSpeaking !== localVoiceSpeaking) {
+          localVoiceSpeaking = nowSpeaking;
+          if (state.user) {
+            if (nowSpeaking) activeVoiceSpeakers.set(state.user.id, state.user);
+            else activeVoiceSpeakers.delete(state.user.id);
+            renderVoiceSpeakersOverlay();
+          }
+          socket.emit('voice:speaking', { speaking: nowSpeaking });
+        }
+      }
+    } catch {}
+  }, 240);
 
   // ================= INITIALIZATION =================
   async function boot() {
