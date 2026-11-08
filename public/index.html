@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261108_oulo_14" />
+  <link rel="stylesheet" href="/styles.css?v=20261108_oulo_15" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -165,10 +165,6 @@
               <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               <span>Топ сериалов</span>
             </button>
-            <button class="cat-pill" data-cat="turkish">
-              <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-              <span>Турецкое</span>
-            </button>
           </div>
 
           <!-- Movies Poster Grid -->
@@ -260,14 +256,8 @@
         <!-- VIEW 4: SAVED (Bookmarks & History) -->
         <section id="view-saved" class="view-page">
           <div class="category-bar">
-            <button class="cat-pill active" data-saved-tab="bookmarks" id="tabBookmarksBtn">
-              <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-              <span>Закладки</span>
-            </button>
-            <button class="cat-pill" data-saved-tab="history" id="tabHistoryBtn">
-              <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <span>История</span>
-            </button>
+            <button class="cat-pill active" data-saved-tab="bookmarks" id="tabBookmarksBtn">🔖 Закладки</button>
+            <button class="cat-pill" data-saved-tab="history" id="tabHistoryBtn">🕒 История</button>
           </div>
           <div id="savedGrid" class="poster-grid"></div>
         </section>
@@ -422,9 +412,6 @@
                 <div class="z01-top-tools">
                   <div class="z01-top-tools-title">🎞️ Источник и поток</div>
                   <div class="z01-top-tools-actions">
-                    <button type="button" id="toggleTurkishHdfcBtn" class="pill-btn tiny ghost btn-toggle-hdfc" title="Переключить на турецкий парсер HDFilmCehennemi">
-                      <span>🇹🇷 HDFilmCehennemi</span>
-                    </button>
                     <button type="button" id="toggleProxyStreamBtn" class="pill-btn tiny ghost btn-toggle-proxy" title="Переключить прокси потока (если видео не грузится)">
                       <span>⚡ Прокси: Авто</span>
                     </button>
@@ -446,23 +433,10 @@
             <!-- Right / Bottom: Rave Chat, Friends Chat, Participants & Room Options Sidebar -->
             <aside class="room-sidebar" id="roomSidebar">
               <div class="sidebar-tabs">
-                <button class="side-tab active" data-rtab="chat">
-                  <svg class="side-tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  <span>Чат</span>
-                </button>
-                <button class="side-tab" data-rtab="users">
-                  <svg class="side-tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                  <span>Зрители (<span id="roomUserCount">1</span>)</span>
-                </button>
-                <button class="side-tab" data-rtab="dms">
-                  <svg class="side-tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                  <span>Друзья</span>
-                  <span id="roomDmBadge" class="nav-badge inline-badge hidden">0</span>
-                </button>
-                <button class="side-tab" data-rtab="options">
-                  <svg class="side-tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                  <span>Опции</span>
-                </button>
+                <button class="side-tab active" data-rtab="chat">💬 Чат</button>
+                <button class="side-tab" data-rtab="users">👥 Зрители (<span id="roomUserCount">1</span>)</button>
+                <button class="side-tab" data-rtab="dms">💌 Друзья <span id="roomDmBadge" class="nav-badge inline-badge hidden">0</span></button>
+                <button class="side-tab" data-rtab="options">⚙️ Опции</button>
               </div>
 
               <!-- Tab 1: Live Room Chat -->
@@ -544,17 +518,6 @@
                     </div>
                   </div>
 
-                  <!-- Section 2.5: Turkish Parser Option -->
-                  <div class="options-section">
-                    <div class="options-section-title">🇹🇷 Турецкий парсер</div>
-                    <div class="options-card">
-                      <div class="options-card-desc">Прямой турецкий дубляж и субтитры с HDFilmCehennemi:</div>
-                      <button type="button" class="btn secondary full-w btn-toggle-hdfc" id="optionsHdfcBtn">
-                        <span>🇹🇷 Переключить на HDFilmCehennemi</span>
-                      </button>
-                    </div>
-                  </div>
-
                   <!-- Section 3: Smart TV & Remote -->
                   <div class="options-section">
                     <div class="options-section-title">📺 Управление на Телевизоре</div>
@@ -626,9 +589,6 @@
           </button>
           <button id="modalStartPrivateRoomBtn" class="btn glass full">
             <span>🔒 Приватная комната (По ссылке)</span>
-          </button>
-          <button type="button" id="modalHdfcWatchBtn" class="btn glass full" style="margin-top:4px;">
-            <span>🇹🇷 Смотреть с HDFilmCehennemi</span>
           </button>
           <button id="modalBookmarkBtn" class="btn glass icon-only" title="В закладки">🔖</button>
         </div>
@@ -875,6 +835,7 @@
               <button type="button" id="profileNotifToggleBtn" class="btn primary">🔔 Проверить уведомления</button>
             </div>
           </div>
+
           <div class="pfolder-card" style="margin-top:14px;">
             <div class="pfolder-card-header">
               <span class="pfolder-card-icon">🔊</span>
@@ -933,23 +894,6 @@
                 <span class="proxy-opt-title">🚀 Напрямую без прокси</span>
                 <span class="proxy-opt-desc">Прямое воспроизведение видео (если не блокируется)</span>
               </button>
-            </div>
-          </div>
-
-          <div class="pfolder-card" style="margin-top:14px;">
-            <div class="pfolder-card-header">
-              <span class="pfolder-card-icon">🇹🇷</span>
-              <div>
-                <div class="pfolder-card-title">Турецкий парсер (HDFilmCehennemi)</div>
-                <div class="pfolder-card-sub">Включить турецкие дубляжи и субтитры в плеере и источниках</div>
-              </div>
-            </div>
-            <div class="setting-toggle-row" style="margin-top:12px;">
-              <span class="setting-toggle-label">Опция HDFilmCehennemi</span>
-              <label class="switch-ui">
-                <input type="checkbox" id="profileHdfcToggle" checked />
-                <span class="switch-slider"></span>
-              </label>
             </div>
           </div>
 
@@ -1324,6 +1268,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261108_oulo_14"></script>
+  <script src="/app.js?v=20261108_oulo_15"></script>
 </body>
 </html>

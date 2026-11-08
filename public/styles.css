@@ -830,10 +830,10 @@ button {
   appearance: none;
   -webkit-appearance: none;
   position: relative;
-  width: 210px;
-  max-width: 225px;
-  min-width: 180px;
-  flex: 0 0 210px;
+  width: 230px;
+  max-width: 250px;
+  min-width: 200px;
+  flex: 0 0 230px;
   padding: 0;
   margin: 0;
   text-align: left;
@@ -864,7 +864,7 @@ button {
 }
 .room-card-banner {
   position: relative;
-  height: 72px;
+  height: 80px;
   background: #111111;
   background-size: cover;
   background-position: center;
@@ -965,16 +965,13 @@ button {
 .avatar-stack span:first-child {
   margin-left: 0;
 }
-@media (max-width: 600px) {
-  .room-card {
-    width: 180px;
-    max-width: 190px;
-    min-width: 160px;
-    flex: 0 0 180px;
-  }
-  .room-card-banner {
-    height: 64px;
-  }
+  justify-content: center;
+  font-size: 0.8rem;
+  margin-left: -6px;
+  overflow: hidden;
+}
+.avatar-stack span:first-child {
+  margin-left: 0;
 }
 
 /* ================= WATCH PARTY ROOM VIEW ================= */
@@ -1433,22 +1430,12 @@ button {
   border-bottom: 1px solid var(--border-subtle);
 }
 .side-tab {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
   flex: 1;
   height: 44px;
   font-size: 0.84rem;
   font-weight: 600;
   color: var(--text-muted);
   border-bottom: 2px solid transparent;
-}
-.side-tab-ico {
-  width: 15px;
-  height: 15px;
-  stroke: currentColor;
-  flex-shrink: 0;
 }
 .side-tab.active {
   color: var(--text-main);

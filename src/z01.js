@@ -1,6 +1,5 @@
 const crypto = require('crypto');
 const rezka = require('./rezka');
-const hdfc = require('./hdfilmcehennemi');
 
 const TMDB_KEY = '4ef0d7355d9ffb5151e987764708ce96';
 const TMDB_MIRRORS = [
@@ -282,14 +281,6 @@ async function getCatalogFeed(category = 'trending', page = 1) {
       });
       forceType = 'movie';
       break;
-    case 'turkish':
-      data = await fetchTmdb('discover/movie', {
-        page: p,
-        with_original_language: 'tr',
-        sort_by: 'popularity.desc'
-      });
-      forceType = 'movie';
-      break;
     case 'trending':
     default:
       data = await fetchTmdb('trending/all/week', { page: p });
@@ -508,16 +499,6 @@ async function getZ01Sources(movie) {
     fullName: 'HDRezka',
     badge: 'FHD',
     url: 'rezka://details',
-    show: true
-  });
-
-  // Turkish HDFilmCehennemi parser
-  sources.push({
-    key: 'hdfilmcehennemi',
-    name: 'HDFilmCehennemi (TR)',
-    fullName: 'HDFilmCehennemi (Türkçe)',
-    badge: 'HD',
-    url: 'hdfc://details',
     show: true
   });
 
@@ -853,167 +834,9 @@ async function handleRezkaStreamResolve({ url }) {
   };
 }
 
-async function handleHdfcBalancerQuery({ url, movie, prevSeasons = [], prevVoices = [] }) {
-  try {
-    const parsed = new URL(url);
-    const pathname = parsed.pathname.replace(/^\/+/, '');
-
-    if (pathname === 'details' || url === 'hdfc://details') {
-      const q = movie.original_title || movie.title || '';
-      const targetYear = movie.year || (movie.release_date ? parseInt(movie.release_date.slice(0, 4), 10) : null);
-      let items = await hdfc.search(q, targetYear);
-      if ((!items || items.length === 0) && movie.title && movie.title !== q) {
-        items = await hdfc.search(movie.title, targetYear);
-      }
-
-      if (!items || items.length === 0) {
-        return {
-          error: `«${q}»${targetYear ? ` (${targetYear})` : ''} не найден на HDFilmCehennemi. Выберите другой источник.`,
-          videos: [],
-          seasons: [],
-          voices: [],
-          similars: []
-        };
-      }
-
-      const best = items[0];
-      const details = await hdfc.getDetails(best.url);
-
-      // Voices in Turkish
-      const voices = (details.translators || []).map(t => ({
-        id: t.id,
-        title: t.title,
-        kind: t.id === 'tr_dub' ? 'dub' : (t.id === 'tr_sub' ? 'sub' : 'orig'),
-        url: `hdfc://episodes?movie_url=${encodeURIComponent(details.url)}&tr=${t.id}&is_series=${details.isSeries ? 1 : 0}`
-      }));
-
-      // Seasons & Episodes
-      const seasons = (details.seasons || []).map(s => ({
-        season: s.season,
-        title: s.title,
-        url: `hdfc://episodes?movie_url=${encodeURIComponent(details.url)}&season=${s.season}&is_series=1`
-      }));
-
-      let videos = [];
-      if (details.isSeries && details.seasons.length > 0) {
-        const firstSeason = details.seasons[0];
-        videos = firstSeason.episodes.map(ep => ({
-          title: ep.title,
-          season: ep.season,
-          episode: ep.episode,
-          url: `hdfc://stream?movie_url=${encodeURIComponent(details.url)}&season=${ep.season}&episode=${ep.episode}&is_movie=0`,
-          method: 'play'
-        }));
-      } else {
-        videos = [{
-          title: details.title || movie.title,
-          url: `hdfc://stream?movie_url=${encodeURIComponent(details.url)}&is_movie=1`,
-          method: 'play'
-        }];
-      }
-
-      return {
-        videos,
-        seasons,
-        voices,
-        similars: []
-      };
-    }
-
-    if (pathname === 'episodes' || url.startsWith('hdfc://episodes')) {
-      const q = parsed.searchParams;
-      const movieUrl = q.get('movie_url');
-      const isSeries = q.get('is_series') === '1';
-      const season = q.get('season') ? parseInt(q.get('season'), 10) : 1;
-      const tr = q.get('tr') || 'tr_dub';
-
-      const details = await hdfc.getDetails(movieUrl);
-
-      const voices = (details.translators || []).map(t => ({
-        id: t.id,
-        title: t.title,
-        kind: t.id === 'tr_dub' ? 'dub' : (t.id === 'tr_sub' ? 'sub' : 'orig'),
-        url: `hdfc://episodes?movie_url=${encodeURIComponent(movieUrl)}&tr=${t.id}&season=${season}&is_series=${isSeries ? 1 : 0}`
-      }));
-
-      if (!isSeries) {
-        return {
-          videos: [{
-            title: details.title || 'Фильм',
-            url: `hdfc://stream?movie_url=${encodeURIComponent(movieUrl)}&tr=${tr}&is_movie=1`,
-            method: 'play'
-          }],
-          seasons: [],
-          voices,
-          similars: []
-        };
-      }
-
-      const seasons = (details.seasons || []).map(s => ({
-        season: s.season,
-        title: s.title,
-        url: `hdfc://episodes?movie_url=${encodeURIComponent(movieUrl)}&tr=${tr}&season=${s.season}&is_series=1`
-      }));
-
-      const activeSeason = details.seasons.find(s => s.season === season) || details.seasons[0];
-      const videos = (activeSeason?.episodes || []).map(ep => ({
-        title: ep.title,
-        season: ep.season,
-        episode: ep.episode,
-        url: `hdfc://stream?movie_url=${encodeURIComponent(movieUrl)}&tr=${tr}&season=${ep.season}&episode=${ep.episode}&is_movie=0`,
-        method: 'play'
-      }));
-
-      return {
-        videos,
-        seasons,
-        voices,
-        similars: []
-      };
-    }
-
-    return { videos: [], seasons: prevSeasons, voices: prevVoices, similars: [] };
-  } catch (err) {
-    return {
-      error: `HDFilmCehennemi: ${err.message}`,
-      videos: [],
-      seasons: prevSeasons,
-      voices: prevVoices,
-      similars: []
-    };
-  }
-}
-
-async function handleHdfcStreamResolve({ url }) {
-  const u = new URL(url);
-  const q = u.searchParams;
-  const movieUrl = q.get('movie_url');
-  const season = q.get('season');
-  const episode = q.get('episode');
-  const voice = q.get('tr') || 'tr_dub';
-
-  const streamData = await hdfc.getStream({
-    pageUrl: movieUrl,
-    season,
-    episode,
-    voice
-  });
-
-  return {
-    url: streamData.streamUrl,
-    headers: streamData.headers,
-    qualities: { 'Auto': streamData.streamUrl },
-    subtitles: streamData.subtitles || [],
-    streamType: 'hls'
-  };
-}
-
 async function queryZ01Balancer({ url, movie, uid, depth = 0, prevSeasons = [], prevVoices = [] }) {
   if (typeof url === 'string' && url.startsWith('rezka://')) {
     return handleRezkaBalancerQuery({ url, movie, prevSeasons, prevVoices });
-  }
-  if (typeof url === 'string' && url.startsWith('hdfc://')) {
-    return handleHdfcBalancerQuery({ url, movie, prevSeasons, prevVoices });
   }
   if (!url || depth > 4) {
     return { videos: [], seasons: prevSeasons, voices: prevVoices, similars: [] };
@@ -1213,9 +1036,6 @@ async function queryZ01Balancer({ url, movie, uid, depth = 0, prevSeasons = [], 
 async function resolveZ01Stream({ url, method, headers, qualities, subtitles, uid }) {
   if (typeof url === 'string' && url.startsWith('rezka://stream')) {
     return handleRezkaStreamResolve({ url });
-  }
-  if (typeof url === 'string' && url.startsWith('hdfc://stream')) {
-    return handleHdfcStreamResolve({ url });
   }
   const reqUid = uid || ('rave' + crypto.randomBytes(4).toString('hex'));
   let finalUrl = typeof url === 'string' ? url.split(' or ')[0].trim() : '';
