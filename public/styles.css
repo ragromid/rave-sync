@@ -4390,6 +4390,18 @@ body.tv-cinema-mode .player-wrapper {
   color: #00e676;
 }
 
+/* Hide native browser video controls on Desktop (> 900px) so only custom oulo OSD controls are displayed */
+@media (min-width: 901px) {
+  #mainVideo::-webkit-media-controls,
+  #mainVideo::-webkit-media-controls-enclosure,
+  #mainVideo::-webkit-media-controls-panel {
+    display: none !important;
+  }
+  #mainVideo {
+    cursor: pointer;
+  }
+}
+
 /* ================= HARDWARE-ACCELERATED TRENDY ANIMATIONS & ACCESSIBILITY ================= */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {

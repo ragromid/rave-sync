@@ -2338,7 +2338,7 @@
 
     setPlayerOverlay(false, false, '');
     const video = $('mainVideo');
-    video.controls = true;
+    video.controls = window.innerWidth <= 900;
     state.justLoadedMediaUntil = Date.now() + 2600;
 
     const epTag = media.season && media.episode ? ` · Сезон ${media.season}, Серия ${media.episode}` : '';
@@ -3063,6 +3063,26 @@
   // Wake OSD on mouse/pointer movement inside playerWrapper
   $('playerWrapper')?.addEventListener('mousemove', () => wakeTvOsd(false));
   $('playerWrapper')?.addEventListener('touchstart', () => wakeTvOsd(false), { passive: true });
+
+  // On desktop (> 900px), native video controls are hidden so only the custom oulo OSD is shown:
+  // single-click on video toggles Play/Pause, double-click toggles Fullscreen
+  mainVideo.addEventListener('click', (e) => {
+    if (window.innerWidth > 900) {
+      e.preventDefault();
+      toggleTvPlayPause();
+    }
+  });
+  mainVideo.addEventListener('dblclick', (e) => {
+    if (window.innerWidth > 900) {
+      e.preventDefault();
+      toggleTvFullscreen();
+    }
+  });
+  window.addEventListener('resize', () => {
+    if (state.loadedStreamKey) {
+      mainVideo.controls = window.innerWidth <= 900;
+    }
+  });
   function toggleSmartTvOsd() {
     const isTv = !document.body.classList.contains('tv-mode');
     setSmartTvMode(isTv);
@@ -5569,8 +5589,17 @@
     e.stopPropagation();
     triggerNextPlayable();
   });
+  $('playNextEpNowBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    triggerNextPlayable();
+  });
 
   $('nextEpCancelBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    nextEpDismissedForVideo = state.loadedStreamKey || 'dismissed';
+    $('nextEpisodePrompt')?.classList.add('hidden');
+  });
+  $('cancelNextEpBtn')?.addEventListener('click', (e) => {
     e.stopPropagation();
     nextEpDismissedForVideo = state.loadedStreamKey || 'dismissed';
     $('nextEpisodePrompt')?.classList.add('hidden');
