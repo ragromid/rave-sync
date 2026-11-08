@@ -18,29 +18,6 @@ const Z01_SERVERS = [
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 
-const LANG_DISPLAY = {
-  'tr': 'Турецкий / Türkçe',
-  'de': 'Немецкий / Deutsch',
-  'es': 'Испанский / Español',
-  'en': 'Английский / English',
-  'fr': 'Французский / Français',
-  'it': 'Итальянский / Italiano',
-  'ko': 'Корейский / 한국어',
-  'ja': 'Японский / 日本語',
-  'zh': 'Китайский / 中文',
-  'pl': 'Польский / Polski',
-  'uk': 'Украинский / Українська'
-};
-
-function formatVoiceTitle(name, origLang) {
-  const n = String(name || '').trim();
-  const langKey = String(origLang || '').toLowerCase();
-  if (/оригинал/i.test(n) && langKey && LANG_DISPLAY[langKey]) {
-    return `Оригинал: ${LANG_DISPLAY[langKey]} (+субтитры)`;
-  }
-  return n;
-}
-
 // Simple in-memory caches
 const catalogCache = new Map();
 const z01Cache = new Map();
@@ -236,29 +213,11 @@ function normalizeCard(item, forceType) {
   };
 }
 
-const TMDB_LANG_MAP = {
-  ru: 'ru-RU',
-  en: 'en-US',
-  tr: 'tr-TR',
-  de: 'de-DE',
-  es: 'es-ES'
-};
-
-function resolveTmdbLang(lang) {
-  if (!lang) return 'ru-RU';
-  const clean = String(lang).toLowerCase().trim().slice(0, 2);
-  return TMDB_LANG_MAP[clean] || 'ru-RU';
-}
-
 async function fetchTmdb(endpoint, queryParams = {}) {
-  const tmdbLang = resolveTmdbLang(queryParams.lang || queryParams.language);
-  const cleanParams = { ...queryParams };
-  delete cleanParams.lang;
-  cleanParams.language = tmdbLang;
-
   const qs = new URLSearchParams({
     api_key: TMDB_KEY,
-    ...cleanParams
+    language: 'ru-RU',
+    ...queryParams
   }).toString();
 
   const cacheKey = `${endpoint}?${qs}`;
@@ -283,26 +242,26 @@ async function fetchTmdb(endpoint, queryParams = {}) {
   throw lastErr || new Error('Failed to fetch TMDB');
 }
 
-async function getCatalogFeed(category = 'trending', page = 1, lang = 'ru') {
+async function getCatalogFeed(category = 'trending', page = 1) {
   const p = String(page || 1);
   let data;
   let forceType = null;
 
   switch (category) {
     case 'popular_movies':
-      data = await fetchTmdb('movie/popular', { page: p, lang });
+      data = await fetchTmdb('movie/popular', { page: p });
       forceType = 'movie';
       break;
     case 'popular_tv':
-      data = await fetchTmdb('tv/popular', { page: p, lang });
+      data = await fetchTmdb('tv/popular', { page: p });
       forceType = 'tv';
       break;
     case 'top_movies':
-      data = await fetchTmdb('movie/top_rated', { page: p, lang });
+      data = await fetchTmdb('movie/top_rated', { page: p });
       forceType = 'movie';
       break;
     case 'top_tv':
-      data = await fetchTmdb('tv/top_rated', { page: p, lang });
+      data = await fetchTmdb('tv/top_rated', { page: p });
       forceType = 'tv';
       break;
     case 'anime':
@@ -310,8 +269,7 @@ async function getCatalogFeed(category = 'trending', page = 1, lang = 'ru') {
         page: p,
         with_genres: '16',
         with_original_language: 'ja',
-        sort_by: 'popularity.desc',
-        lang
+        sort_by: 'popularity.desc'
       });
       forceType = 'tv';
       break;
@@ -319,14 +277,13 @@ async function getCatalogFeed(category = 'trending', page = 1, lang = 'ru') {
       data = await fetchTmdb('discover/movie', {
         page: p,
         with_genres: '16',
-        sort_by: 'popularity.desc',
-        lang
+        sort_by: 'popularity.desc'
       });
       forceType = 'movie';
       break;
     case 'trending':
     default:
-      data = await fetchTmdb('trending/all/week', { page: p, lang });
+      data = await fetchTmdb('trending/all/week', { page: p });
       break;
   }
 
@@ -341,13 +298,12 @@ async function getCatalogFeed(category = 'trending', page = 1, lang = 'ru') {
   };
 }
 
-async function searchCatalog(query, page = 1, lang = 'ru') {
+async function searchCatalog(query, page = 1) {
   if (!query || !String(query).trim()) return { page: 1, total_pages: 1, results: [] };
   const data = await fetchTmdb('search/multi', {
     query: String(query).trim(),
     page: String(page || 1),
-    include_adult: 'false',
-    lang
+    include_adult: 'false'
   });
   const results = (data.results || [])
     .filter(x => (x.media_type === 'movie' || x.media_type === 'tv') && (x.poster_path || x.backdrop_path || x.title || x.name))
@@ -406,10 +362,10 @@ async function resolveExternalIds(movie) {
   return setCached(z01Cache, cacheKey, { imdb_id, kinopoisk_id });
 }
 
-async function getCatalogDetails(id, type = 'movie', lang = 'ru') {
+async function getCatalogDetails(id, type = 'movie') {
   const isTv = type === 'tv' || type === '1' || type === 'serial';
   const endpoint = isTv ? `tv/${id}` : `movie/${id}`;
-  const raw = await fetchTmdb(endpoint, { append_to_response: 'external_ids', lang });
+  const raw = await fetchTmdb(endpoint, { append_to_response: 'external_ids' });
   const card = normalizeCard(raw, isTv ? 'tv' : 'movie');
   const ext = await resolveExternalIds(card);
   if (ext.imdb_id) card.imdb_id = ext.imdb_id;
@@ -519,30 +475,18 @@ async function getZ01Sources(movie) {
     seenKeys.add(key);
 
     const parts = splitSourceName(item.name || key);
-    let name = parts.name || item.name || key;
-    let badge = parts.badge || '';
-
-    // Highlight multi-language / international capabilities
-    if (key === 'veoveo') {
-      name = 'VeoVeo (Multi: ENG / GER / ESP / FRE)';
-      badge = 'Multi';
-    } else if (key === 'iremux') {
-      name = 'iRemux (Multi-Audio 1080p)';
-      badge = 'Multi';
-    }
-
     sources.push({
       key,
-      name,
+      name: parts.name || item.name || key,
       fullName: item.name || key,
-      badge,
+      badge: parts.badge || '',
       url: item.url,
       show: item.show !== undefined ? !!item.show : true
     });
   }
 
-  // Sort: shown first, then higher quality / multi-language badge
-  const qRank = { '4K': 4, 'Multi': 4, 'FHD': 3, 'HD': 2, 'SD': 1, '': 0 };
+  // Sort: shown first, then higher quality badge
+  const qRank = { '4K': 4, 'FHD': 3, 'HD': 2, 'SD': 1, '': 0 };
   sources.sort((a, b) => {
     if (a.show !== b.show) return a.show ? -1 : 1;
     return (qRank[b.badge] || 0) - (qRank[a.badge] || 0);
@@ -679,33 +623,18 @@ async function handleRezkaBalancerQuery({ url, movie, prevSeasons = [], prevVoic
 
       const best = (rezka.findBestMatch ? rezka.findBestMatch(items, movie) : null) || items[0];
       const details = await rezka.getDetails(best.url);
-      const translators = (details.translators || []).filter(t => !t.isPremium);
-
-      if (!translators.length || details.isPremiumOnly) {
-        return {
-          error: `«${q}» на HDRezka доступен только по платной Premium-подписке (заставки-пустышки заблокированы). Пожалуйста, выберите другой плеер выше (Collaps, Ashdi, CDNMovies, Rutube и др.).`,
-          videos: [],
-          seasons: [],
-          voices: [],
-          similars: []
-        };
-      }
-
+      const translators = details.translators || [];
       const defaultTr = translators.find(t => t.isDefault) || translators[0] || { id: '0', name: 'Стандартная' };
 
-      const origLang = movie?.original_language || '';
-      const voices = translators.map((t, idx) => {
-        const title = formatVoiceTitle(t.name, origLang);
-        return {
-          index: idx,
-          title,
-          rawTitle: t.name,
-          kind: 'mvo',
-          groupTitle: 'Озвучка',
-          url: `rezka://episodes?id=${details.id}&tr=${t.id}&movie_url=${encodeURIComponent(details.url)}&is_series=${details.isSeries ? 1 : 0}`,
-          active: t.id === defaultTr.id
-        };
-      });
+      const voices = translators.map((t, idx) => ({
+        index: idx,
+        title: t.name,
+        rawTitle: t.name,
+        kind: 'mvo',
+        groupTitle: 'Озвучка',
+        url: `rezka://episodes?id=${details.id}&tr=${t.id}&movie_url=${encodeURIComponent(details.url)}&is_series=${details.isSeries ? 1 : 0}`,
+        active: t.id === defaultTr.id
+      }));
 
       const seasons = (details.seasons || []).map((s, idx) => ({
         index: idx,
@@ -771,12 +700,10 @@ async function handleRezkaBalancerQuery({ url, movie, prevSeasons = [], prevVoic
       if (!voices.length && movieUrl) {
         try {
           const details = await rezka.getDetails(movieUrl);
-          const freeTranslators = (details.translators || []).filter(t => !t.isPremium);
-          const origLang = movie?.original_language || '';
-          if (freeTranslators.length) {
-            voices = freeTranslators.map((t, idx) => ({
+          if (details.translators?.length) {
+            voices = details.translators.map((t, idx) => ({
               index: idx,
-              title: formatVoiceTitle(t.name, origLang),
+              title: t.name,
               rawTitle: t.name,
               kind: 'mvo',
               groupTitle: 'Озвучка',

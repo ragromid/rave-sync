@@ -908,8 +908,8 @@ app.delete('/api/admin/rooms', adminMiddleware, (req, res) => {
 
 app.get('/api/catalog/feed', async (req, res) => {
   try {
-    const { category = 'trending', page = 1, lang = 'ru' } = req.query;
-    const data = await z01.getCatalogFeed(category, page, lang);
+    const { category = 'trending', page = 1 } = req.query;
+    const data = await z01.getCatalogFeed(category, page);
     res.json(data);
   } catch (e) {
     res.status(500).json({ error: e.message || 'Ошибка загрузки каталога' });
@@ -918,8 +918,8 @@ app.get('/api/catalog/feed', async (req, res) => {
 
 app.get('/api/catalog/search', async (req, res) => {
   try {
-    const { q = '', page = 1, lang = 'ru' } = req.query;
-    const data = await z01.searchCatalog(q, page, lang);
+    const { q = '', page = 1 } = req.query;
+    const data = await z01.searchCatalog(q, page);
     res.json(data);
   } catch (e) {
     res.status(500).json({ error: e.message || 'Ошибка поиска' });
@@ -928,9 +928,9 @@ app.get('/api/catalog/search', async (req, res) => {
 
 app.get('/api/catalog/details', async (req, res) => {
   try {
-    const { id, type = 'movie', lang = 'ru' } = req.query;
+    const { id, type = 'movie' } = req.query;
     if (!id) return res.status(400).json({ error: 'Missing id' });
-    const card = await z01.getCatalogDetails(id, type, lang);
+    const card = await z01.getCatalogDetails(id, type);
     res.json({ movie: card });
   } catch (e) {
     res.status(500).json({ error: e.message || 'Ошибка получения деталей' });
@@ -1991,15 +1991,6 @@ io.on('connection', (socket) => {
       serverTime: Date.now(),
       action: 'resync'
     });
-  });
-
-  // Synchronize audio track selection across the room
-  socket.on('player:set_audio_track', ({ audioTrackIndex }) => {
-    const meta = socketMeta.get(socket.id);
-    if (!meta || !meta.roomCode) return;
-    const room = rooms.get(meta.roomCode);
-    if (!room) return;
-    socket.to(meta.roomCode).emit('player:set_audio_track', { audioTrackIndex });
   });
 
   // Change media / Z01 balancer / voice / episode / custom link in room
