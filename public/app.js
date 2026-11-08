@@ -1325,12 +1325,29 @@
   }
 
   // ================= CATALOG (LAMPA x TMDB) =================
+  let catalogLoading = false;
+  let catalogHasMore = true;
+  let catalogReqSeq = 0;
+  let sentinelIntersecting = false;
+  const seenCatalogIds = new Set();
+
   async function loadCatalog(reset = true) {
+    if (!reset && (catalogLoading || !catalogHasMore)) return;
     $('heroBanner').classList.toggle('hidden', !!state.searchQuery);
+    const reqId = ++catalogReqSeq;
+    catalogLoading = true;
+
+    const loaderEl = $('catalogInfiniteLoader');
     if (reset) {
       state.page = 1;
+      catalogHasMore = true;
+      seenCatalogIds.clear();
       $('catalogGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Загрузка каталога...</div>';
+      if (loaderEl) loaderEl.classList.add('hidden');
+    } else if (loaderEl) {
+      loaderEl.classList.remove('hidden');
     }
+
     try {
       let data;
       if (state.searchQuery) {
@@ -1338,8 +1355,18 @@
       } else {
         data = await api(`/api/catalog/feed?category=${encodeURIComponent(state.category)}&page=${state.page}`);
       }
+      if (reqId !== catalogReqSeq) return;
 
-      const items = data.results || [];
+      const rawItems = data.results || [];
+      const items = [];
+      for (const it of rawItems) {
+        const key = `${it.type || 'm'}_${it.id}`;
+        if (!seenCatalogIds.has(key)) {
+          seenCatalogIds.add(key);
+          items.push(it);
+        }
+      }
+
       if (reset) {
         $('catalogGrid').innerHTML = '';
         if (items.length > 0 && !state.searchQuery && state.page === 1) {
@@ -1356,10 +1383,29 @@
           }
         }, 120);
       }
-      $('loadMoreCatalogBtn').classList.toggle('hidden', state.page >= (data.total_pages || 1) || items.length === 0);
+
+      const totalPages = data.total_pages || 1;
+      catalogHasMore = state.page < totalPages && rawItems.length > 0;
+      $('loadMoreCatalogBtn')?.classList.add('hidden');
     } catch (e) {
+      if (reqId !== catalogReqSeq) return;
       if (reset) {
         $('catalogGrid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Ошибка загрузки: ${esc(e.message)}</div>`;
+      }
+      catalogHasMore = false;
+    } finally {
+      if (reqId === catalogReqSeq) {
+        catalogLoading = false;
+        if (loaderEl) loaderEl.classList.add('hidden');
+        // If viewport is large and sentinel is still within prefetch zone, load next page
+        if (sentinelIntersecting && catalogHasMore && state.currentView === 'explore') {
+          requestAnimationFrame(() => {
+            if (sentinelIntersecting && !catalogLoading && catalogHasMore && state.currentView === 'explore') {
+              state.page++;
+              loadCatalog(false);
+            }
+          });
+        }
       }
     }
   }
@@ -1381,19 +1427,30 @@
     if (state.heroMovie) openMovieModal(state.heroMovie);
   });
 
-  // Event delegation helper for movie grids so clicking is guaranteed to work
+  // Event delegation helper for movie grids so zero per-card listeners are needed
   function setupGridDelegation(gridEl) {
     if (!gridEl || gridEl._delegatedBound) return;
     gridEl._delegatedBound = true;
-    gridEl.addEventListener('click', (e) => {
-      const card = e.target.closest('.poster-card');
+    const activateCard = (card) => {
       if (!card) return;
       const movieId = card.dataset.movieId;
       const item = (state.catalogItems || []).find(x => String(x.id) === String(movieId)) ||
                    (state.bookmarks || []).find(x => String(x.id) === String(movieId)) ||
                    (state.history || []).map(h => h.movie).find(x => String(x?.id) === String(movieId));
-      if (!item) return;
-      openMovieModal(item);
+      if (item) openMovieModal(item);
+    };
+    gridEl.addEventListener('click', (e) => {
+      const card = e.target.closest('.poster-card');
+      if (card) activateCard(card);
+    });
+    gridEl.addEventListener('keydown', (e) => {
+      if (!isTvSelectKey(e)) return;
+      const card = e.target.closest('.poster-card');
+      if (card) {
+        e.preventDefault();
+        e.stopPropagation();
+        activateCard(card);
+      }
     });
   }
 
@@ -1403,10 +1460,12 @@
       container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Пока пусто</div>';
       return;
     }
+    if (!items.length) return;
 
-    // Ensure delegated clicks are active on container
+    // Ensure delegated clicks & keydowns are active on container
     setupGridDelegation(container);
 
+    const frag = document.createDocumentFragment();
     for (const item of items) {
       const card = document.createElement('button');
       card.type = 'button';
@@ -1418,25 +1477,16 @@
       const posterUrl = item.poster || item.backdrop || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300"><rect width="200" height="300" fill="%23171a29"/></svg>';
       card.innerHTML = `
         <div class="poster-art">
-          <img src="${esc(posterUrl)}" loading="lazy" alt="${esc(item.title)}" />
+          <img src="${esc(posterUrl)}" loading="lazy" decoding="async" alt="${esc(item.title)}" />
           ${item.vote_average ? `<span class="poster-rating">★ ${esc(item.vote_average)}</span>` : ''}
           <span class="poster-type">${item.type === 'tv' ? 'Сериал' : 'Фильм'}</span>
         </div>
         <div class="poster-title">${esc(item.title)}</div>
         <div class="poster-sub">${esc(item.year || '')}</div>
       `;
-      card.addEventListener('click', () => {
-        openMovieModal(item);
-      });
-      card.addEventListener('keydown', (e) => {
-        if (isTvSelectKey(e)) {
-          e.preventDefault();
-          e.stopPropagation();
-          openMovieModal(item);
-        }
-      });
-      container.appendChild(card);
+      frag.appendChild(card);
     }
+    container.appendChild(frag);
   }
 
   // Category bar
@@ -1452,10 +1502,31 @@
     });
   });
 
-  $('loadMoreCatalogBtn').addEventListener('click', () => {
-    state.page++;
-    loadCatalog(false);
+  $('loadMoreCatalogBtn')?.addEventListener('click', () => {
+    if (!catalogLoading && catalogHasMore) {
+      state.page++;
+      loadCatalog(false);
+    }
   });
+
+  // Zero-jank Infinite Scroll via IntersectionObserver
+  const sentinelEl = $('catalogScrollSentinel');
+  if (sentinelEl && 'IntersectionObserver' in window) {
+    const viewRoot = document.querySelector('.view-container') || null;
+    const io = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      sentinelIntersecting = !!entry?.isIntersecting;
+      if (sentinelIntersecting && !catalogLoading && catalogHasMore && state.currentView === 'explore') {
+        state.page++;
+        loadCatalog(false);
+      }
+    }, {
+      root: viewRoot,
+      rootMargin: '700px 0px',
+      threshold: 0
+    });
+    io.observe(sentinelEl);
+  }
 
   // Global search
   let searchTimer = null;

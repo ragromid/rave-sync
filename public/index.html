@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_32" />
+  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_33" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -169,8 +169,13 @@
 
           <!-- Movies Poster Grid -->
           <div id="catalogGrid" class="poster-grid"></div>
-          <div class="load-more-wrap">
-            <button id="loadMoreCatalogBtn" class="btn glass">Показать ещё</button>
+          <div class="load-more-wrap" id="catalogScrollSentinel">
+            <div id="catalogInfiniteLoader" class="infinite-loader hidden">
+              <span class="infinite-dot"></span>
+              <span class="infinite-dot"></span>
+              <span class="infinite-dot"></span>
+            </div>
+            <button id="loadMoreCatalogBtn" class="btn glass hidden">Показать ещё</button>
           </div>
         </section>
 
@@ -1216,6 +1221,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261109_oulo_32"></script>
+  <script src="/app.js?v=20261109_oulo_33"></script>
 </body>
 </html>
