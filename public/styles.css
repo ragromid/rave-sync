@@ -1202,26 +1202,68 @@ button {
 /* Mobile Room Quick Switcher */
 .mobile-room-tabs {
   display: none;
-  background: var(--bg-elevated);
+  background: #0a0a0c;
   border-bottom: 1px solid var(--border-subtle);
   flex-shrink: 0;
+  padding: 6px 8px;
+  gap: 6px;
 }
 .m-rtab {
-  flex: 1;
-  height: 40px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  border-bottom: 2px solid transparent;
-  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.14s ease, box-shadow 0.16s ease;
+}
+.m-rtab:active {
+  transform: scale(0.96);
 }
 .m-rtab.active {
-  color: #00e676;
-  border-bottom-color: #00e676;
-  background: rgba(0, 230, 118, 0.08);
+  color: #000000;
+  background: #00e676;
+  border-color: #00e676;
+  font-weight: 700;
+  box-shadow: 0 3px 12px rgba(0, 230, 118, 0.3);
+}
+.m-rtab-ico {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+.m-rtab.active .m-rtab-ico {
+  stroke: #000000;
+}
+.rtab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.m-rtab.active .rtab-count,
+.side-tab.active .rtab-count {
+  background: rgba(0, 0, 0, 0.2);
+  color: #000000;
 }
 .inline-badge {
   position: static;
@@ -1298,71 +1340,74 @@ button {
   display: none !important;
 }
 
-/* Z01 Selector Panel (inspired by Z01UI .mo-seg & .mo-opt) */
+/* Z01 Selector Panel */
 .z01-panel {
-  padding: 12px 16px 18px;
+  padding: 12px 14px 16px;
   background: var(--bg-main);
 }
-.z01-top-tools {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border-subtle);
-  gap: 10px;
-}
-.z01-top-tools-title {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.z01-top-tools-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
 .z01-segments {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 8px;
   margin-bottom: 10px;
 }
 .z01-seg {
   display: flex;
   flex-direction: column;
-  min-width: 130px;
-  max-width: 240px;
-  padding: 7px 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: 10px;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px 12px;
+  background: #141417;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: border-color 0.16s ease, background-color 0.16s ease, transform 0.14s ease, box-shadow 0.16s ease;
 }
 .z01-seg:hover {
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.05);
+}
+.z01-seg:active {
+  transform: scale(0.98);
 }
 .z01-seg.open,
 .z01-seg.active {
   background: rgba(0, 230, 118, 0.08);
-  border-color: #00e676;
-  box-shadow: 0 0 12px rgba(0, 230, 118, 0.2);
+  border-color: rgba(0, 230, 118, 0.48);
+  box-shadow: 0 2px 12px rgba(0, 230, 118, 0.14);
 }
-.z01-seg.active .z01-seg-label {
+.z01-seg-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.z01-seg-chevron {
+  width: 13px;
+  height: 13px;
+  color: rgba(255, 255, 255, 0.45);
+  flex-shrink: 0;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+.z01-seg.open .z01-seg-chevron {
+  transform: rotate(180deg);
+  color: #00e676;
+}
+.z01-seg.active .z01-seg-label,
+.z01-seg.open .z01-seg-label {
   color: #00e676;
 }
 .z01-seg-label {
   font-size: 0.66rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: var(--text-muted);
 }
 .z01-seg-val {
   font-size: 0.85rem;
   font-weight: 600;
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1371,47 +1416,101 @@ button {
   gap: 5px;
 }
 .z01-tag {
-  font-size: 0.65rem;
+  font-size: 0.64rem;
   font-weight: 700;
   padding: 1px 5px;
-  border-radius: 4px;
-  background: rgba(92, 225, 230, 0.18);
-  color: var(--accent-cyan);
+  border-radius: 5px;
+  background: rgba(0, 230, 118, 0.16);
+  color: #00e676;
+  flex-shrink: 0;
+}
+
+.z01-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.z01-tool-btn {
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.74rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.14s ease;
+}
+.z01-tool-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.65);
+}
+.z01-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+.z01-tool-btn:active {
+  transform: scale(0.96);
+}
+.z01-tool-btn.active {
+  background: rgba(0, 230, 118, 0.12);
+  border-color: rgba(0, 230, 118, 0.42);
+  color: #00e676;
+}
+.z01-tool-btn.active svg {
+  color: #00e676;
 }
 
 .z01-dropdown-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   padding: 10px;
-  background: var(--bg-elevated);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-subtle);
+  background: #121215;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   max-height: 220px;
   overflow-y: auto;
 }
 .z01-opt {
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: var(--bg-card);
-  border: 1px solid transparent;
+  padding: 9px 11px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   text-align: left;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  transition: all 0.15s;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 .z01-opt:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 .z01-opt.active {
-  border-color: var(--accent-cyan);
-  background: rgba(92, 225, 230, 0.1);
+  border-color: #00e676;
+  background: rgba(0, 230, 118, 0.12);
 }
 .z01-opt-title {
   font-size: 0.83rem;
   font-weight: 600;
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1425,33 +1524,36 @@ button {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding: 6px 4px 10px;
-  margin: -4px 0 0;
+  padding: 4px 2px 8px;
+  margin: 0;
   touch-action: pan-x;
 }
 .ep-btn {
-  min-width: 74px;
+  min-width: 78px;
   padding: 8px 12px;
-  border-radius: 9px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: #141417;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
   flex-shrink: 0;
-  transition: all 0.15s;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 .ep-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 .ep-btn.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+  background: #00e676;
+  border-color: #00e676;
+  color: #000000;
+  box-shadow: 0 2px 10px rgba(0, 230, 118, 0.28);
 }
 .ep-num {
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   font-weight: 700;
 }
 .ep-sub {
@@ -1475,34 +1577,44 @@ button {
 
 .sidebar-tabs {
   display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
   height: 48px;
   min-height: 48px;
-  background: var(--bg-elevated);
+  background: #0a0a0c;
   border-bottom: 1px solid var(--border-subtle);
   flex-shrink: 0;
 }
 .side-tab {
   flex: 1;
-  height: 100%;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   padding: 0 10px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--text-muted);
-  border-bottom: 2px solid transparent;
+  color: rgba(255, 255, 255, 0.75);
   white-space: nowrap;
-  transition: color 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
 }
 .side-tab:hover {
-  color: var(--text-main);
-  background: rgba(255, 255, 255, 0.03);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 .side-tab.active {
-  color: #ffffff;
-  border-bottom-color: #00e676;
+  color: #000000;
+  background: #00e676;
+  border-color: #00e676;
+  font-weight: 700;
+  box-shadow: 0 3px 12px rgba(0, 230, 118, 0.28);
 }
 
 .rtab-content {
@@ -1645,11 +1757,134 @@ body.keyboard-open .chat-input-row {
   padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   overflow-y: auto;
 }
 .friends-list {
   padding: 0;
+}
+
+/* Viewers Tab (Зрители) Modern Glass UI */
+.viewers-tab-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.viewers-section-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.viewers-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.viewers-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.72);
+}
+.viewers-section-card .participants-list {
+  padding: 0;
+  overflow: visible;
+  gap: 7px;
+}
+.viewer-card-row {
+  padding: 9px 11px;
+  border-radius: 12px;
+  background: #141417;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  cursor: pointer;
+  transition: border-color 0.16s ease, background-color 0.16s ease, transform 0.14s ease;
+}
+.viewer-card-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+.viewer-card-row:active {
+  transform: scale(0.98);
+}
+.viewer-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.viewer-online-dot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #00e676;
+  border: 2px solid #141417;
+}
+.viewer-meta-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.viewer-card-row .user-row-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #ffffff;
+  flex-wrap: wrap;
+}
+.viewer-role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(0, 230, 118, 0.16);
+  border: 1px solid rgba(0, 230, 118, 0.35);
+  color: #00e676;
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.viewer-voice-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 0.64rem;
+  font-weight: 600;
+}
+.viewer-row-chevron {
+  width: 15px;
+  height: 15px;
+  color: rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+}
+.queue-empty-state {
+  padding: 14px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  text-align: center;
+  font-size: 0.76rem;
+  color: var(--text-muted);
 }
 
 /* Room Options & Tools Deck */
@@ -3240,8 +3475,20 @@ body.keyboard-open .chat-input-row {
   flex: 1;
 }
 .settings-item-icon {
-  font-size: 1.2rem;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(0, 230, 118, 0.1);
+  border: 1px solid rgba(0, 230, 118, 0.24);
+  color: #00e676;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+}
+.settings-item-icon svg {
+  width: 16px;
+  height: 16px;
 }
 .settings-item-info {
   display: flex;
@@ -3496,13 +3743,12 @@ body.keyboard-open .chat-input-row {
   body.keyboard-open .mobile-room-tabs,
   .room-layout:has(#chatInput:focus) .mobile-room-tabs,
   .room-layout:has(.chat-input-field:focus) .mobile-room-tabs {
-    height: 32px !important;
-    min-height: 32px !important;
+    padding: 4px 6px !important;
   }
   body.keyboard-open .m-rtab,
   .room-layout:has(#chatInput:focus) .m-rtab,
   .room-layout:has(.chat-input-field:focus) .m-rtab {
-    height: 32px !important;
+    height: 30px !important;
     font-size: 0.72rem !important;
     padding: 0 6px !important;
   }
@@ -3534,49 +3780,68 @@ body.keyboard-open .chat-input-row {
     font-size: 1rem;
   }
   .mobile-room-tabs {
-    display: flex;
-    overflow-x: auto;
-    scrollbar-width: none;
-    background: var(--bg-surface);
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    padding: 6px 8px;
+    background: #0a0a0c;
     border-bottom: 1px solid var(--border-subtle);
     flex-shrink: 0;
-    height: 36px;
-    min-height: 36px;
-  }
-  .mobile-room-tabs::-webkit-scrollbar {
-    display: none;
   }
   .m-rtab {
-    flex: 1 0 auto;
-    min-width: 58px;
-    height: 38px;
-    padding: 0 8px;
-    font-size: 0.76rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    border-bottom: 2px solid transparent;
+    min-width: 0;
+    height: 36px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.78);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 4px;
     white-space: nowrap;
+    overflow: hidden;
+  }
+  .m-rtab span {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .m-rtab.active {
-    color: #00e676;
-    border-bottom-color: #00e676;
-    background: rgba(0, 230, 118, 0.08);
+    color: #000000;
+    background: #00e676;
+    border-color: #00e676;
+    font-weight: 700;
+    box-shadow: 0 3px 12px rgba(0, 230, 118, 0.3);
   }
   .m-rtab-ico {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     stroke: currentColor;
     flex-shrink: 0;
   }
   .m-rtab.active .m-rtab-ico {
-    stroke: #00e676;
+    stroke: #000000;
   }
   .sidebar-tabs {
     display: none;
+  }
+  .z01-segments {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .z01-episodes-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+    gap: 7px;
+    overflow-x: visible;
+    padding: 4px 0 8px;
+  }
+  .ep-btn {
+    min-width: 0;
+    width: 100%;
   }
   /* By default on mobile, Chat is shown immediately below the tabs; Z01 panel is shown when mobile-tab-z01 is active */
   .room-layout:not(.mobile-tab-z01) .z01-panel {
@@ -3592,6 +3857,7 @@ body.keyboard-open .chat-input-row {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+    overflow-x: hidden;
   }
   .room-layout.mobile-tab-z01 .room-sidebar {
     display: none !important;

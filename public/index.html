@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_27" />
+  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_28" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -409,16 +409,21 @@
               <!-- Mobile Room Quick Switcher -->
               <div class="mobile-room-tabs" id="mobileRoomTabs">
                 <button type="button" class="m-rtab active" data-mrtab="chat">
+                  <svg class="m-rtab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                   <span>Чат</span>
                   <span id="chatUnreadBadge" class="nav-badge inline-badge hidden">0</span>
                 </button>
                 <button type="button" class="m-rtab" data-mrtab="z01">
+                  <svg class="m-rtab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
                   <span id="mobileZ01TabLabel">Озвучка</span>
                 </button>
                 <button type="button" class="m-rtab" data-mrtab="users">
-                  <span>Зрители (<span id="roomUserCountMobile">1</span>)</span>
+                  <svg class="m-rtab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  <span>Зрители</span>
+                  <span class="rtab-count" id="roomUserCountMobile">1</span>
                 </button>
                 <button type="button" class="m-rtab" data-mrtab="dms">
+                  <svg class="m-rtab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                   <span>Друзья</span>
                   <span id="roomDmBadgeMobile" class="nav-badge inline-badge hidden">0</span>
                 </button>
@@ -426,26 +431,6 @@
 
               <!-- Z01 Online Selector Panel (Balancers, Seasons, Voices, Episodes, Qualities) -->
               <div id="z01Panel" class="z01-panel hidden">
-                <div class="z01-top-tools">
-                  <div class="z01-top-tools-title">Поток и параметры</div>
-                  <div class="z01-top-tools-actions">
-                    <button type="button" id="toggleAmbientBtn" class="pill-btn tiny ghost active" title="Фоновая подсветка вокруг плеера">
-                      <span>Подсветка</span>
-                    </button>
-                    <button type="button" id="togglePipBtn" class="pill-btn tiny ghost" title="Режим Картинка в картинке (PiP)">
-                      <span>PiP</span>
-                    </button>
-                    <button type="button" id="sleepTimerBtn" class="pill-btn tiny ghost" title="Таймер сна">
-                      <span>Таймер</span>
-                    </button>
-                    <button type="button" id="toggleProxyStreamBtn" class="pill-btn tiny ghost btn-toggle-proxy" title="Переключить прокси потока (если видео не грузится)">
-                      <span>Прокси: Авто</span>
-                    </button>
-                    <button type="button" id="resyncPlayerBtn" class="pill-btn tiny ghost btn-resync-player" title="Синхронизировать таймкод с комнатой">
-                      <span>Синхр.</span>
-                    </button>
-                  </div>
-                </div>
                 <div class="z01-segments" id="z01Segments">
                   <!-- Populated dynamically: Source, Season, Voice, Quality -->
                 </div>
@@ -453,15 +438,42 @@
                 <div id="z01DropdownGrid" class="z01-dropdown-grid hidden"></div>
                 <!-- Episodes strip for TV Series -->
                 <div id="z01EpisodesStrip" class="z01-episodes-strip hidden"></div>
+                <!-- Compact Stream Utility Bar (no horizontal scroll, no timer) -->
+                <div class="z01-tools-grid">
+                  <button type="button" id="resyncPlayerBtn" class="z01-tool-btn btn-resync-player" title="Синхронизировать таймкод с комнатой">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                    <span>Синхр.</span>
+                  </button>
+                  <button type="button" id="toggleProxyStreamBtn" class="z01-tool-btn btn-toggle-proxy" title="Переключить прокси потока (если видео не грузится)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <span>Прокси: Авто</span>
+                  </button>
+                  <button type="button" id="toggleAmbientBtn" class="z01-tool-btn active" title="Фоновая подсветка вокруг плеера">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <span>Подсветка</span>
+                  </button>
+                  <button type="button" id="togglePipBtn" class="z01-tool-btn" title="Режим Картинка в картинке (PiP)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><rect x="12" y="11" width="7" height="6" rx="1"/></svg>
+                    <span>PiP</span>
+                  </button>
+                </div>
               </div>
             </div>
 
             <!-- Right / Bottom: Rave Chat, Friends Chat, Participants & Room Options Sidebar -->
             <aside class="room-sidebar" id="roomSidebar">
               <div class="sidebar-tabs">
-                <button class="side-tab active" data-rtab="chat">Чат</button>
-                <button class="side-tab" data-rtab="users">Зрители (<span id="roomUserCount">1</span>)</button>
-                <button class="side-tab" data-rtab="dms">Друзья <span id="roomDmBadge" class="nav-badge inline-badge hidden">0</span></button>
+                <button class="side-tab active" data-rtab="chat">
+                  <span>Чат</span>
+                </button>
+                <button class="side-tab" data-rtab="users">
+                  <span>Зрители</span>
+                  <span class="rtab-count" id="roomUserCount">1</span>
+                </button>
+                <button class="side-tab" data-rtab="dms">
+                  <span>Друзья</span>
+                  <span id="roomDmBadge" class="nav-badge inline-badge hidden">0</span>
+                </button>
               </div>
 
               <!-- Tab 1: Live Room Chat -->
@@ -509,13 +521,33 @@
 
               <!-- Tab 3: Participants List & Room Playlist Queue -->
               <div id="rtab-users" class="rtab-content">
-                <div id="roomParticipantsList" class="participants-list"></div>
-                <div class="room-queue-section" id="roomQueueSection">
-                  <div class="room-queue-head">
-                    <span class="room-queue-title">📋 Очередь просмотра (<span id="roomQueueCount">0</span>)</span>
-                    <button type="button" id="addQueueFromCatalogBtn" class="pill-btn tiny accent">+ Добавить</button>
+                <div class="viewers-tab-scroll">
+                  <div class="viewers-section-card">
+                    <div class="viewers-section-head">
+                      <div class="viewers-section-title">
+                        <span class="dm-status-dot online"></span>
+                        <span>В комнате (<span id="roomViewersHeadCount">1</span>)</span>
+                      </div>
+                      <button type="button" id="viewersInviteBtn" class="pill-btn tiny accent">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                        <span>Позвать</span>
+                      </button>
+                    </div>
+                    <div id="roomParticipantsList" class="participants-list"></div>
                   </div>
-                  <div id="roomQueueList" class="room-queue-list"></div>
+
+                  <div class="viewers-section-card" id="roomQueueSection">
+                    <div class="viewers-section-head">
+                      <div class="viewers-section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;color:#00e676;"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                        <span>Очередь (<span id="roomQueueCount">0</span>)</span>
+                      </div>
+                      <button type="button" id="addQueueFromCatalogBtn" class="pill-btn tiny">
+                        <span>+ Добавить</span>
+                      </button>
+                    </div>
+                    <div id="roomQueueList" class="room-queue-list"></div>
+                  </div>
                 </div>
               </div>
 
@@ -1050,42 +1082,25 @@
       </div>
 
       <div class="room-settings-content">
-        <!-- Section: Room Code & Link -->
-        <div class="settings-group">
-          <div class="settings-group-label">Ссылка и код</div>
-          <div class="settings-item">
-            <div class="settings-item-left">
-              <span class="settings-item-icon">🔗</span>
-              <div class="settings-item-info">
-                <span class="settings-item-title" id="settingsRoomCode">#CODE</span>
-                <span class="settings-item-sub">Прямой вход по ссылке</span>
-              </div>
-            </div>
-            <button type="button" id="settingsCopyLinkBtn" class="pill-btn tiny accent">
-              <span>Скопировать</span>
-            </button>
-          </div>
-        </div>
-
         <!-- Section: Friends & Communication -->
         <div class="settings-group">
           <div class="settings-group-label">Связь и друзья</div>
           <div class="settings-item">
             <div class="settings-item-left">
-              <span class="settings-item-icon">💌</span>
+              <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></span>
               <div class="settings-item-info">
                 <span class="settings-item-title">Пригласить друзей</span>
                 <span class="settings-item-sub">Отправить уведомление друзьям</span>
               </div>
             </div>
-            <button type="button" id="settingsInviteFriendsBtn" class="pill-btn tiny">
+            <button type="button" id="settingsInviteFriendsBtn" class="pill-btn tiny accent">
               <span>+ Друг</span>
             </button>
           </div>
 
           <div class="settings-item">
             <div class="settings-item-left">
-              <span class="settings-item-icon">🎙️</span>
+              <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span>
               <div class="settings-item-info">
                 <span class="settings-item-title">Голосовой чат</span>
                 <span class="settings-item-sub" id="settingsVoiceSub">Микрофон отключен</span>
@@ -1102,7 +1117,7 @@
           <div class="settings-group-label">Управление комнатой (Хост)</div>
           <div class="settings-item">
             <div class="settings-item-left">
-              <span class="settings-item-icon" id="settingsPrivacyIcon">🌐</span>
+              <span class="settings-item-icon" id="settingsPrivacyIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
               <div class="settings-item-info">
                 <span class="settings-item-title">Видимость</span>
                 <span class="settings-item-sub" id="settingsPrivacySub">В общем каталоге</span>
@@ -1119,7 +1134,7 @@
           <div class="settings-group-label">Плеер и поток</div>
           <div class="settings-item">
             <div class="settings-item-left">
-              <span class="settings-item-icon">🔄</span>
+              <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span>
               <div class="settings-item-info">
                 <span class="settings-item-title">Синхронизация</span>
                 <span class="settings-item-sub">Выровнять таймкод с комнатой</span>
@@ -1132,7 +1147,7 @@
 
           <div class="settings-item">
             <div class="settings-item-left">
-              <span class="settings-item-icon">📺</span>
+              <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg></span>
               <div class="settings-item-info">
                 <span class="settings-item-title">Пульт Smart TV</span>
                 <span class="settings-item-sub">Управление на телевизоре</span>
@@ -1147,7 +1162,7 @@
         <!-- Section: Leave Room -->
         <div class="settings-group" style="margin-top:4px;">
           <button type="button" id="settingsLeaveRoomBtn" class="btn danger full-w">
-            🚪 Выйти из комнаты
+            <span>Выйти из комнаты</span>
           </button>
         </div>
       </div>
@@ -1310,6 +1325,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261109_oulo_27"></script>
+  <script src="/app.js?v=20261109_oulo_28"></script>
 </body>
 </html>

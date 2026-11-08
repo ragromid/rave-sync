@@ -2223,7 +2223,10 @@
       const seg = document.createElement('div');
       seg.className = `z01-seg ${openDropdown === key ? 'open' : ''}`;
       seg.innerHTML = `
-        <span class="z01-seg-label">${esc(label)}</span>
+        <div class="z01-seg-top">
+          <span class="z01-seg-label">${esc(label)}</span>
+          <svg class="z01-seg-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
         <div class="z01-seg-val">
           ${badge ? `<span class="z01-tag">${esc(badge)}</span>` : ''}
           <span>${esc(value)}</span>
@@ -2246,7 +2249,10 @@
     const z01Seg = document.createElement('div');
     z01Seg.className = `z01-seg ${!isRezkaActive ? 'active' : ''} ${openDropdown === 'source' ? 'open' : ''}`;
     z01Seg.innerHTML = `
-      <span class="z01-seg-label">Источник Z01</span>
+      <div class="z01-seg-top">
+        <span class="z01-seg-label">Источник Z01</span>
+        <svg class="z01-seg-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
       <div class="z01-seg-val">
         ${activeZ01?.badge ? `<span class="z01-tag">${esc(activeZ01.badge)}</span>` : ''}
         <span>${esc(activeZ01 ? activeZ01.name : 'Z01')}</span>
@@ -4571,8 +4577,8 @@
     const voiceBadge = $('settingsVoiceBadge');
 
     if (voiceBtn) voiceBtn.classList.toggle('active', active);
-    if (voiceSub) voiceSub.textContent = active ? 'Микрофон включен 🟢' : 'Микрофон отключен ⚪';
-    if (voiceBadge) voiceBadge.textContent = active ? 'Отключить 🔴' : 'Включить 🎙️';
+    if (voiceSub) voiceSub.textContent = active ? 'Микрофон включен' : 'Микрофон отключен';
+    if (voiceBadge) voiceBadge.textContent = active ? 'Отключить' : 'Включить';
   }
 
   function openRoomSettingsModal() {
@@ -4598,7 +4604,9 @@
 
     const privIcon = $('settingsPrivacyIcon');
     if (privIcon) {
-      privIcon.textContent = room.isPublic ? '🌐' : '🔒';
+      privIcon.innerHTML = room.isPublic
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
     }
 
     const privSub = $('settingsPrivacySub');
@@ -4634,7 +4642,11 @@
     const privAction = $('settingsPrivacyAction');
     if (privAction) privAction.textContent = nextPublic ? 'Сделать приватной' : 'Сделать публичной';
     const privIcon = $('settingsPrivacyIcon');
-    if (privIcon) privIcon.textContent = nextPublic ? '🌐' : '🔒';
+    if (privIcon) {
+      privIcon.innerHTML = nextPublic
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+    }
     const privSub = $('settingsPrivacySub');
     if (privSub) privSub.textContent = nextPublic ? 'В общем каталоге комнат' : 'Доступ только по прямой ссылке';
     showToast(nextPublic ? 'Комната теперь публичная' : 'Комната теперь приватная (только по коду/ссылке)');
@@ -4654,15 +4666,7 @@
   }
 
   $('roomSettingsBtn')?.addEventListener('click', openRoomSettingsModal);
-  $('settingsCopyLinkBtn')?.addEventListener('click', () => {
-    if (!state.room) return;
-    const shareUrl = `${window.location.origin}/?room=${state.room.code}`;
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      showToast('Ссылка на комнату скопирована! 📋');
-    }).catch(() => {
-      showToast(`Код комнаты: #${state.room.code}`);
-    });
-  });
+  $('viewersInviteBtn')?.addEventListener('click', () => $('inviteFriendsModalBtn')?.click());
   $('settingsInviteFriendsBtn')?.addEventListener('click', () => {
     closeModal('roomSettingsModal');
     $('inviteFriendsModalBtn')?.click();
@@ -4689,21 +4693,30 @@
     $('roomUserCount').textContent = list.length;
     const mobCnt = $('roomUserCountMobile');
     if (mobCnt) mobCnt.textContent = list.length;
+    const headCnt = $('roomViewersHeadCount');
+    if (headCnt) headCnt.textContent = list.length;
     const container = $('roomParticipantsList');
     container.innerHTML = '';
     list.forEach(p => {
       const isHost = state.room && p.id === state.room.hostId;
       const row = document.createElement('div');
-      row.className = 'user-row';
-      row.style.cursor = 'pointer';
+      row.className = 'user-row viewer-card-row';
       row.innerHTML = `
         <div class="user-row-left">
-          <div class="avatar-circle" style="background:${esc(p.color || '#00e676')}">${avatarInnerHtml(p)}</div>
-          <div>
-            <div class="user-row-name">${esc(p.displayName)} ${isHost ? '👑' : ''}</div>
-            <div class="user-row-sub">@${esc(p.username)} ${p.inVoice ? '· 🎙️ В голосе' : ''}</div>
+          <div class="viewer-avatar-wrap">
+            <div class="avatar-circle" style="background:${esc(p.color || '#00e676')}">${avatarInnerHtml(p)}</div>
+            <span class="viewer-online-dot"></span>
+          </div>
+          <div class="viewer-meta-col">
+            <div class="user-row-name">
+              <span>${esc(p.displayName)}</span>
+              ${isHost ? '<span class="viewer-role-badge">Хост</span>' : ''}
+              ${p.inVoice ? '<span class="viewer-voice-badge">В эфире</span>' : ''}
+            </div>
+            <div class="user-row-sub">@${esc(p.username)}</div>
           </div>
         </div>
+        <svg class="viewer-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       `;
       row.addEventListener('click', () => openUserCard(p.id));
       container.appendChild(row);
@@ -5716,7 +5729,7 @@
     if (countEl) countEl.textContent = queue.length;
     if (!listEl) return;
     if (!queue.length) {
-      listEl.innerHTML = '<div style="font-size:0.75rem;color:var(--text-muted);padding:6px 0;">Очередь пуста — добавьте фильмы из каталога</div>';
+      listEl.innerHTML = '<div class="queue-empty-state">Очередь пуста — добавьте фильмы из каталога</div>';
       return;
     }
     listEl.innerHTML = '';
@@ -5733,8 +5746,13 @@
           <div class="queue-item-meta">${esc(m.year || '')}${item.addedBy?.displayName ? ` · от ${esc(item.addedBy.displayName)}` : ''}</div>
         </div>
         <div class="queue-item-actions">
-          <button type="button" class="queue-vote-btn ${hasVoted ? 'voted' : ''}" title="Голосовать">👍 ${votes.length}</button>
-          <button type="button" class="pill-btn tiny accent queue-play-btn" title="Включить сейчас">▶️</button>
+          <button type="button" class="queue-vote-btn ${hasVoted ? 'voted' : ''}" title="Голосовать">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            <span>${votes.length}</span>
+          </button>
+          <button type="button" class="pill-btn tiny accent queue-play-btn" title="Включить сейчас">
+            <svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+          </button>
           <button type="button" class="pill-btn tiny queue-del-btn" title="Удалить">✕</button>
         </div>
       `;
@@ -5754,7 +5772,7 @@
 
   $('addQueueFromCatalogBtn')?.addEventListener('click', () => {
     switchView('explore');
-    showToast('Выберите фильм в каталоге и нажмите «📋 В очередь комнаты»');
+    showToast('Выберите фильм в каталоге и нажмите «В очередь комнаты»');
   });
 
   // Skip Intro (+85s) & Auto-Next Episode / Queue Prompt
@@ -5835,10 +5853,6 @@
   });
 
   mainVideo.addEventListener('ended', () => {
-    if (sleepTimerMode === 'episode') {
-      activateSleepStop();
-      return;
-    }
     const cand = getNextPlayableCandidate();
     if (cand && nextEpDismissedForVideo !== (state.loadedStreamKey || 'dismissed')) {
       triggerNextPlayable();
@@ -5859,7 +5873,7 @@
     ambientEnabled = !ambientEnabled;
     localStorage.setItem('oulo_ambient_glow', ambientEnabled ? 'true' : 'false');
     updateAmbientUi();
-    showToast(ambientEnabled ? '✨ Фоновая подсветка включена' : 'Фоновая подсветка выключена');
+    showToast(ambientEnabled ? 'Фоновая подсветка включена' : 'Фоновая подсветка выключена');
   });
 
   setInterval(() => {
@@ -5888,41 +5902,6 @@
       }
     } catch {
       showToast('Запустите видео для включения «Картинки в картинке»');
-    }
-  });
-
-  // Sleep Timer (Off -> 30m -> 60m -> End of episode)
-  let sleepTimerMode = 'off'; // 'off' | '30' | '60' | 'episode'
-  let sleepTimeoutId = null;
-
-  function activateSleepStop() {
-    clearTimeout(sleepTimeoutId);
-    sleepTimerMode = 'off';
-    if ($('sleepTimerBtn')) $('sleepTimerBtn').textContent = 'Таймер';
-    if (!mainVideo.paused) mainVideo.pause();
-    if (state.voiceActive) stopVoiceChat();
-    showToast('Таймер сна сработал — просмотр поставлен на паузу');
-  }
-
-  $('sleepTimerBtn')?.addEventListener('click', () => {
-    clearTimeout(sleepTimeoutId);
-    const modes = ['off', '30', '60', 'episode'];
-    sleepTimerMode = modes[(modes.indexOf(sleepTimerMode) + 1) % modes.length];
-    const btn = $('sleepTimerBtn');
-    if (sleepTimerMode === 'off') {
-      if (btn) btn.textContent = 'Таймер';
-      showToast('Таймер сна выключен');
-    } else if (sleepTimerMode === '30') {
-      if (btn) btn.textContent = '30 мин';
-      sleepTimeoutId = setTimeout(activateSleepStop, 30 * 60 * 1000);
-      showToast('Таймер сна: пауза через 30 минут');
-    } else if (sleepTimerMode === '60') {
-      if (btn) btn.textContent = '60 мин';
-      sleepTimeoutId = setTimeout(activateSleepStop, 60 * 60 * 1000);
-      showToast('Таймер сна: пауза через 60 минут');
-    } else if (sleepTimerMode === 'episode') {
-      if (btn) btn.textContent = 'До конца';
-      showToast('Таймер сна: пауза после окончания серии/фильма');
     }
   });
 
