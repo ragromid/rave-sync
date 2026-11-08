@@ -158,6 +158,51 @@ button {
   letter-spacing: -0.04em;
   color: #fff;
   line-height: 1;
+  transition: color 0.25s ease, text-shadow 0.25s ease, letter-spacing 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.brand.easter-spin .brand-icon {
+  animation: ouloLogoSpin 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  border-color: #00e676;
+  box-shadow: 0 0 22px rgba(0, 230, 118, 0.65);
+}
+.brand.easter-overdrive .brand-icon {
+  background: #00e676;
+  border-color: #00e676;
+  box-shadow: 0 0 28px rgba(0, 230, 118, 0.85);
+}
+.brand.easter-overdrive .brand-icon svg path {
+  fill: #000000;
+}
+.brand.easter-overdrive .brand-icon svg circle {
+  fill: #ffffff;
+}
+.brand.easter-overdrive .brand-name {
+  color: #00e676;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 18px rgba(0, 230, 118, 0.55);
+}
+@keyframes ouloLogoSpin {
+  0% { transform: rotate(0deg) scale(0.9); }
+  50% { transform: rotate(195deg) scale(1.18); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+.oulo-easter-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 50%;
+  will-change: transform, opacity;
+  animation: ouloParticleBurst var(--dur, 700ms) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes ouloParticleBurst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(0.2);
+  }
 }
 
 .search-box {

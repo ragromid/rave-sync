@@ -691,7 +691,110 @@
     btn.addEventListener('click', () => switchView(btn.dataset.goto));
   });
 
-  $('brandLogo').addEventListener('click', () => switchView('explore'));
+  // Interactive Easter Egg on Brand Logo (#brandLogo)
+  let brandClickCombo = 0;
+  let brandComboResetTimer = null;
+  const easterSecretQuotes = [
+    '🎬 Секретный режим oulo активирован — запущен рандомный топ-фильм!',
+    '🍿 Пасхалка найдена! Включаем случайный шедевр на вечер...',
+    '⚡ oulo OVERDRIVE: выбираем для вас лучший фильм из каталога!',
+    '✨ Магия кино активирована — ловите случайную рекомендацию!'
+  ];
+
+  function playBrandEasterSound(stage = 1) {
+    if (!state.soundEnabled) return;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+      const notes = stage >= 5
+        ? [523.25, 659.25, 783.99, 1046.5] // C5 - E5 - G5 - C6 chord arpeggio
+        : [587.33 + stage * 70, 880 + stage * 90];
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = stage >= 5 ? 'triangle' : 'sine';
+        osc.frequency.setValueAtTime(freq, now + i * 0.055);
+        gain.gain.setValueAtTime(0.08, now + i * 0.055);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.055 + 0.28);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + i * 0.055);
+        osc.stop(now + i * 0.055 + 0.3);
+      });
+      setTimeout(() => ctx.close().catch(() => {}), 800);
+    } catch {}
+  }
+
+  function spawnBrandParticles(originEl, count = 14, spread = 65) {
+    if (!originEl) return;
+    const rect = originEl.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'oulo-easter-particle';
+      const isGreen = i % 3 !== 0;
+      const size = Math.round(4 + Math.random() * 5);
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
+      const dist = spread * (0.45 + Math.random() * 0.75);
+      const tx = Math.round(Math.cos(angle) * dist);
+      const ty = Math.round(Math.sin(angle) * dist);
+      p.style.width = `${size}px`;
+      p.style.height = `${size}px`;
+      p.style.left = `${cx - size / 2}px`;
+      p.style.top = `${cy - size / 2}px`;
+      p.style.background = isGreen ? '#00e676' : '#ffffff';
+      p.style.boxShadow = isGreen ? '0 0 10px #00e676' : '0 0 8px #ffffff';
+      p.style.setProperty('--tx', `${tx}px`);
+      p.style.setProperty('--ty', `${ty}px`);
+      p.style.setProperty('--dur', `${500 + Math.round(Math.random() * 350)}ms`);
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 900);
+    }
+  }
+
+  $('brandLogo').addEventListener('click', () => {
+    switchView('explore');
+    const brand = $('brandLogo');
+    const icon = brand?.querySelector('.brand-icon') || brand;
+    brandClickCombo++;
+    clearTimeout(brandComboResetTimer);
+    brandComboResetTimer = setTimeout(() => {
+      brandClickCombo = 0;
+    }, 1800);
+
+    if (brand) {
+      brand.classList.remove('easter-spin');
+      void brand.offsetWidth;
+      brand.classList.add('easter-spin');
+    }
+
+    if (brandClickCombo >= 5) {
+      brandClickCombo = 0;
+      spawnBrandParticles(icon, 36, 130);
+      playBrandEasterSound(5);
+      if (brand) {
+        brand.classList.add('easter-overdrive');
+        setTimeout(() => brand.classList.remove('easter-overdrive'), 2600);
+      }
+      const msg = easterSecretQuotes[Math.floor(Math.random() * easterSecretQuotes.length)];
+      showToast(msg);
+      // Open a random movie from the loaded catalog as a surprise!
+      const cards = Array.from(document.querySelectorAll('#catalogGrid .poster-card'));
+      if (cards.length > 0) {
+        const randomCard = cards[Math.floor(Math.random() * cards.length)];
+        setTimeout(() => randomCard.click(), 350);
+      }
+    } else {
+      spawnBrandParticles(icon, 12 + brandClickCombo * 4, 55 + brandClickCombo * 12);
+      playBrandEasterSound(brandClickCombo);
+      if (brandClickCombo === 3) {
+        showToast('👀 Ещё 2 нажатия до секретной пасхалки oulo...');
+      }
+    }
+  });
   $('returnToRoomBtn').addEventListener('click', () => switchView('room'));
 
   // Modal open/close helpers
