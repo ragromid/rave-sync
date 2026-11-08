@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261108_oulo_16" />
+  <link rel="stylesheet" href="/styles.css?v=20261108_oulo_17" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -37,20 +37,28 @@
           <circle cx="11" cy="11" r="7"></circle>
           <path d="M20 20l-4-4" stroke-linecap="round"></path>
         </svg>
-        <input type="search" id="globalSearchInput" enterkeyhint="search" placeholder="Поиск фильмов и сериалов..." autocomplete="off" />
-        <button type="button" id="clearSearchBtn" class="icon-btn tiny hidden" title="Очистить">✕</button>
+        <input type="search" id="globalSearchInput" enterkeyhint="search" placeholder="Поиск фильмов и сериалов..." autocomplete="off" data-i18n-placeholder="search_placeholder" />
+        <button type="button" id="clearSearchBtn" class="icon-btn tiny hidden" title="Очистить" data-i18n-title="clear">✕</button>
       </form>
 
       <div class="topbar-actions">
         <!-- Active room mini-pill when browsing catalog while in a room -->
-        <button id="returnToRoomBtn" class="pill-btn accent pulse hidden" title="Вернуться в комнату">
-          <span>🔴</span><span class="hide-sm">&nbsp;В комнату</span>
+        <button id="returnToRoomBtn" class="pill-btn accent pulse hidden" title="Вернуться в комнату" data-i18n-title="in_room">
+          <span>🔴</span><span class="hide-sm" data-i18n="in_room">&nbsp;В комнату</span>
+        </button>
+
+        <!-- Quick Settings & Language Button (Always accessible to everyone) -->
+        <button id="globalSettingsBtn" class="icon-btn" title="Настройки и язык" aria-label="Настройки" data-i18n-title="nav_settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
         </button>
 
         <!-- User Avatar / Profile & Settings Button -->
-        <button id="userMenuBtn" class="user-chip" title="Мой профиль и настройки">
+        <button id="userMenuBtn" class="user-chip" title="Мой профиль и аккаунт" data-i18n-title="profile">
           <span id="headerUserAvatar" class="avatar-circle">👤</span>
-          <span id="headerUserName" class="hide-sm">Войти</span>
+          <span id="headerUserName" class="hide-sm" data-i18n="login">Войти</span>
         </button>
       </div>
     </header>
@@ -78,21 +86,25 @@
       <nav class="nav-rail">
         <button class="nav-item active" data-view="explore">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
-          <span>Каталог</span>
+          <span data-i18n="nav_catalog">Каталог</span>
         </button>
         <button class="nav-item" data-view="rooms">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span>Комнаты</span>
+          <span data-i18n="nav_rooms">Комнаты</span>
           <span id="publicRoomsBadge" class="nav-badge hidden">0</span>
         </button>
         <button class="nav-item" data-view="friends">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Друзья</span>
+          <span data-i18n="nav_friends">Друзья</span>
           <span id="friendsReqBadge" class="nav-badge hidden">0</span>
         </button>
         <button class="nav-item" data-view="saved">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-          <span>Моё</span>
+          <span data-i18n="nav_saved">Моё</span>
+        </button>
+        <button class="nav-item" id="navSettingsBtn" data-view="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span data-i18n="nav_settings">Настройки</span>
         </button>
       </nav>
 
@@ -114,10 +126,10 @@
               <div class="hero-actions">
                 <button id="heroWatchPartyBtn" class="btn primary">
                   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                  <span>Смотреть вместе</span>
+                  <span data-i18n="hero_watch_party">Смотреть вместе</span>
                 </button>
                 <button id="heroDetailsBtn" class="btn glass">
-                  <span>Подробнее</span>
+                  <span data-i18n="hero_details">Подробнее</span>
                 </button>
               </div>
             </div>
@@ -128,9 +140,9 @@
             <div class="section-head">
               <div class="section-title">
                 <span class="live-dot"></span>
-                <span>Сейчас смотрят</span>
+                <span data-i18n="live_rooms_title">Сейчас смотрят</span>
               </div>
-              <button class="text-link" data-goto="rooms">Все комнаты →</button>
+              <button class="text-link" data-goto="rooms" data-i18n="all_rooms">Все комнаты →</button>
             </div>
             <div id="liveRoomsStrip" class="rooms-horizontal"></div>
           </div>
@@ -139,31 +151,31 @@
           <div class="category-bar" id="categoryBar">
             <button class="cat-pill active" data-cat="trending">
               <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-              <span>В тренде</span>
+              <span data-i18n="cat_trending">В тренде</span>
             </button>
             <button class="cat-pill" data-cat="popular_movies">
               <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
-              <span>Фильмы</span>
+              <span data-i18n="cat_popular_movies">Фильмы</span>
             </button>
             <button class="cat-pill" data-cat="popular_tv">
               <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
-              <span>Сериалы</span>
+              <span data-i18n="cat_popular_tv">Сериалы</span>
             </button>
             <button class="cat-pill" data-cat="anime">
               <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              <span>Аниме</span>
+              <span data-i18n="cat_anime">Аниме</span>
             </button>
             <button class="cat-pill" data-cat="cartoons">
               <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-              <span>Мультфильмы</span>
+              <span data-i18n="cat_cartoons">Мультфильмы</span>
             </button>
             <button class="cat-pill" data-cat="top_movies">
               <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-2.34"/><path d="M14 14.66V17c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-2.34"/><path d="M6 4h12v7a6 6 0 0 1-12 0V4z"/></svg>
-              <span>Топ фильмов</span>
+              <span data-i18n="cat_top_movies">Топ фильмов</span>
             </button>
             <button class="cat-pill" data-cat="top_tv">
               <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              <span>Топ сериалов</span>
+              <span data-i18n="cat_top_tv">Топ сериалов</span>
             </button>
           </div>
 
@@ -596,138 +608,203 @@
     </div>
   </div>
 
-  <!-- MODAL 2: AUTH / PROFILE -->
+  <!-- MODAL 2: AUTH / PROFILE & SETTINGS -->
   <div id="authModal" class="modal-backdrop hidden">
     <div class="modal-card auth-modal-card">
       <button class="modal-close" data-close="authModal">✕</button>
 
-      <!-- Guest: Login / Register -->
-      <div id="authGuestView">
-        <div class="auth-tabs">
-          <button class="auth-tab active" data-atab="login">Вход</button>
-          <button class="auth-tab" data-atab="register">Регистрация</button>
-        </div>
-
-        <form id="authForm" class="auth-form">
-          <div class="form-group">
-            <label>Логин</label>
-            <input type="text" id="authUsername" required placeholder="Например: alex" autocomplete="username" />
-          </div>
-          <div class="form-group" id="authDisplayNameGroup" style="display:none;">
-            <label>Имя в профиле</label>
-            <input type="text" id="authDisplayName" placeholder="Как вас видят друзья" />
-          </div>
-          <div class="form-group">
-            <label>Пароль</label>
-            <input type="password" id="authPassword" required placeholder="Минимум 4 символа" autocomplete="current-password" />
-          </div>
-          <div class="form-group" id="authAvatarGroup" style="display:none;">
-            <label>Аватар</label>
-            <div class="avatar-picker" id="registerAvatarPicker">
-              <button type="button" class="av-pick selected" data-av="🦊">🦊</button>
-              <button type="button" class="av-pick" data-av="🐱">🐱</button>
-              <button type="button" class="av-pick" data-av="🐼">🐼</button>
-              <button type="button" class="av-pick" data-av="🐯">🐯</button>
-              <button type="button" class="av-pick" data-av="🦁">🦁</button>
-              <button type="button" class="av-pick" data-av="🦄">🦄</button>
-              <button type="button" class="av-pick" data-av="👾">👾</button>
-              <button type="button" class="av-pick" data-av="🎬">🎬</button>
-            </div>
-          </div>
-          <div id="authError" class="form-error hidden"></div>
-          <button type="submit" class="btn primary full" id="authSubmitBtn">Войти</button>
-          <div style="text-align:center;margin-top:4px;">
-            <a href="/admin" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;">🔑 Забыли пароль? Админ-панель →</a>
-          </div>
-        </form>
-      </div>
-
-      <!-- Logged-in User Profile & Settings Modal -->
-      <div id="authProfileView" class="hidden">
+      <!-- Unified Profile & Settings View (Always accessible) -->
+      <div id="authProfileView">
         <div class="profile-modal-top">
-          <h3>Настройки и профиль</h3>
+          <h3 data-i18n="settings_modal_title">Настройки и профиль</h3>
         </div>
 
         <!-- Folder Tabs Navigation -->
         <div class="profile-folders-nav" id="profileFoldersNav">
-          <button type="button" class="pfolder-tab active" data-ptab="profile">
-            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span>Профиль</span>
-          </button>
-          <button type="button" class="pfolder-tab" data-ptab="quick-actions">
-            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            <span>Подключение</span>
+          <button type="button" class="pfolder-tab active" data-ptab="language">
+            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>
+            <span data-i18n="tab_language">Язык</span>
           </button>
           <button type="button" class="pfolder-tab" data-ptab="personalization">
             <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
-            <span>Оформление</span>
-          </button>
-          <button type="button" class="pfolder-tab" data-ptab="notifications">
-            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span>Уведомления</span>
+            <span data-i18n="tab_personalization">Оформление</span>
           </button>
           <button type="button" class="pfolder-tab" data-ptab="playback">
             <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-            <span>Плеер</span>
+            <span data-i18n="tab_playback">Плеер</span>
+          </button>
+          <button type="button" class="pfolder-tab" data-ptab="notifications">
+            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span data-i18n="tab_notifications">Уведомления</span>
+          </button>
+          <button type="button" class="pfolder-tab" data-ptab="quick-actions">
+            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span data-i18n="tab_quick_actions">Подключение</span>
+          </button>
+          <button type="button" class="pfolder-tab" data-ptab="profile">
+            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span data-i18n="tab_profile">Профиль</span>
           </button>
         </div>
 
-        <!-- Folder 1: Профиль (Profile info, Stats, Display name, Bio, Logout) -->
-        <div id="ptab-profile" class="pfolder-content active">
-          <div class="profile-header-box">
-            <div id="profileBigAvatar" class="profile-big-avatar">🦊</div>
-            <div class="profile-meta-col">
-              <div id="profileUsernameTag" class="profile-username">@user</div>
-              <div class="profile-photo-btns">
-                <input type="file" id="profilePhotoInput" accept="image/*" hidden />
-                <button type="button" id="uploadPhotoBtn" class="pill-btn tiny accent">📷 Загрузить фото</button>
-                <button type="button" id="removePhotoBtn" class="pill-btn tiny hidden">✕ Удалить фото</button>
+        <!-- Folder 0: Язык (Language Selector) -->
+        <div id="ptab-language" class="pfolder-content active">
+          <div class="pfolder-card">
+            <div class="pfolder-card-header">
+              <span class="pfolder-card-icon">🌐</span>
+              <div>
+                <div class="pfolder-card-title" data-i18n="lang_card_title">Язык интерфейса и каталога</div>
+                <div class="pfolder-card-sub" data-i18n="lang_card_sub">Выберите язык приложения. Все описания фильмов и разделы переключатся на выбранный язык.</div>
               </div>
             </div>
+            <div class="lang-selector-grid" id="langSelectorGrid">
+              <button type="button" class="lang-card active" data-lang="ru">
+                <span class="lang-card-flag">🇷🇺</span>
+                <div class="lang-card-text">
+                  <div class="lang-card-name">Русский</div>
+                  <div class="lang-card-native">RU</div>
+                </div>
+                <span class="lang-card-check">✓</span>
+              </button>
+              <button type="button" class="lang-card" data-lang="en">
+                <span class="lang-card-flag">🇬🇧</span>
+                <div class="lang-card-text">
+                  <div class="lang-card-name">English</div>
+                  <div class="lang-card-native">EN</div>
+                </div>
+                <span class="lang-card-check">✓</span>
+              </button>
+              <button type="button" class="lang-card" data-lang="tr">
+                <span class="lang-card-flag">🇹🇷</span>
+                <div class="lang-card-text">
+                  <div class="lang-card-name">Türkçe</div>
+                  <div class="lang-card-native">TR</div>
+                </div>
+                <span class="lang-card-check">✓</span>
+              </button>
+              <button type="button" class="lang-card" data-lang="de">
+                <span class="lang-card-flag">🇩🇪</span>
+                <div class="lang-card-text">
+                  <div class="lang-card-name">Deutsch</div>
+                  <div class="lang-card-native">DE</div>
+                </div>
+                <span class="lang-card-check">✓</span>
+              </button>
+              <button type="button" class="lang-card" data-lang="es">
+                <span class="lang-card-flag">🇪🇸</span>
+                <div class="lang-card-text">
+                  <div class="lang-card-name">Español</div>
+                  <div class="lang-card-native">ES</div>
+                </div>
+                <span class="lang-card-check">✓</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Folder 1: Профиль (Profile for logged-in or Login/Register for guest) -->
+        <div id="ptab-profile" class="pfolder-content">
+          <!-- Guest: Login / Register form -->
+          <div id="authGuestView">
+            <div class="auth-guest-notice" style="margin-bottom:14px;color:var(--text-muted);font-size:0.82rem;" data-i18n="auth_guest_prompt">
+              Войдите в аккаунт, чтобы сохранять историю, закладки и общаться с друзьями.
+            </div>
+            <div class="auth-tabs">
+              <button class="auth-tab active" data-atab="login" data-i18n="auth_login">Вход</button>
+              <button class="auth-tab" data-atab="register" data-i18n="auth_register">Регистрация</button>
+            </div>
+
+            <form id="authForm" class="auth-form">
+              <div class="form-group">
+                <label data-i18n="auth_username">Логин</label>
+                <input type="text" id="authUsername" required placeholder="Например: alex" autocomplete="username" />
+              </div>
+              <div class="form-group" id="authDisplayNameGroup" style="display:none;">
+                <label data-i18n="auth_display_name">Имя в профиле</label>
+                <input type="text" id="authDisplayName" placeholder="Как вас видят друзья" />
+              </div>
+              <div class="form-group">
+                <label data-i18n="auth_password">Пароль</label>
+                <input type="password" id="authPassword" required placeholder="Минимум 4 символа" autocomplete="current-password" />
+              </div>
+              <div class="form-group" id="authAvatarGroup" style="display:none;">
+                <label data-i18n="emoji_avatar_title">Аватар</label>
+                <div class="avatar-picker" id="registerAvatarPicker">
+                  <button type="button" class="av-pick selected" data-av="🦊">🦊</button>
+                  <button type="button" class="av-pick" data-av="🐱">🐱</button>
+                  <button type="button" class="av-pick" data-av="🐼">🐼</button>
+                  <button type="button" class="av-pick" data-av="🐯">🐯</button>
+                  <button type="button" class="av-pick" data-av="🦁">🦁</button>
+                  <button type="button" class="av-pick" data-av="🦄">🦄</button>
+                  <button type="button" class="av-pick" data-av="👾">👾</button>
+                  <button type="button" class="av-pick" data-av="🎬">🎬</button>
+                </div>
+              </div>
+              <div id="authError" class="form-error hidden"></div>
+              <button type="submit" class="btn primary full" id="authSubmitBtn" data-i18n="auth_submit_login">Войти</button>
+              <div style="text-align:center;margin-top:4px;">
+                <a href="/admin" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;">🔑 Забыли пароль? Админ-панель →</a>
+              </div>
+            </form>
           </div>
 
-          <!-- User Watch Statistics Grid -->
-          <div class="profile-stats-grid" id="profileStatsGrid">
-            <div class="stat-card">
-              <div class="stat-val" id="statWatchTime">0 мин</div>
-              <div class="stat-label">⏱️ В просмотре</div>
+          <!-- Logged-in User Content -->
+          <div id="profileUserContent" class="hidden">
+            <div class="profile-header-box">
+              <div id="profileBigAvatar" class="profile-big-avatar">🦊</div>
+              <div class="profile-meta-col">
+                <div id="profileUsernameTag" class="profile-username">@user</div>
+                <div class="profile-photo-btns">
+                  <input type="file" id="profilePhotoInput" accept="image/*" hidden />
+                  <button type="button" id="uploadPhotoBtn" class="pill-btn tiny accent">📷 Загрузить фото</button>
+                  <button type="button" id="removePhotoBtn" class="pill-btn tiny hidden">✕ Удалить фото</button>
+                </div>
+              </div>
             </div>
-            <div class="stat-card">
-              <div class="stat-val" id="statWatchedCount">0</div>
-              <div class="stat-label">🎬 Фильмов и серий</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-val" id="statRoomsCreated">0</div>
-              <div class="stat-label">🎉 Комнат создано</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-val" id="statMessagesSent">0</div>
-              <div class="stat-label">💬 Сообщений</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-val" id="statReactionsSent">0</div>
-              <div class="stat-label">🔥 Реакций</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-val" id="statSocialCount">0</div>
-              <div class="stat-label">👥 Друзей / 🔖 Закл.</div>
-            </div>
-          </div>
 
-          <form id="profileForm" class="auth-form">
-            <div class="form-group">
-              <label>Отображаемое имя</label>
-              <input type="text" id="profileDisplayName" required maxlength="32" />
+            <!-- User Watch Statistics Grid -->
+            <div class="profile-stats-grid" id="profileStatsGrid">
+              <div class="stat-card">
+                <div class="stat-val" id="statWatchTime">0 мин</div>
+                <div class="stat-label" data-i18n="stat_watch_time">⏱️ В просмотре</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="statWatchedCount">0</div>
+                <div class="stat-label" data-i18n="stat_watched_count">🎬 Фильмов и серий</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="statRoomsCreated">0</div>
+                <div class="stat-label" data-i18n="stat_rooms_created">🎉 Комнат создано</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="statMessagesSent">0</div>
+                <div class="stat-label">💬 Сообщений</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="statReactionsSent">0</div>
+                <div class="stat-label">🔥 Реакций</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="statSocialCount">0</div>
+                <div class="stat-label">👥 Друзей / 🔖 Закл.</div>
+              </div>
             </div>
-            <div class="form-group">
-              <label>О себе / Статус</label>
-              <input type="text" id="profileBio" placeholder="Что любите смотреть?" maxlength="140" />
-            </div>
-            <div class="profile-actions">
-              <button type="submit" class="btn primary">Сохранить профиль</button>
-              <button type="button" id="logoutBtn" class="btn glass danger">Выйти</button>
-            </div>
-          </form>
+
+            <form id="profileForm" class="auth-form">
+              <div class="form-group">
+                <label data-i18n="auth_display_name">Отображаемое имя</label>
+                <input type="text" id="profileDisplayName" required maxlength="32" />
+              </div>
+              <div class="form-group">
+                <label data-i18n="profile_bio">О себе / Статус</label>
+                <input type="text" id="profileBio" placeholder="Что любите смотреть?" maxlength="140" />
+              </div>
+              <div class="profile-actions">
+                <button type="submit" class="btn primary" data-i18n="auth_save_profile">Сохранить профиль</button>
+                <button type="button" id="logoutBtn" class="btn glass danger" data-i18n="auth_logout">Выйти</button>
+              </div>
+            </form>
+          </div>
         </div>
 
         <!-- Folder 2: Быстрое подключение & Ссылки (Custom Link & Join Room Code) -->
@@ -1268,6 +1345,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261108_oulo_16"></script>
+  <script src="/app.js?v=20261108_oulo_17"></script>
 </body>
 </html>

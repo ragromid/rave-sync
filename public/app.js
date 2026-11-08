@@ -35,6 +35,7 @@
 
     // Active Watch Party Room
     room: null,
+    lang: localStorage.getItem('oulo_lang') || 'ru',
     proxyMode: localStorage.getItem('ravelampa_proxy_mode') || 'auto', // 'auto' | 'always' | 'off'
     soundEnabled: localStorage.getItem('ravelampa_sound_enabled') !== 'false',
     inAppNotifsEnabled: localStorage.getItem('ravelampa_inapp_notifs') !== 'false',
@@ -657,6 +658,370 @@
     }
   }
 
+  // ================= INTERNATIONALIZATION (I18N) =================
+  const I18N = {
+    ru: {
+      search_placeholder: 'Поиск фильмов и сериалов...',
+      clear: 'Очистить',
+      in_room: 'В комнату',
+      login: 'Войти',
+      profile: 'Мой профиль и аккаунт',
+      notif_banner_title: 'Включить уведомления oulo?',
+      notif_banner_sub: 'Получайте мгновенные уведомления о сообщениях друзей, фото и приглашениях в комнаты',
+      allow: 'Разрешить',
+      later: 'Позже',
+      nav_catalog: 'Каталог',
+      nav_rooms: 'Комнаты',
+      nav_friends: 'Друзья',
+      nav_saved: 'Моё',
+      nav_settings: 'Настройки',
+      hero_watch_party: 'Смотреть вместе',
+      hero_details: 'Подробнее',
+      live_rooms_title: 'Сейчас смотрят',
+      all_rooms: 'Все комнаты →',
+      cat_trending: 'В тренде',
+      cat_popular_movies: 'Фильмы',
+      cat_popular_tv: 'Сериалы',
+      cat_anime: 'Аниме',
+      cat_cartoons: 'Мультфильмы',
+      cat_top_movies: 'Топ фильмов',
+      cat_top_tv: 'Топ сериалов',
+      settings_modal_title: 'Настройки и профиль',
+      tab_language: 'Язык',
+      tab_personalization: 'Оформление',
+      tab_playback: 'Плеер',
+      tab_notifications: 'Уведомления',
+      tab_quick_actions: 'Подключение',
+      tab_profile: 'Профиль',
+      lang_card_title: 'Язык интерфейса и каталога',
+      lang_card_sub: 'Выберите язык приложения. Все описания фильмов и разделы переключатся на выбранный язык.',
+      auth_guest_prompt: 'Войдите в аккаунт, чтобы сохранять историю, закладки и общаться с друзьями.',
+      auth_login: 'Вход',
+      auth_register: 'Регистрация',
+      auth_username: 'Логин',
+      auth_display_name: 'Имя в профиле',
+      auth_password: 'Пароль',
+      emoji_avatar_title: 'Аватар',
+      auth_submit_login: 'Войти',
+      auth_submit_register: 'Создать аккаунт',
+      stat_watch_time: '⏱️ В просмотре',
+      stat_watched_count: '🎬 Фильмов и серий',
+      stat_rooms_created: '🎉 Комнат создано',
+      profile_bio: 'О себе / Статус',
+      auth_save_profile: 'Сохранить профиль',
+      auth_logout: 'Выйти',
+      toast_lang_changed: 'Язык изменён на Русский',
+      loading_catalog: 'Загрузка каталога...',
+      nothing_found: 'Ничего не найдено',
+      room_copy_link: 'Копировать ссылку',
+      room_invite_friends: 'Пригласить друзей',
+      chat_placeholder: 'Написать сообщение...',
+      send_msg: 'Отправить'
+    },
+    en: {
+      search_placeholder: 'Search movies and series...',
+      clear: 'Clear',
+      in_room: 'In Room',
+      login: 'Log In',
+      profile: 'My Profile & Account',
+      notif_banner_title: 'Enable oulo notifications?',
+      notif_banner_sub: 'Get instant notifications about messages, photos and room invites',
+      allow: 'Allow',
+      later: 'Later',
+      nav_catalog: 'Catalog',
+      nav_rooms: 'Rooms',
+      nav_friends: 'Friends',
+      nav_saved: 'Saved',
+      nav_settings: 'Settings',
+      hero_watch_party: 'Watch Together',
+      hero_details: 'Details',
+      live_rooms_title: 'Watching Now',
+      all_rooms: 'All rooms →',
+      cat_trending: 'Trending',
+      cat_popular_movies: 'Movies',
+      cat_popular_tv: 'Series',
+      cat_anime: 'Anime',
+      cat_cartoons: 'Cartoons',
+      cat_top_movies: 'Top Movies',
+      cat_top_tv: 'Top Series',
+      settings_modal_title: 'Settings & Profile',
+      tab_language: 'Language',
+      tab_personalization: 'Appearance',
+      tab_playback: 'Player',
+      tab_notifications: 'Notifications',
+      tab_quick_actions: 'Connect',
+      tab_profile: 'Profile',
+      lang_card_title: 'Interface & Catalog Language',
+      lang_card_sub: 'Choose application language. Film overviews, catalog and UI will update.',
+      auth_guest_prompt: 'Log in to save watch history, bookmarks and chat with friends.',
+      auth_login: 'Log In',
+      auth_register: 'Register',
+      auth_username: 'Username',
+      auth_display_name: 'Display Name',
+      auth_password: 'Password',
+      emoji_avatar_title: 'Avatar',
+      auth_submit_login: 'Log In',
+      auth_submit_register: 'Create Account',
+      stat_watch_time: '⏱️ Watch Time',
+      stat_watched_count: '🎬 Movies & Series',
+      stat_rooms_created: '🎉 Rooms Created',
+      profile_bio: 'About / Status',
+      auth_save_profile: 'Save Profile',
+      auth_logout: 'Log Out',
+      toast_lang_changed: 'Language switched to English',
+      loading_catalog: 'Loading catalog...',
+      nothing_found: 'Nothing found',
+      room_copy_link: 'Copy link',
+      room_invite_friends: 'Invite friends',
+      chat_placeholder: 'Write a message...',
+      send_msg: 'Send'
+    },
+    tr: {
+      search_placeholder: 'Film ve dizi ara...',
+      clear: 'Temizle',
+      in_room: 'Odaya dön',
+      login: 'Giriş Yap',
+      profile: 'Profilim ve Hesap',
+      notif_banner_title: 'oulo bildirimleri açılsın mı?',
+      notif_banner_sub: 'Mesajlar, fotoğraflar ve oda davetleri hakkında anlık bildirim alın',
+      allow: 'İzin ver',
+      later: 'Daha sonra',
+      nav_catalog: 'Katalog',
+      nav_rooms: 'Odalar',
+      nav_friends: 'Arkadaşlar',
+      nav_saved: 'Kaydedilenler',
+      nav_settings: 'Ayarlar',
+      hero_watch_party: 'Birlikte İzle',
+      hero_details: 'Detaylar',
+      live_rooms_title: 'Şimdi İzlenenler',
+      all_rooms: 'Tüm odalar →',
+      cat_trending: 'Trendler',
+      cat_popular_movies: 'Filmler',
+      cat_popular_tv: 'Diziler',
+      cat_anime: 'Anime',
+      cat_cartoons: 'Çizgi Filmler',
+      cat_top_movies: 'En İyi Filmler',
+      cat_top_tv: 'En İyi Diziler',
+      settings_modal_title: 'Ayarlar ve Profil',
+      tab_language: 'Dil',
+      tab_personalization: 'Görünüm',
+      tab_playback: 'Oynatıcı',
+      tab_notifications: 'Bildirimler',
+      tab_quick_actions: 'Bağlantı',
+      tab_profile: 'Profil',
+      lang_card_title: 'Arayüz ve Katalog Dili',
+      lang_card_sub: 'Uygulama dilini seçin. Film açıklamaları ve menüler güncellenir.',
+      auth_guest_prompt: 'İzleme geçmişini, yer işaretlerini kaydetmek ve arkadaşlarınızla sohbet etmek için giriş yapın.',
+      auth_login: 'Giriş',
+      auth_register: 'Kayıt Ol',
+      auth_username: 'Kullanıcı Adı',
+      auth_display_name: 'Görünen İsim',
+      auth_password: 'Şifre',
+      emoji_avatar_title: 'Avatar',
+      auth_submit_login: 'Giriş Yap',
+      auth_submit_register: 'Hesap Oluştur',
+      stat_watch_time: '⏱️ İzleme Süresi',
+      stat_watched_count: '🎬 Film ve Dizi',
+      stat_rooms_created: '🎉 Oluşturulan Odalar',
+      profile_bio: 'Hakkında / Durum',
+      auth_save_profile: 'Profili Kaydet',
+      auth_logout: 'Çıkış Yap',
+      toast_lang_changed: 'Dil Türkçe olarak değiştirildi',
+      loading_catalog: 'Katalog yükleniyor...',
+      nothing_found: 'Sonuç bulunamadı',
+      room_copy_link: 'Bağlantıyı kopyala',
+      room_invite_friends: 'Arkadaşları davet et',
+      chat_placeholder: 'Bir mesaj yazın...',
+      send_msg: 'Gönder'
+    },
+    de: {
+      search_placeholder: 'Filme und Serien suchen...',
+      clear: 'Löschen',
+      in_room: 'Zum Raum',
+      login: 'Anmelden',
+      profile: 'Mein Profil & Konto',
+      notif_banner_title: 'oulo-Benachrichtigungen aktivieren?',
+      notif_banner_sub: 'Erhalten Sie Sofortbenachrichtigungen über Nachrichten und Raumeinladungen',
+      allow: 'Erlauben',
+      later: 'Später',
+      nav_catalog: 'Katalog',
+      nav_rooms: 'Räume',
+      nav_friends: 'Freunde',
+      nav_saved: 'Gespeichert',
+      nav_settings: 'Einstellungen',
+      hero_watch_party: 'Zusammen schauen',
+      hero_details: 'Details',
+      live_rooms_title: 'Jetzt live',
+      all_rooms: 'Alle Räume →',
+      cat_trending: 'Im Trend',
+      cat_popular_movies: 'Filme',
+      cat_popular_tv: 'Serien',
+      cat_anime: 'Anime',
+      cat_cartoons: 'Animation',
+      cat_top_movies: 'Top Filme',
+      cat_top_tv: 'Top Serien',
+      settings_modal_title: 'Einstellungen & Profil',
+      tab_language: 'Sprache',
+      tab_personalization: 'Design',
+      tab_playback: 'Player',
+      tab_notifications: 'Benachrichtigungen',
+      tab_quick_actions: 'Verbindung',
+      tab_profile: 'Profil',
+      lang_card_title: 'Benutzeroberfläche & Katalogsprache',
+      lang_card_sub: 'Wählen Sie die App-Sprache. Filmbeschreibungen und Menüs werden aktualisiert.',
+      auth_guest_prompt: 'Melden Sie sich an, um den Verlauf, Lesezeichen zu speichern und mit Freunden zu chatten.',
+      auth_login: 'Anmelden',
+      auth_register: 'Registrieren',
+      auth_username: 'Benutzername',
+      auth_display_name: 'Anzeigename',
+      auth_password: 'Passwort',
+      emoji_avatar_title: 'Avatar',
+      auth_submit_login: 'Anmelden',
+      auth_submit_register: 'Konto erstellen',
+      stat_watch_time: '⏱️ Wiedergabezeit',
+      stat_watched_count: '🎬 Filme & Serien',
+      stat_rooms_created: '🎉 Räume erstellt',
+      profile_bio: 'Über mich / Status',
+      auth_save_profile: 'Profil speichern',
+      auth_logout: 'Abmelden',
+      toast_lang_changed: 'Sprache auf Deutsch gewechselt',
+      loading_catalog: 'Katalog wird geladen...',
+      nothing_found: 'Nichts gefunden',
+      room_copy_link: 'Link kopieren',
+      room_invite_friends: 'Freunde einladen',
+      chat_placeholder: 'Nachricht schreiben...',
+      send_msg: 'Senden'
+    },
+    es: {
+      search_placeholder: 'Buscar películas y series...',
+      clear: 'Borrar',
+      in_room: 'A la sala',
+      login: 'Iniciar sesión',
+      profile: 'Mi perfil y cuenta',
+      notif_banner_title: '¿Activar notificaciones de oulo?',
+      notif_banner_sub: 'Recibe avisos al instante sobre mensajes, fotos e invitaciones a salas',
+      allow: 'Permitir',
+      later: 'Más tarde',
+      nav_catalog: 'Catálogo',
+      nav_rooms: 'Salas',
+      nav_friends: 'Amigos',
+      nav_saved: 'Guardado',
+      nav_settings: 'Ajustes',
+      hero_watch_party: 'Ver juntos',
+      hero_details: 'Detalles',
+      live_rooms_title: 'Viendo ahora',
+      all_rooms: 'Todas las salas →',
+      cat_trending: 'Tendencias',
+      cat_popular_movies: 'Películas',
+      cat_popular_tv: 'Series',
+      cat_anime: 'Anime',
+      cat_cartoons: 'Animación',
+      cat_top_movies: 'Películas top',
+      cat_top_tv: 'Series top',
+      settings_modal_title: 'Ajustes y Perfil',
+      tab_language: 'Idioma',
+      tab_personalization: 'Apariencia',
+      tab_playback: 'Reproductor',
+      tab_notifications: 'Notificaciones',
+      tab_quick_actions: 'Conexión',
+      tab_profile: 'Perfil',
+      lang_card_title: 'Idioma de la interfaz y catálogo',
+      lang_card_sub: 'Elige el idioma de la app. La interfaz y catálogo se actualizarán.',
+      auth_guest_prompt: 'Inicia sesión para guardar historial, marcadores y chatear con amigos.',
+      auth_login: 'Entrar',
+      auth_register: 'Registrarse',
+      auth_username: 'Usuario',
+      auth_display_name: 'Nombre visible',
+      auth_password: 'Contraseña',
+      emoji_avatar_title: 'Avatar',
+      auth_submit_login: 'Iniciar sesión',
+      auth_submit_register: 'Crear cuenta',
+      stat_watch_time: '⏱️ Tiempo visto',
+      stat_watched_count: '🎬 Películas y series',
+      stat_rooms_created: '🎉 Salas creadas',
+      profile_bio: 'Sobre mí / Estado',
+      auth_save_profile: 'Guardar perfil',
+      auth_logout: 'Cerrar sesión',
+      toast_lang_changed: 'Idioma cambiado a Español',
+      loading_catalog: 'Cargando catálogo...',
+      nothing_found: 'No se encontraron resultados',
+      room_copy_link: 'Copiar enlace',
+      room_invite_friends: 'Invitar amigos',
+      chat_placeholder: 'Escribe un mensaje...',
+      send_msg: 'Enviar'
+    }
+  };
+
+  function t(key, fallback = '') {
+    const cur = state.lang || 'ru';
+    if (I18N[cur] && I18N[cur][key]) return I18N[cur][key];
+    if (I18N.ru && I18N.ru[key]) return I18N.ru[key];
+    if (I18N.en && I18N.en[key]) return I18N.en[key];
+    return fallback || key;
+  }
+
+  function applyLanguage(lang) {
+    if (!I18N[lang]) lang = 'ru';
+    state.lang = lang;
+    localStorage.setItem('oulo_lang', lang);
+    document.documentElement.lang = lang;
+
+    // Update all elements with data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.dataset.i18n;
+      const text = t(k);
+      if (text) el.textContent = text;
+    });
+
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const k = el.dataset.i18nPlaceholder;
+      const text = t(k);
+      if (text) el.placeholder = text;
+    });
+
+    // Update titles
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      const k = el.dataset.i18nTitle;
+      const text = t(k);
+      if (text) el.title = text;
+    });
+
+    // Update active state in language selector cards
+    document.querySelectorAll('#langSelectorGrid .lang-card').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+
+    // Update user header button text if not logged in
+    if (!state.user && $('headerUserName')) {
+      $('headerUserName').textContent = t('login');
+    }
+  }
+
+  async function setLanguage(lang, reloadFeed = true) {
+    if (!I18N[lang]) lang = 'ru';
+    applyLanguage(lang);
+
+    // Save to user settings if logged in
+    if (state.user && state.token) {
+      try {
+        state.user.settings = state.user.settings || {};
+        state.user.settings.language = lang;
+        api('/api/auth/profile', {
+          method: 'PUT',
+          body: JSON.stringify({ settings: state.user.settings })
+        }).catch(() => {});
+      } catch {}
+    }
+
+    showToast(t('toast_lang_changed'));
+
+    // Re-fetch catalog in new language so all cards immediately update
+    if (reloadFeed && (state.currentView === 'explore' || !state.room)) {
+      loadCatalog(true);
+    }
+  }
+
   // ================= VIEW NAVIGATION =================
   function switchView(viewName) {
     state.currentView = viewName;
@@ -684,7 +1049,13 @@
   }
 
   document.querySelectorAll('.nav-item').forEach(btn => {
-    btn.addEventListener('click', () => switchView(btn.dataset.view));
+    btn.addEventListener('click', () => {
+      if (btn.dataset.view === 'settings') {
+        openAuthModal('language');
+        return;
+      }
+      switchView(btn.dataset.view);
+    });
   });
 
   document.querySelectorAll('[data-goto]').forEach(btn => {
@@ -750,7 +1121,7 @@
     } else {
       $('headerUserAvatar').textContent = '👤';
       $('headerUserAvatar').style.background = '#00e676';
-      $('headerUserName').textContent = 'Войти';
+      $('headerUserName').textContent = t('login', 'Войти');
     }
   }
 
@@ -760,6 +1131,9 @@
     state.bookmarks = data.bookmarks || [];
     state.history = data.history || [];
     state.progress = data.progress || {};
+    if (state.user?.settings?.language) {
+      applyLanguage(state.user.settings.language);
+    }
     if (state.user?.settings?.proxyMode) {
       state.proxyMode = state.user.settings.proxyMode;
       const labels = { auto: '⚡ Прокси: Авто', always: '🛡️ Прокси: Вкл', off: '🌐 Прокси: Выкл' };
@@ -822,6 +1196,10 @@
       updateProfileNotifUI();
     } else if (target === 'playback') {
       updateProfilePlaybackUI();
+    } else if (target === 'language') {
+      document.querySelectorAll('#langSelectorGrid .lang-card').forEach(b => {
+        b.classList.toggle('active', b.dataset.lang === (state.lang || 'ru'));
+      });
     }
   }
 
@@ -938,16 +1316,18 @@
     $('profileForm')?.requestSubmit();
   });
 
-  async function openAuthModal(defaultTab = 'profile') {
+  async function openAuthModal(defaultTab = 'language') {
     const modal = $('authModal');
     modal.classList.remove('hidden');
+    $('authProfileView')?.classList.remove('hidden');
+
     if (state.user) {
-      $('authGuestView').classList.add('hidden');
-      $('authProfileView').classList.remove('hidden');
+      $('authGuestView')?.classList.add('hidden');
+      $('profileUserContent')?.classList.remove('hidden');
       switchProfileFolder(defaultTab);
       pendingAvatarUrl = null;
       setAvatarElement($('profileBigAvatar'), state.user, '🦊');
-      $('removePhotoBtn').classList.toggle('hidden', !state.user.avatarUrl);
+      $('removePhotoBtn')?.classList.toggle('hidden', !state.user.avatarUrl);
       $('profileUsernameTag').textContent = `@${state.user.username}`;
       $('profileDisplayName').value = state.user.displayName || '';
       $('profileBio').value = state.user.bio || '';
@@ -972,12 +1352,22 @@
         }
       } catch {}
     } else {
-      $('authGuestView').classList.remove('hidden');
-      $('authProfileView').classList.add('hidden');
+      $('authGuestView')?.classList.remove('hidden');
+      $('profileUserContent')?.classList.add('hidden');
+      switchProfileFolder(defaultTab);
     }
   }
 
+  $('globalSettingsBtn')?.addEventListener('click', () => openAuthModal('language'));
   $('userMenuBtn')?.addEventListener('click', () => openAuthModal('profile'));
+
+  // Language selector button clicks
+  document.querySelectorAll('#langSelectorGrid .lang-card').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const chosen = btn.dataset.lang;
+      if (chosen) setLanguage(chosen, true);
+    });
+  });
 
   // Custom photo upload with client-side square crop & compression (160x160 JPEG)
   $('uploadPhotoBtn').addEventListener('click', () => {
@@ -1162,14 +1552,15 @@
     $('heroBanner').classList.toggle('hidden', !!state.searchQuery);
     if (reset) {
       state.page = 1;
-      $('catalogGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Загрузка каталога...</div>';
+      $('catalogGrid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">${t('loading_catalog', 'Загрузка каталога...')}</div>`;
     }
     try {
       let data;
+      const curLang = state.lang || 'ru';
       if (state.searchQuery) {
-        data = await api(`/api/catalog/search?q=${encodeURIComponent(state.searchQuery)}&page=${state.page}`);
+        data = await api(`/api/catalog/search?q=${encodeURIComponent(state.searchQuery)}&page=${state.page}&lang=${encodeURIComponent(curLang)}`);
       } else {
-        data = await api(`/api/catalog/feed?category=${encodeURIComponent(state.category)}&page=${state.page}`);
+        data = await api(`/api/catalog/feed?category=${encodeURIComponent(state.category)}&page=${state.page}&lang=${encodeURIComponent(curLang)}`);
       }
 
       const items = data.results || [];
@@ -1382,7 +1773,8 @@
 
       // Enrich details in background (imdb_id, kinopoisk_id)
       try {
-        const det = await api(`/api/catalog/details?id=${encodeURIComponent(movie.id)}&type=${encodeURIComponent(movie.type || 'movie')}`);
+        const curLang = state.lang || 'ru';
+        const det = await api(`/api/catalog/details?id=${encodeURIComponent(movie.id)}&type=${encodeURIComponent(movie.type || 'movie')}&lang=${encodeURIComponent(curLang)}`);
         if (det.movie && state.selectedMovie && String(state.selectedMovie.id) === String(movie.id)) {
           state.selectedMovie = det.movie;
           if (det.movie.overview && $('modalOverview')) $('modalOverview').textContent = det.movie.overview;
@@ -5360,6 +5752,7 @@
     } catch {}
 
     updateNotificationBellUi();
+    applyLanguage(state.lang);
     loadCatalog(true);
     loadPublicRooms();
     await initAuth();

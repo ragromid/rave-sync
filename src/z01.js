@@ -213,11 +213,29 @@ function normalizeCard(item, forceType) {
   };
 }
 
+const TMDB_LANG_MAP = {
+  ru: 'ru-RU',
+  en: 'en-US',
+  tr: 'tr-TR',
+  de: 'de-DE',
+  es: 'es-ES'
+};
+
+function resolveTmdbLang(lang) {
+  if (!lang) return 'ru-RU';
+  const clean = String(lang).toLowerCase().trim().slice(0, 2);
+  return TMDB_LANG_MAP[clean] || 'ru-RU';
+}
+
 async function fetchTmdb(endpoint, queryParams = {}) {
+  const tmdbLang = resolveTmdbLang(queryParams.lang || queryParams.language);
+  const cleanParams = { ...queryParams };
+  delete cleanParams.lang;
+  cleanParams.language = tmdbLang;
+
   const qs = new URLSearchParams({
     api_key: TMDB_KEY,
-    language: 'ru-RU',
-    ...queryParams
+    ...cleanParams
   }).toString();
 
   const cacheKey = `${endpoint}?${qs}`;
@@ -242,26 +260,26 @@ async function fetchTmdb(endpoint, queryParams = {}) {
   throw lastErr || new Error('Failed to fetch TMDB');
 }
 
-async function getCatalogFeed(category = 'trending', page = 1) {
+async function getCatalogFeed(category = 'trending', page = 1, lang = 'ru') {
   const p = String(page || 1);
   let data;
   let forceType = null;
 
   switch (category) {
     case 'popular_movies':
-      data = await fetchTmdb('movie/popular', { page: p });
+      data = await fetchTmdb('movie/popular', { page: p, lang });
       forceType = 'movie';
       break;
     case 'popular_tv':
-      data = await fetchTmdb('tv/popular', { page: p });
+      data = await fetchTmdb('tv/popular', { page: p, lang });
       forceType = 'tv';
       break;
     case 'top_movies':
-      data = await fetchTmdb('movie/top_rated', { page: p });
+      data = await fetchTmdb('movie/top_rated', { page: p, lang });
       forceType = 'movie';
       break;
     case 'top_tv':
-      data = await fetchTmdb('tv/top_rated', { page: p });
+      data = await fetchTmdb('tv/top_rated', { page: p, lang });
       forceType = 'tv';
       break;
     case 'anime':
@@ -269,7 +287,8 @@ async function getCatalogFeed(category = 'trending', page = 1) {
         page: p,
         with_genres: '16',
         with_original_language: 'ja',
-        sort_by: 'popularity.desc'
+        sort_by: 'popularity.desc',
+        lang
       });
       forceType = 'tv';
       break;
@@ -277,13 +296,14 @@ async function getCatalogFeed(category = 'trending', page = 1) {
       data = await fetchTmdb('discover/movie', {
         page: p,
         with_genres: '16',
-        sort_by: 'popularity.desc'
+        sort_by: 'popularity.desc',
+        lang
       });
       forceType = 'movie';
       break;
     case 'trending':
     default:
-      data = await fetchTmdb('trending/all/week', { page: p });
+      data = await fetchTmdb('trending/all/week', { page: p, lang });
       break;
   }
 
@@ -298,12 +318,13 @@ async function getCatalogFeed(category = 'trending', page = 1) {
   };
 }
 
-async function searchCatalog(query, page = 1) {
+async function searchCatalog(query, page = 1, lang = 'ru') {
   if (!query || !String(query).trim()) return { page: 1, total_pages: 1, results: [] };
   const data = await fetchTmdb('search/multi', {
     query: String(query).trim(),
     page: String(page || 1),
-    include_adult: 'false'
+    include_adult: 'false',
+    lang
   });
   const results = (data.results || [])
     .filter(x => (x.media_type === 'movie' || x.media_type === 'tv') && (x.poster_path || x.backdrop_path || x.title || x.name))
@@ -362,10 +383,10 @@ async function resolveExternalIds(movie) {
   return setCached(z01Cache, cacheKey, { imdb_id, kinopoisk_id });
 }
 
-async function getCatalogDetails(id, type = 'movie') {
+async function getCatalogDetails(id, type = 'movie', lang = 'ru') {
   const isTv = type === 'tv' || type === '1' || type === 'serial';
   const endpoint = isTv ? `tv/${id}` : `movie/${id}`;
-  const raw = await fetchTmdb(endpoint, { append_to_response: 'external_ids' });
+  const raw = await fetchTmdb(endpoint, { append_to_response: 'external_ids', lang });
   const card = normalizeCard(raw, isTv ? 'tv' : 'movie');
   const ext = await resolveExternalIds(card);
   if (ext.imdb_id) card.imdb_id = ext.imdb_id;

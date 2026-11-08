@@ -3022,6 +3022,76 @@ body.keyboard-open .chat-input-row {
   color: var(--text-muted);
 }
 
+/* Language Selector Grid and Cards */
+.lang-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+.lang-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  cursor: pointer;
+  color: var(--text-main);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  text-align: left;
+  user-select: none;
+  position: relative;
+  width: 100%;
+}
+.lang-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 230, 118, 0.4);
+  transform: translateY(-2px);
+}
+.lang-card.active {
+  background: rgba(0, 230, 118, 0.12);
+  border-color: #00e676;
+  box-shadow: 0 4px 18px rgba(0, 230, 118, 0.25);
+}
+.lang-card-flag {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.lang-card-text {
+  flex: 1;
+  min-width: 0;
+}
+.lang-card-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+.lang-card.active .lang-card-name {
+  color: #00e676;
+}
+.lang-card-native {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+.lang-card-check {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #00e676;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.lang-card.active .lang-card-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
 /* Minimalist Room Settings Modal */
 .room-settings-card {
   max-width: 440px;

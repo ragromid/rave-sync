@@ -908,8 +908,8 @@ app.delete('/api/admin/rooms', adminMiddleware, (req, res) => {
 
 app.get('/api/catalog/feed', async (req, res) => {
   try {
-    const { category = 'trending', page = 1 } = req.query;
-    const data = await z01.getCatalogFeed(category, page);
+    const { category = 'trending', page = 1, lang = 'ru' } = req.query;
+    const data = await z01.getCatalogFeed(category, page, lang);
     res.json(data);
   } catch (e) {
     res.status(500).json({ error: e.message || 'Ошибка загрузки каталога' });
@@ -918,8 +918,8 @@ app.get('/api/catalog/feed', async (req, res) => {
 
 app.get('/api/catalog/search', async (req, res) => {
   try {
-    const { q = '', page = 1 } = req.query;
-    const data = await z01.searchCatalog(q, page);
+    const { q = '', page = 1, lang = 'ru' } = req.query;
+    const data = await z01.searchCatalog(q, page, lang);
     res.json(data);
   } catch (e) {
     res.status(500).json({ error: e.message || 'Ошибка поиска' });
@@ -928,9 +928,9 @@ app.get('/api/catalog/search', async (req, res) => {
 
 app.get('/api/catalog/details', async (req, res) => {
   try {
-    const { id, type = 'movie' } = req.query;
+    const { id, type = 'movie', lang = 'ru' } = req.query;
     if (!id) return res.status(400).json({ error: 'Missing id' });
-    const card = await z01.getCatalogDetails(id, type);
+    const card = await z01.getCatalogDetails(id, type, lang);
     res.json({ movie: card });
   } catch (e) {
     res.status(500).json({ error: e.message || 'Ошибка получения деталей' });
