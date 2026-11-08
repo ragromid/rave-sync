@@ -932,28 +932,26 @@
 
   function populateProfileStats(user) {
     const st = user?.stats || {};
-    $('statWatchTime').textContent = formatWatchTime(st.watchSeconds || 0);
+    if ($('statWatchTime')) $('statWatchTime').textContent = formatWatchTime(st.watchSeconds || 0);
     const watchedTotal = (st.moviesWatched || 0) + (st.episodesWatched || 0) || (st.historyCount || state.history.length || 0);
-    $('statWatchedCount').textContent = watchedTotal;
-    $('statRoomsCreated').textContent = st.roomsCreated || 0;
-    $('statMessagesSent').textContent = st.messagesSent || 0;
-    $('statReactionsSent').textContent = st.reactionsSent || 0;
+    if ($('statWatchedCount')) $('statWatchedCount').textContent = watchedTotal;
+    if ($('statRoomsCreated')) $('statRoomsCreated').textContent = st.roomsCreated || 0;
+    if ($('statMessagesSent')) $('statMessagesSent').textContent = st.messagesSent || 0;
+    if ($('statReactionsSent')) $('statReactionsSent').textContent = st.reactionsSent || 0;
     const friendsCnt = st.friendsCount ?? state.friends.length ?? 0;
-    const bmCnt = st.bookmarksCount ?? state.bookmarks.length ?? 0;
-    $('statSocialCount').textContent = `${friendsCnt} / ${bmCnt}`;
-    renderBadgesStrip('profileBadgesStrip', { ...st, friendsCount: friendsCnt, bookmarksCount: bmCnt });
+    if ($('statSocialCount')) $('statSocialCount').textContent = `${friendsCnt}`;
   }
 
   function switchProfileFolder(target) {
+    const mapped = (target === 'notifications' || target === 'playback') ? 'settings' : 'profile';
     document.querySelectorAll('.pfolder-tab').forEach(t => {
-      t.classList.toggle('active', t.dataset.ptab === target);
+      t.classList.toggle('active', t.dataset.ptab === mapped);
     });
     document.querySelectorAll('.pfolder-content').forEach(c => {
-      c.classList.toggle('active', c.id === `ptab-${target}`);
+      c.classList.toggle('active', c.id === `ptab-${mapped}`);
     });
-    if (target === 'notifications') {
+    if (mapped === 'settings') {
       updateProfileNotifUI();
-    } else if (target === 'playback') {
       updateProfilePlaybackUI();
     }
   }
@@ -967,7 +965,6 @@
   function updateProfileNotifUI() {
     const hasNotifApi = 'Notification' in window;
     const perm = hasNotifApi ? Notification.permission : (inAppSoundUnlocked ? 'granted' : 'default');
-    const icon = $('notifFolderIcon');
     const sub = $('notifFolderSub');
     const btn = $('profileNotifToggleBtn');
     const soundToggle = $('profileSoundToggle');
@@ -978,20 +975,17 @@
 
     if (!btn) return;
     if (perm === 'granted' || inAppSoundUnlocked) {
-      if (icon) icon.textContent = '🔔';
-      if (sub) sub.textContent = 'Оповещения включены и активны в браузере';
-      btn.textContent = '🔔 Проверить звук и пуш';
-      btn.className = 'btn primary';
+      if (sub) sub.textContent = 'Активны в браузере';
+      btn.textContent = 'Тест';
+      btn.className = 'pill-btn tiny accent';
     } else if (perm === 'denied') {
-      if (icon) icon.textContent = '🔕';
-      if (sub) sub.textContent = 'Уведомления заблокированы в настройках браузера';
-      btn.textContent = '🔕 Разрешить в браузере';
-      btn.className = 'btn glass danger';
+      if (sub) sub.textContent = 'Заблокированы в браузере';
+      btn.textContent = 'Разрешить';
+      btn.className = 'pill-btn tiny danger';
     } else {
-      if (icon) icon.textContent = '🔔';
-      if (sub) sub.textContent = 'Нажмите кнопку, чтобы разрешить системные уведомления';
-      btn.textContent = '🔔 Включить уведомления';
-      btn.className = 'btn primary';
+      if (sub) sub.textContent = 'Разрешить оповещения';
+      btn.textContent = 'Включить';
+      btn.className = 'pill-btn tiny accent';
     }
   }
 
@@ -1115,6 +1109,9 @@
   // Custom photo upload with client-side square crop & compression (160x160 JPEG)
   $('uploadPhotoBtn').addEventListener('click', () => {
     $('profilePhotoInput').click();
+  });
+  $('profileBigAvatar')?.addEventListener('click', () => {
+    $('profilePhotoInput')?.click();
   });
 
   $('profilePhotoInput').addEventListener('change', (e) => {
@@ -1254,9 +1251,8 @@
       setAvatarElement($('ucAvatar'), u, '🦊');
       $('ucDisplayName').textContent = u.displayName;
       $('ucUsername').textContent = `@${u.username}`;
-      $('ucBio').textContent = u.bio || 'Смотрит фильмы в oulo 🍿';
+      $('ucBio').textContent = u.bio || 'Участник oulo';
       const st = u.stats || {};
-      renderBadgesStrip('ucBadgesStrip', st);
 
       const tmBox = $('ucTasteMatchBox');
       if (tmBox) {
@@ -1266,10 +1262,10 @@
           const sharedList = (tm.sharedMovies && tm.sharedMovies.length > 0) ? tm.sharedMovies : (tm.theirBookmarks || []).slice(0, 6);
           const sharedLabel = (tm.sharedMovies && tm.sharedMovies.length > 0)
             ? `Общие фильмы (${tm.sharedMovies.length}):`
-            : 'Избранное пользователя:';
+            : 'В закладках:';
           tmBox.innerHTML = `
             <div class="taste-match-header">
-              <span>🎯 Совместимость вкусов</span>
+              <span>Совпадение вкусов</span>
               <span class="taste-match-pct">${tm.matchPercent || 0}%</span>
             </div>
             <div class="taste-match-bar">
@@ -1278,7 +1274,7 @@
             ${sharedList.length ? `
               <div style="font-size:0.72rem;color:var(--text-muted);margin-top:8px;">${esc(sharedLabel)}</div>
               <div class="taste-shared-strip">
-                ${sharedList.map((m, idx) => `<button type="button" class="taste-shared-chip" data-tm-idx="${idx}">🎬 ${esc(m.title)}</button>`).join('')}
+                ${sharedList.map((m, idx) => `<button type="button" class="taste-shared-chip" data-tm-idx="${idx}">${esc(m.title)}</button>`).join('')}
               </div>
             ` : ''}
           `;
@@ -1298,12 +1294,9 @@
       }
 
       $('ucStatsGrid').innerHTML = `
-        <div class="stat-card"><div class="stat-val">${esc(formatWatchTime(st.watchSeconds || 0))}</div><div class="stat-label">⏱️ В просмотре</div></div>
-        <div class="stat-card"><div class="stat-val">${(st.moviesWatched || 0) + (st.episodesWatched || 0)}</div><div class="stat-label">🎬 Просмотрено</div></div>
-        <div class="stat-card"><div class="stat-val">${st.roomsCreated || 0}</div><div class="stat-label">🎉 Комнат</div></div>
-        <div class="stat-card"><div class="stat-val">${st.messagesSent || 0}</div><div class="stat-label">💬 Сообщений</div></div>
-        <div class="stat-card"><div class="stat-val">${st.reactionsSent || 0}</div><div class="stat-label">🔥 Реакций</div></div>
-        <div class="stat-card"><div class="stat-val">${st.friendsCount || 0}</div><div class="stat-label">👥 Друзей</div></div>
+        <div class="stat-card"><div class="stat-val">${(st.moviesWatched || 0) + (st.episodesWatched || 0)}</div><div class="stat-label">Просмотрено</div></div>
+        <div class="stat-card"><div class="stat-val">${esc(formatWatchTime(st.watchSeconds || 0))}</div><div class="stat-label">Время</div></div>
+        <div class="stat-card"><div class="stat-val">${st.friendsCount || 0}</div><div class="stat-label">Друзья</div></div>
       `;
       $('userCardModal').classList.remove('hidden');
     } catch {}
@@ -1802,12 +1795,8 @@
   });
 
   $('joinByCodeBtn')?.addEventListener('click', () => {
-    if (state.user) {
-      openAuthModal('quick-actions');
-    } else {
-      $('joinCodeModal')?.classList.remove('hidden');
-      $('joinCodeInput')?.focus();
-    }
+    $('joinCodeModal')?.classList.remove('hidden');
+    $('joinCodeInput')?.focus();
   });
 
   $('joinCodeForm')?.addEventListener('submit', (e) => {
@@ -1819,23 +1808,10 @@
     joinRoomByCode(code);
   });
 
-  $('pfolderJoinCodeForm')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const code = $('pfolderJoinCodeInput').value.trim().toUpperCase();
-    if (!code) return;
-    $('authModal')?.classList.add('hidden');
-    $('pfolderJoinCodeInput').value = '';
-    joinRoomByCode(code);
-  });
-
   // Custom link (YouTube / MP4 / M3U8)
   function openCustomLinkModal() {
-    if (state.user) {
-      openAuthModal('quick-actions');
-    } else {
-      $('customLinkModal')?.classList.remove('hidden');
-      $('customLinkUrl')?.focus();
-    }
+    $('customLinkModal')?.classList.remove('hidden');
+    $('customLinkUrl')?.focus();
   }
   $('customLinkBtn')?.addEventListener('click', openCustomLinkModal);
   $('openLinkFromRoomBtn')?.addEventListener('click', openCustomLinkModal);

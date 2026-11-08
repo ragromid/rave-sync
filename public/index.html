@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_28" />
+  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_29" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -174,11 +174,13 @@
           </div>
         </section>
 
-        <!-- VIEW 2: ROOMS (Rave Public & Private Watch Parties) -->
+        <!-- VIEW 2: ROOMS (Public & Private Watch Parties) -->
         <section id="view-rooms" class="view-page">
           <div class="page-header">
-            <h2>Комнаты Rave</h2>
+            <h2>Комнаты</h2>
             <div class="page-header-actions">
+              <button id="joinByCodeBtn" class="btn glass">По коду</button>
+              <button id="customLinkBtn" class="btn glass">Своя ссылка</button>
               <button id="createCustomRoomBtn" class="btn primary">+ Создать комнату</button>
             </div>
           </div>
@@ -714,304 +716,186 @@
       <!-- Logged-in User Profile & Settings Modal -->
       <div id="authProfileView" class="hidden">
         <div class="profile-modal-top">
-          <h3>Настройки и профиль</h3>
+          <h3>Профиль</h3>
         </div>
 
-        <!-- Folder Tabs Navigation -->
+        <!-- Minimal 2-Tab Segmented Switch -->
         <div class="profile-folders-nav" id="profileFoldersNav">
           <button type="button" class="pfolder-tab active" data-ptab="profile">
             <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span>Профиль</span>
+            <span>Аккаунт</span>
           </button>
-          <button type="button" class="pfolder-tab" data-ptab="quick-actions">
-            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            <span>Подключение</span>
-          </button>
-          <button type="button" class="pfolder-tab" data-ptab="personalization">
-            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
-            <span>Оформление</span>
-          </button>
-          <button type="button" class="pfolder-tab" data-ptab="notifications">
-            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span>Уведомления</span>
-          </button>
-          <button type="button" class="pfolder-tab" data-ptab="playback">
-            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-            <span>Плеер</span>
+          <button type="button" class="pfolder-tab" data-ptab="settings">
+            <svg class="pfolder-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>Настройки</span>
           </button>
         </div>
 
-        <!-- Folder 1: Профиль (Profile info, Stats, Display name, Bio, Logout) -->
+        <!-- Tab 1: Аккаунт -->
         <div id="ptab-profile" class="pfolder-content active">
-          <div class="profile-header-box">
-            <div id="profileBigAvatar" class="profile-big-avatar">🦊</div>
-            <div class="profile-meta-col">
-              <div id="profileUsernameTag" class="profile-username">@user</div>
-              <div class="profile-photo-btns">
-                <input type="file" id="profilePhotoInput" accept="image/*" hidden />
-                <button type="button" id="uploadPhotoBtn" class="pill-btn tiny accent">📷 Загрузить фото</button>
-                <button type="button" id="removePhotoBtn" class="pill-btn tiny hidden">✕ Удалить фото</button>
+          <div class="profile-hero-card">
+            <div class="profile-header-box">
+              <div id="profileBigAvatar" class="profile-big-avatar" title="Нажмите, чтобы загрузить фото">🦊</div>
+              <div class="profile-meta-col">
+                <div id="profileUsernameTag" class="profile-username">@user</div>
+                <div class="profile-photo-btns">
+                  <input type="file" id="profilePhotoInput" accept="image/*" hidden />
+                  <button type="button" id="uploadPhotoBtn" class="pill-btn tiny">Сменить фото</button>
+                  <button type="button" id="removePhotoBtn" class="pill-btn tiny hidden">Удалить</button>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- User Achievement Badges -->
-          <div id="profileBadgesStrip" class="badges-strip"></div>
-
-          <!-- User Watch Statistics Grid -->
-          <div class="profile-stats-grid" id="profileStatsGrid">
-            <div class="stat-card">
-              <div class="stat-val" id="statWatchTime">0 мин</div>
-              <div class="stat-label">⏱️ В просмотре</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-val" id="statWatchedCount">0</div>
-              <div class="stat-label">🎬 Фильмов и серий</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-val" id="statRoomsCreated">0</div>
-              <div class="stat-label">🎉 Комнат создано</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-val" id="statMessagesSent">0</div>
-              <div class="stat-label">💬 Сообщений</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-val" id="statReactionsSent">0</div>
-              <div class="stat-label">🔥 Реакций</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-val" id="statSocialCount">0</div>
-              <div class="stat-label">👥 Друзей / 🔖 Закл.</div>
+            <!-- Compact 3-Metric Strip -->
+            <div class="profile-stats-grid" id="profileStatsGrid">
+              <div class="stat-card">
+                <div class="stat-val" id="statWatchedCount">0</div>
+                <div class="stat-label">Просмотрено</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="statWatchTime">0 мин</div>
+                <div class="stat-label">Время</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="statSocialCount">0</div>
+                <div class="stat-label">Друзья</div>
+              </div>
             </div>
           </div>
 
           <form id="profileForm" class="auth-form">
             <div class="form-group">
-              <label>Отображаемое имя</label>
+              <label>Имя</label>
               <input type="text" id="profileDisplayName" required maxlength="32" />
             </div>
             <div class="form-group">
-              <label>О себе / Статус</label>
-              <input type="text" id="profileBio" placeholder="Что любите смотреть?" maxlength="140" />
+              <label>О себе</label>
+              <input type="text" id="profileBio" placeholder="Короткий статус..." maxlength="140" />
             </div>
+
+            <div class="profile-appearance-row">
+              <div class="profile-appearance-block">
+                <span class="profile-sub-label">Цвет</span>
+                <div class="color-picker" id="profileColorPicker">
+                  <button type="button" class="color-swatch selected" data-color="#00e676" style="background:#00e676"></button>
+                  <button type="button" class="color-swatch" data-color="#10b981" style="background:#10b981"></button>
+                  <button type="button" class="color-swatch" data-color="#ffffff" style="background:#ffffff"></button>
+                  <button type="button" class="color-swatch" data-color="#a1a1aa" style="background:#a1a1aa"></button>
+                  <button type="button" class="color-swatch" data-color="#27272a" style="background:#27272a"></button>
+                  <button type="button" class="color-swatch" data-color="#18181b" style="background:#18181b"></button>
+                </div>
+              </div>
+
+              <div class="profile-appearance-block">
+                <span class="profile-sub-label">Иконка (без фото)</span>
+                <div class="avatar-picker compact-avatar-picker" id="profileAvatarPicker">
+                  <button type="button" class="av-pick" data-av="🦊">🦊</button>
+                  <button type="button" class="av-pick" data-av="🐱">🐱</button>
+                  <button type="button" class="av-pick" data-av="🐼">🐼</button>
+                  <button type="button" class="av-pick" data-av="🦁">🦁</button>
+                  <button type="button" class="av-pick" data-av="👾">👾</button>
+                  <button type="button" class="av-pick" data-av="🤖">🤖</button>
+                  <button type="button" class="av-pick" data-av="🎬">🎬</button>
+                  <button type="button" class="av-pick" data-av="🍿">🍿</button>
+                </div>
+              </div>
+            </div>
+
             <div class="profile-actions">
-              <button type="submit" class="btn primary">Сохранить профиль</button>
+              <button type="submit" class="btn primary" style="flex:1;">Сохранить</button>
               <button type="button" id="logoutBtn" class="btn glass danger">Выйти</button>
             </div>
           </form>
         </div>
 
-        <!-- Folder 2: Быстрое подключение & Ссылки (Custom Link & Join Room Code) -->
-        <div id="ptab-quick-actions" class="pfolder-content">
-          <div class="pfolder-card">
-            <div class="pfolder-card-header">
-              <span class="pfolder-card-icon">🔗</span>
-              <div>
-                <div class="pfolder-card-title">Своя ссылка на видео</div>
-                <div class="pfolder-card-sub">YouTube, HDRezka, прямые потоки HLS (.m3u8) и MP4</div>
-              </div>
-            </div>
-            <form id="pfolderCustomLinkForm" class="auth-form" style="margin-top:10px;">
-              <div class="form-group">
-                <label>URL видео или фильма</label>
-                <input type="url" id="pfolderCustomLinkUrl" required placeholder="https://..." />
-              </div>
-              <div class="form-group">
-                <label>Название (необязательно)</label>
-                <input type="text" id="pfolderCustomLinkTitle" placeholder="Видео по ссылке" />
-              </div>
-              <button type="submit" class="btn primary full">▶️ Запустить просмотр</button>
-            </form>
-          </div>
+        <!-- Tab 2: Настройки (Clean Unified List) -->
+        <div id="ptab-settings" class="pfolder-content">
+          <div class="settings-group">
+            <div class="settings-group-label">Уведомления и чат</div>
 
-          <div class="pfolder-card" style="margin-top:14px;">
-            <div class="pfolder-card-header">
-              <span class="pfolder-card-icon">#️⃣</span>
-              <div>
-                <div class="pfolder-card-title">Войти по коду комнаты</div>
-                <div class="pfolder-card-sub">Введите код совместного просмотра от друга</div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+                <div class="settings-item-info">
+                  <span class="settings-item-title">Push-уведомления</span>
+                  <span class="settings-item-sub" id="notifFolderSub">Оповещения в браузере</span>
+                </div>
               </div>
+              <button type="button" id="profileNotifToggleBtn" class="pill-btn tiny accent">Проверить</button>
             </div>
-            <form id="pfolderJoinCodeForm" class="auth-form" style="margin-top:10px;">
-              <div class="form-group">
-                <input type="text" id="pfolderJoinCodeInput" required placeholder="AB12CD" style="text-transform:uppercase;text-align:center;font-size:1.15rem;letter-spacing:0.15em;" maxlength="10" />
-              </div>
-              <button type="submit" class="btn primary full">🚀 Войти в комнату</button>
-            </form>
-          </div>
-        </div>
 
-        <!-- Folder 3: Оформление & Персонализация (Colors, Avatars, Preview) -->
-        <div id="ptab-personalization" class="pfolder-content">
-          <div class="pfolder-card">
-            <div class="pfolder-card-header">
-              <span class="pfolder-card-icon">🎨</span>
-              <div>
-                <div class="pfolder-card-title">Цвет профиля и темы</div>
-                <div class="pfolder-card-sub">Акцентный оттенок кнопок, свечения и вашего аватара</div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></span>
+                <div class="settings-item-info">
+                  <span class="settings-item-title">Звук сообщений</span>
+                  <span class="settings-item-sub">Сигнал при новых сообщениях</span>
+                </div>
               </div>
-            </div>
-            <div class="color-picker" id="profileColorPicker" style="margin-top:12px;">
-              <button type="button" class="color-swatch selected" data-color="#00e676" style="background:#00e676"></button>
-              <button type="button" class="color-swatch" data-color="#10b981" style="background:#10b981"></button>
-              <button type="button" class="color-swatch" data-color="#22c55e" style="background:#22c55e"></button>
-              <button type="button" class="color-swatch" data-color="#00ff66" style="background:#00ff66"></button>
-              <button type="button" class="color-swatch" data-color="#ffffff" style="background:#ffffff"></button>
-              <button type="button" class="color-swatch" data-color="#e4e4e7" style="background:#e4e4e7"></button>
-              <button type="button" class="color-swatch" data-color="#27272a" style="background:#27272a"></button>
-              <button type="button" class="color-swatch" data-color="#0a0a0a" style="background:#0a0a0a"></button>
-            </div>
-          </div>
-
-          <div class="pfolder-card" style="margin-top:14px;">
-            <div class="pfolder-card-header">
-              <span class="pfolder-card-icon">🦊</span>
-              <div>
-                <div class="pfolder-card-title">Эмодзи-аватар (если нет фото)</div>
-                <div class="pfolder-card-sub">Выберите символ вашего персонажа</div>
-              </div>
-            </div>
-            <div class="avatar-picker" id="profileAvatarPicker" style="margin-top:12px;">
-              <button type="button" class="av-pick" data-av="🦊">🦊</button>
-              <button type="button" class="av-pick" data-av="🐱">🐱</button>
-              <button type="button" class="av-pick" data-av="🐼">🐼</button>
-              <button type="button" class="av-pick" data-av="🐯">🐯</button>
-              <button type="button" class="av-pick" data-av="🦁">🦁</button>
-              <button type="button" class="av-pick" data-av="🦄">🦄</button>
-              <button type="button" class="av-pick" data-av="👾">👾</button>
-              <button type="button" class="av-pick" data-av="🤖">🤖</button>
-              <button type="button" class="av-pick" data-av="🔥">🔥</button>
-              <button type="button" class="av-pick" data-av="🎬">🎬</button>
-              <button type="button" class="av-pick" data-av="🚀">🚀</button>
-              <button type="button" class="av-pick" data-av="🍿">🍿</button>
-            </div>
-          </div>
-
-          <div style="margin-top:14px;text-align:right;">
-            <button type="button" id="savePersonalizationBtn" class="btn primary">Сохранить оформление</button>
-          </div>
-        </div>
-
-        <!-- Folder 4: Уведомления (Notifications, Sound, Test) -->
-        <div id="ptab-notifications" class="pfolder-content">
-          <div class="pfolder-card">
-            <div class="pfolder-card-header">
-              <span class="pfolder-card-icon" id="notifFolderIcon">🔔</span>
-              <div>
-                <div class="pfolder-card-title">Браузерные и системные уведомления</div>
-                <div class="pfolder-card-sub" id="notifFolderSub">Разрешение на push и звуковые оповещения</div>
-              </div>
-            </div>
-            <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-              <button type="button" id="profileNotifToggleBtn" class="btn primary">🔔 Проверить уведомления</button>
-            </div>
-          </div>
-
-          <div class="pfolder-card" style="margin-top:14px;">
-            <div class="pfolder-card-header">
-              <span class="pfolder-card-icon">🔊</span>
-              <div>
-                <div class="pfolder-card-title">Звуковые сигналы в чате</div>
-                <div class="pfolder-card-sub">Воспроизведение звуков при новых сообщениях и реакциях</div>
-              </div>
-            </div>
-            <div class="setting-toggle-row" style="margin-top:12px;">
-              <span class="setting-toggle-label">Звук сообщений</span>
               <label class="switch-ui">
                 <input type="checkbox" id="profileSoundToggle" checked />
                 <span class="switch-slider"></span>
               </label>
             </div>
-          </div>
 
-          <div class="pfolder-card" style="margin-top:14px;">
-            <div class="pfolder-card-header">
-              <span class="pfolder-card-icon">💬</span>
-              <div>
-                <div class="pfolder-card-title">Всплывающие карточки Telegram</div>
-                <div class="pfolder-card-sub">Оповещения сверху экрана при входящих сообщениях</div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                <div class="settings-item-info">
+                  <span class="settings-item-title">Всплывающие баннеры</span>
+                  <span class="settings-item-sub">Уведомления сверху экрана</span>
+                </div>
               </div>
-            </div>
-            <div class="setting-toggle-row" style="margin-top:12px;">
-              <span class="setting-toggle-label">Всплывающие карточки</span>
               <label class="switch-ui">
                 <input type="checkbox" id="profileInAppNotifToggle" checked />
                 <span class="switch-slider"></span>
               </label>
             </div>
           </div>
-        </div>
 
-        <!-- Folder 5: Плеер & Стрим (Proxy mode, Auto sync, Cache) -->
-        <div id="ptab-playback" class="pfolder-content">
-          <div class="pfolder-card">
-            <div class="pfolder-card-header">
-              <span class="pfolder-card-icon">⚡</span>
-              <div>
-                <div class="pfolder-card-title">Режим проксирования видео</div>
-                <div class="pfolder-card-sub">Настройка обхода CORS и прямых потоков балансеров</div>
+          <div class="settings-group" style="margin-top:14px;">
+            <div class="settings-group-label">Видео и плеер</div>
+
+            <div class="settings-item settings-item-col">
+              <div class="settings-item-top">
+                <div class="settings-item-left">
+                  <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+                  <div class="settings-item-info">
+                    <span class="settings-item-title">Режим прокси</span>
+                    <span class="settings-item-sub">Обход блокировок видеопотока</span>
+                  </div>
+                </div>
+              </div>
+              <div class="proxy-select-grid" id="profileProxyGrid">
+                <button type="button" class="proxy-opt-btn active" data-pmode="auto">Авто</button>
+                <button type="button" class="proxy-opt-btn" data-pmode="always">Через прокси</button>
+                <button type="button" class="proxy-opt-btn" data-pmode="off">Напрямую</button>
               </div>
             </div>
-            <div class="proxy-select-grid" id="profileProxyGrid" style="margin-top:12px;">
-              <button type="button" class="proxy-opt-btn active" data-pmode="auto">
-                <span class="proxy-opt-title">⚡ Авто (Рекомендуется)</span>
-                <span class="proxy-opt-desc">Умный выбор прямого потока или прокси</span>
-              </button>
-              <button type="button" class="proxy-opt-btn" data-pmode="always">
-                <span class="proxy-opt-title">🛡️ Всегда через сервер</span>
-                <span class="proxy-opt-desc">Надёжный обход любых блокировок провайдера</span>
-              </button>
-              <button type="button" class="proxy-opt-btn" data-pmode="off">
-                <span class="proxy-opt-title">🚀 Напрямую без прокси</span>
-                <span class="proxy-opt-desc">Прямое воспроизведение видео (если не блокируется)</span>
-              </button>
-            </div>
-          </div>
 
-          <div class="pfolder-card" style="margin-top:14px;">
-            <div class="pfolder-card-header">
-              <span class="pfolder-card-icon">🔊</span>
-              <div>
-                <div class="pfolder-card-title">Громкость и усилитель звука</div>
-                <div class="pfolder-card-sub">Аппаратное усиление тихих дорожек и диалогов фильмов до 250%</div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span>
+                <div class="settings-item-info">
+                  <span class="settings-item-title">Автосинхронизация</span>
+                  <span class="settings-item-sub">Подстройка таймкода под комнату</span>
+                </div>
               </div>
-            </div>
-            <div style="margin-top:12px; display:flex; gap:8px;">
-              <button type="button" class="pill-btn tiny audio-boost-btn" data-boost="1">100%</button>
-              <button type="button" class="pill-btn tiny audio-boost-btn" data-boost="1.5">150%</button>
-              <button type="button" class="pill-btn tiny audio-boost-btn active" data-boost="2">200% (Громко)</button>
-              <button type="button" class="pill-btn tiny audio-boost-btn" data-boost="2.5">250% (Макс)</button>
-            </div>
-          </div>
-
-          <div class="pfolder-card" style="margin-top:14px;">
-            <div class="pfolder-card-header">
-              <span class="pfolder-card-icon">🔄</span>
-              <div>
-                <div class="pfolder-card-title">Синхронизация совместного просмотра</div>
-                <div class="pfolder-card-sub">Автоматическая синхронизация таймкода комнаты</div>
-              </div>
-            </div>
-            <div class="setting-toggle-row" style="margin-top:12px;">
-              <span class="setting-toggle-label">Мягкая синхронизация</span>
               <label class="switch-ui">
                 <input type="checkbox" id="profileSyncToggle" checked />
                 <span class="switch-slider"></span>
               </label>
             </div>
-          </div>
 
-          <div class="pfolder-card" style="margin-top:14px;">
-            <div class="pfolder-card-header">
-              <span class="pfolder-card-icon">🧹</span>
-              <div>
-                <div class="pfolder-card-title">Локальные данные и кэш</div>
-                <div class="pfolder-card-sub">Сброс сохранённых позиций фильмов и временных данных</div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+                <div class="settings-item-info">
+                  <span class="settings-item-title">Кэш просмотра</span>
+                  <span class="settings-item-sub">Сбросить сохранённые таймкоды</span>
+                </div>
               </div>
-            </div>
-            <div style="margin-top:12px;">
-              <button type="button" id="profileClearCacheBtn" class="pill-btn danger">Очистить кэш просмотра</button>
+              <button type="button" id="profileClearCacheBtn" class="pill-btn tiny">Очистить</button>
             </div>
           </div>
         </div>
@@ -1031,7 +915,6 @@
         </div>
       </div>
       <p id="ucBio" class="uc-bio"></p>
-      <div id="ucBadgesStrip" class="badges-strip"></div>
       <div id="ucTasteMatchBox" class="taste-match-box hidden"></div>
       <div class="profile-stats-grid" id="ucStatsGrid"></div>
     </div>
@@ -1325,6 +1208,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261109_oulo_28"></script>
+  <script src="/app.js?v=20261109_oulo_29"></script>
 </body>
 </html>
