@@ -1608,6 +1608,7 @@
       });
       state.bookmarks = res.bookmarks || [];
       updateModalBookmarkUi(res.added);
+      if (state.currentView === 'saved') renderSavedGrid();
       showToast(res.added ? 'Добавлено в закладки' : 'Удалено из закладок');
     } catch (e) {
       showToast(e.message);
@@ -1616,8 +1617,35 @@
 
   // Saved Tab (Bookmarks & History)
   function renderSavedGrid() {
-    const list = state.savedTab === 'bookmarks' ? state.bookmarks : state.history.map(h => h.movie).filter(Boolean);
-    renderPosterCards(list, $('savedGrid'), true);
+    const bmList = state.bookmarks || [];
+    const histList = (state.history || []).map(h => h.movie).filter(Boolean);
+    if ($('savedBookmarksCount')) $('savedBookmarksCount').textContent = bmList.length;
+    if ($('savedHistoryCount')) $('savedHistoryCount').textContent = histList.length;
+
+    const isBm = state.savedTab === 'bookmarks';
+    const list = isBm ? bmList : histList;
+    const grid = $('savedGrid');
+    if (!grid) return;
+
+    if (!list.length) {
+      grid.innerHTML = `
+        <div class="saved-empty-card">
+          <div class="saved-empty-ico">
+            ${isBm
+              ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
+              : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+            }
+          </div>
+          <div class="saved-empty-title">${isBm ? 'Закладок пока нет' : 'История просмотров пуста'}</div>
+          <div class="saved-empty-sub">${isBm ? 'Сохраняйте фильмы и сериалы в закладки, чтобы быстро вернуться к ним позже' : 'Здесь появятся фильмы и сериалы, которые вы запускали'}</div>
+          <button type="button" class="btn primary" id="savedGoExploreBtn">Перейти в каталог</button>
+        </div>
+      `;
+      $('savedGoExploreBtn')?.addEventListener('click', () => switchView('explore'));
+      return;
+    }
+
+    renderPosterCards(list, grid, true);
   }
 
   document.querySelectorAll('[data-saved-tab]').forEach(btn => {

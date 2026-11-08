@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_31" />
+  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_32" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -259,9 +259,20 @@
 
         <!-- VIEW 4: SAVED (Bookmarks & History) -->
         <section id="view-saved" class="view-page">
-          <div class="category-bar">
-            <button class="cat-pill active" data-saved-tab="bookmarks" id="tabBookmarksBtn">🔖 Закладки</button>
-            <button class="cat-pill" data-saved-tab="history" id="tabHistoryBtn">🕒 История</button>
+          <div class="page-header saved-page-header">
+            <h2>Моё</h2>
+            <div class="saved-tabs-switch">
+              <button type="button" class="saved-tab-btn active" data-saved-tab="bookmarks" id="tabBookmarksBtn">
+                <svg class="saved-tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                <span>Закладки</span>
+                <span class="saved-count-pill" id="savedBookmarksCount">0</span>
+              </button>
+              <button type="button" class="saved-tab-btn" data-saved-tab="history" id="tabHistoryBtn">
+                <svg class="saved-tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>История</span>
+                <span class="saved-count-pill" id="savedHistoryCount">0</span>
+              </button>
+            </div>
           </div>
           <div id="savedGrid" class="poster-grid"></div>
         </section>
@@ -1208,6 +1219,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261109_oulo_31"></script>
+  <script src="/app.js?v=20261109_oulo_32"></script>
 </body>
 </html>
