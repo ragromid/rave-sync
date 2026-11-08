@@ -18,6 +18,29 @@ const Z01_SERVERS = [
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 
+const LANG_DISPLAY = {
+  'tr': 'Турецкий / Türkçe',
+  'de': 'Немецкий / Deutsch',
+  'es': 'Испанский / Español',
+  'en': 'Английский / English',
+  'fr': 'Французский / Français',
+  'it': 'Итальянский / Italiano',
+  'ko': 'Корейский / 한국어',
+  'ja': 'Японский / 日本語',
+  'zh': 'Китайский / 中文',
+  'pl': 'Польский / Polski',
+  'uk': 'Украинский / Українська'
+};
+
+function formatVoiceTitle(name, origLang) {
+  const n = String(name || '').trim();
+  const langKey = String(origLang || '').toLowerCase();
+  if (/оригинал/i.test(n) && langKey && LANG_DISPLAY[langKey]) {
+    return `Оригинал: ${LANG_DISPLAY[langKey]} (+субтитры)`;
+  }
+  return n;
+}
+
 // Simple in-memory caches
 const catalogCache = new Map();
 const z01Cache = new Map();
@@ -496,18 +519,30 @@ async function getZ01Sources(movie) {
     seenKeys.add(key);
 
     const parts = splitSourceName(item.name || key);
+    let name = parts.name || item.name || key;
+    let badge = parts.badge || '';
+
+    // Highlight multi-language / international capabilities
+    if (key === 'veoveo') {
+      name = 'VeoVeo (Multi: ENG / GER / ESP / FRE)';
+      badge = 'Multi';
+    } else if (key === 'iremux') {
+      name = 'iRemux (Multi-Audio 1080p)';
+      badge = 'Multi';
+    }
+
     sources.push({
       key,
-      name: parts.name || item.name || key,
+      name,
       fullName: item.name || key,
-      badge: parts.badge || '',
+      badge,
       url: item.url,
       show: item.show !== undefined ? !!item.show : true
     });
   }
 
-  // Sort: shown first, then higher quality badge
-  const qRank = { '4K': 4, 'FHD': 3, 'HD': 2, 'SD': 1, '': 0 };
+  // Sort: shown first, then higher quality / multi-language badge
+  const qRank = { '4K': 4, 'Multi': 4, 'FHD': 3, 'HD': 2, 'SD': 1, '': 0 };
   sources.sort((a, b) => {
     if (a.show !== b.show) return a.show ? -1 : 1;
     return (qRank[b.badge] || 0) - (qRank[a.badge] || 0);
@@ -658,15 +693,19 @@ async function handleRezkaBalancerQuery({ url, movie, prevSeasons = [], prevVoic
 
       const defaultTr = translators.find(t => t.isDefault) || translators[0] || { id: '0', name: 'Стандартная' };
 
-      const voices = translators.map((t, idx) => ({
-        index: idx,
-        title: t.name,
-        rawTitle: t.name,
-        kind: 'mvo',
-        groupTitle: 'Озвучка',
-        url: `rezka://episodes?id=${details.id}&tr=${t.id}&movie_url=${encodeURIComponent(details.url)}&is_series=${details.isSeries ? 1 : 0}`,
-        active: t.id === defaultTr.id
-      }));
+      const origLang = movie?.original_language || '';
+      const voices = translators.map((t, idx) => {
+        const title = formatVoiceTitle(t.name, origLang);
+        return {
+          index: idx,
+          title,
+          rawTitle: t.name,
+          kind: 'mvo',
+          groupTitle: 'Озвучка',
+          url: `rezka://episodes?id=${details.id}&tr=${t.id}&movie_url=${encodeURIComponent(details.url)}&is_series=${details.isSeries ? 1 : 0}`,
+          active: t.id === defaultTr.id
+        };
+      });
 
       const seasons = (details.seasons || []).map((s, idx) => ({
         index: idx,
@@ -733,10 +772,11 @@ async function handleRezkaBalancerQuery({ url, movie, prevSeasons = [], prevVoic
         try {
           const details = await rezka.getDetails(movieUrl);
           const freeTranslators = (details.translators || []).filter(t => !t.isPremium);
+          const origLang = movie?.original_language || '';
           if (freeTranslators.length) {
             voices = freeTranslators.map((t, idx) => ({
               index: idx,
-              title: t.name,
+              title: formatVoiceTitle(t.name, origLang),
               rawTitle: t.name,
               kind: 'mvo',
               groupTitle: 'Озвучка',

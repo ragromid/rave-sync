@@ -2609,6 +2609,92 @@
     video.classList.remove('hidden');
   }
 
+  function formatTrackLang(name = '', lang = '') {
+    const raw = (name + ' ' + lang).toLowerCase();
+    if (raw.includes('ger') || raw.includes('deu') || raw.includes('нем')) return { flag: '🇩🇪', label: 'Deutsch' };
+    if (raw.includes('eng') || raw.includes('анг')) return { flag: '🇬🇧', label: 'English' };
+    if (raw.includes('spa') || raw.includes('esp') || raw.includes('исп') || raw.includes('lat')) return { flag: '🇪🇸', label: 'Español' };
+    if (raw.includes('tur') || raw.includes('тюр') || raw.includes('тур')) return { flag: '🇹🇷', label: 'Türkçe' };
+    if (raw.includes('fre') || raw.includes('fra') || raw.includes('фран')) return { flag: '🇫🇷', label: 'Français' };
+    if (raw.includes('ita') || raw.includes('ита')) return { flag: '🇮🇹', label: 'Italiano' };
+    if (raw.includes('rus') || raw.includes('рус')) return { flag: '🇷🇺', label: 'Русский' };
+    if (raw.includes('ukr') || raw.includes('укр')) return { flag: '🇺🇦', label: 'Українська' };
+    if (raw.includes('jpn') || raw.includes('япон')) return { flag: '🇯🇵', label: '日本語' };
+    if (raw.includes('kor') || raw.includes('коре')) return { flag: '🇰🇷', label: '한국어' };
+    return { flag: '🗣️', label: name || lang || 'Аудио' };
+  }
+
+  function updateHlsAudioTracks(hls) {
+    if (!hls) return;
+    const tracks = hls.audioTracks || [];
+    const btn = $('tvAudioTrackBtn');
+    if (!btn) return;
+
+    if (tracks.length > 1) {
+      btn.classList.remove('hidden');
+      updateHlsAudioTrackButton(hls);
+    } else {
+      btn.classList.add('hidden');
+    }
+  }
+
+  function updateHlsAudioTrackButton(hls) {
+    const btn = $('tvAudioTrackBtn');
+    const lbl = $('tvAudioTrackLabel');
+    if (!btn || !hls) return;
+    const tracks = hls.audioTracks || [];
+    const curIdx = hls.audioTrack;
+    const curTrack = tracks[curIdx] || tracks[0];
+    if (curTrack && lbl) {
+      const f = formatTrackLang(curTrack.name, curTrack.lang);
+      lbl.textContent = `${f.flag} ${f.label}`;
+    }
+  }
+
+  function showAudioTrackModal() {
+    if (!state.hls) return;
+    const tracks = state.hls.audioTracks || [];
+    if (!tracks.length) {
+      showToast('В данном потоке только одна аудиодорожка');
+      return;
+    }
+    const container = $('audioTracksList');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const curTrackIdx = state.hls.audioTrack;
+    tracks.forEach((tr, idx) => {
+      const f = formatTrackLang(tr.name, tr.lang);
+      const isCur = idx === curTrackIdx;
+      const b = document.createElement('button');
+      b.className = `z01-opt ${isCur ? 'active' : ''}`;
+      b.style.display = 'flex';
+      b.style.alignItems = 'center';
+      b.style.gap = '10px';
+      b.style.padding = '12px 16px';
+      b.style.cursor = 'pointer';
+      b.innerHTML = `
+        <span style="font-size: 22px;">${f.flag}</span>
+        <div style="text-align: left; flex: 1;">
+          <div style="font-weight: 600; font-size: 14px; color: ${isCur ? '#00e676' : '#fff'};">${esc(f.label)}</div>
+          <div style="font-size: 11px; color: #888;">${esc(tr.name || tr.lang || `Track ${idx + 1}`)}</div>
+        </div>
+        ${isCur ? '<span style="color: #00e676; font-size: 16px;">✓</span>' : ''}
+      `;
+      b.onclick = () => {
+        state.hls.audioTrack = idx;
+        updateHlsAudioTrackButton(state.hls);
+        closeModal('audioTrackModal');
+        showToast(`Озвучка: ${f.flag} ${f.label}`);
+        if (state.room) {
+          socket.emit('player:set_audio_track', { audioTrackIndex: idx });
+        }
+      };
+      container.appendChild(b);
+    });
+    openModal('audioTrackModal');
+  }
+
   function loadMediaIntoPlayer(media, playback = { playing: true, currentTime: 0 }) {
     destroyPlayers();
     state.loadedStreamKey = media?.streamUrl || media?.youtubeId || '';
@@ -2627,6 +2713,7 @@
     const balTag = media.balancerName ? ` [${media.balancerName}]` : '';
     const voiceTag = media.voiceName ? ` · ${media.voiceName}` : '';
     $('roomSubText').textContent = `${media.title || 'Видео'}${epTag}${voiceTag}${balTag}`;
+    $('tvAudioTrackBtn')?.classList.add('hidden');
 
     // Case 1: YouTube
     if (media.streamType === 'youtube' || media.youtubeId) {
@@ -2692,7 +2779,16 @@
       state.hls = hls;
       hls.loadSource(streamUrl);
       hls.attachMedia(video);
-      hls.on(window.Hls.Events.MANIFEST_PARSED, onLoaded);
+      hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
+        updateHlsAudioTracks(hls);
+        onLoaded();
+      });
+      hls.on(window.Hls.Events.AUDIO_TRACKS_UPDATED, () => {
+        updateHlsAudioTracks(hls);
+      });
+      hls.on(window.Hls.Events.AUDIO_TRACK_SWITCHED, () => {
+        updateHlsAudioTrackButton(hls);
+      });
       hls.on(window.Hls.Events.ERROR, (_, data) => {
         if (data.fatal) {
           switch (data.type) {
@@ -3312,6 +3408,10 @@
       if (firstBtn) firstBtn.focus();
     }
   });
+  $('tvAudioTrackBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showAudioTrackModal();
+  });
 
   // Timeline click/scrub
   $('tvTimelineBar')?.addEventListener('click', (e) => {
@@ -3840,6 +3940,16 @@
 
   socket.on('player:heartbeat', (data) => {
     applyRemoteSync(data, true);
+  });
+
+  socket.on('player:set_audio_track', (data) => {
+    if (state.hls && typeof data.audioTrackIndex === 'number' && state.hls.audioTracks?.[data.audioTrackIndex]) {
+      state.hls.audioTrack = data.audioTrackIndex;
+      updateHlsAudioTrackButton(state.hls);
+      const cur = state.hls.audioTracks[data.audioTrackIndex];
+      const f = formatTrackLang(cur.name, cur.lang);
+      showToast(`Озвучка в комнате: ${f.flag} ${f.label}`);
+    }
   });
 
   socket.on('chat:message', (msg) => {

@@ -1993,6 +1993,15 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Synchronize audio track selection across the room
+  socket.on('player:set_audio_track', ({ audioTrackIndex }) => {
+    const meta = socketMeta.get(socket.id);
+    if (!meta || !meta.roomCode) return;
+    const room = rooms.get(meta.roomCode);
+    if (!room) return;
+    socket.to(meta.roomCode).emit('player:set_audio_track', { audioTrackIndex });
+  });
+
   // Change media / Z01 balancer / voice / episode / custom link in room
   socket.on('room:set_media', ({ media }) => {
     const meta = socketMeta.get(socket.id);

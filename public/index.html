@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261108_oulo_18" />
+  <link rel="stylesheet" href="/styles.css?v=20261108_oulo_19" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -380,6 +380,10 @@
                     <button type="button" id="tvSourceBtn" class="tv-ctrl-btn tv-focusable" title="Озвучка, серии и источник">
                       <span class="tv-ctrl-ico">🎞️</span>
                       <span class="tv-ctrl-lbl">Серии / Озв.</span>
+                    </button>
+                    <button type="button" id="tvAudioTrackBtn" class="tv-ctrl-btn tv-focusable hidden" title="Язык аудио (Audio Track)">
+                      <span class="tv-ctrl-ico">🗣️</span>
+                      <span class="tv-ctrl-lbl" id="tvAudioTrackLabel">Аудио</span>
                     </button>
                     <button type="button" id="tvCinemaBtn" class="tv-ctrl-btn tv-focusable" title="Режим ТВ (широкий экран без чата)">
                       <span class="tv-ctrl-ico">📺</span>
@@ -1060,6 +1064,16 @@
     </div>
   </div>
 
+  <!-- Audio Track Selector Modal -->
+  <div id="audioTrackModal" class="modal-backdrop hidden">
+    <div class="modal-card small-modal-card">
+      <button class="modal-close" data-close="audioTrackModal">✕</button>
+      <h3>🗣️ Язык озвучки / Audio Track</h3>
+      <p class="modal-hint">Выберите аудиодорожку фильма (английский, немецкий, испанский, русский и др.)</p>
+      <div id="audioTracksList" class="z01-dropdown-grid" style="margin-top: 14px; max-height: 360px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
   <div id="joinCodeModal" class="modal-backdrop hidden">
     <div class="modal-card small-modal-card">
       <button class="modal-close" data-close="joinCodeModal">✕</button>
@@ -1345,6 +1359,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261108_oulo_18"></script>
+  <script src="/app.js?v=20261108_oulo_19"></script>
 </body>
 </html>
