@@ -5131,10 +5131,15 @@
   function updateDmHeader(friend) {
     setAvatarElement($('dmFriendAvatar'), friend, '🦊');
     $('dmFriendName').textContent = friend.displayName;
-    const statusTxt = friend.currentRoom
-      ? `🍿 Смотрит: ${friend.currentRoom.mediaTitle}`
-      : (friend.online ? '🟢 В сети' : '⚪ Не в сети');
-    $('dmFriendStatus').textContent = statusTxt;
+    if ($('dmFriendStatus')) {
+      if (friend.currentRoom) {
+        $('dmFriendStatus').innerHTML = `<span class="dm-status-dot online"></span><span>Смотрит: ${esc(friend.currentRoom.mediaTitle)}</span>`;
+      } else if (friend.online) {
+        $('dmFriendStatus').innerHTML = '<span class="dm-status-dot online"></span><span>В сети</span>';
+      } else {
+        $('dmFriendStatus').innerHTML = '<span class="dm-status-dot"></span><span>Не в сети</span>';
+      }
+    }
     $('dmFriendHeaderMeta').onclick = () => openUserCard(friend.id);
 
     const joinBtn = $('dmJoinRoomBtn');
