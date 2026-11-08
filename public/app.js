@@ -900,6 +900,9 @@
     const syncToggle = $('profileSyncToggle');
     if (syncToggle) syncToggle.checked = state.autoSync !== false;
 
+    const hdfcToggle = $('profileHdfcToggle');
+    if (hdfcToggle) hdfcToggle.checked = localStorage.getItem('hdfc_parser_enabled') !== 'false';
+
     document.querySelectorAll('.audio-boost-btn').forEach(btn => {
       const val = parseFloat(btn.dataset.boost);
       btn.classList.toggle('active', Math.abs(val - currentVolumeMultiplier) < 0.05);
@@ -927,6 +930,12 @@
     state.autoSync = e.target.checked;
     localStorage.setItem('ravelampa_auto_sync', state.autoSync ? 'true' : 'false');
     showToast(state.autoSync ? '🔄 Автосинхронизация включена' : '⏸️ Автосинхронизация выключена');
+  });
+
+  $('profileHdfcToggle')?.addEventListener('change', (e) => {
+    const enabled = e.target.checked;
+    localStorage.setItem('hdfc_parser_enabled', enabled ? 'true' : 'false');
+    showToast(enabled ? '🇹🇷 Турецкий парсер включен' : 'Турецкий парсер отключен');
   });
 
   $('profileClearCacheBtn')?.addEventListener('click', () => {
@@ -1413,6 +1422,20 @@
     await loadZ01ForMovieInRoom(state.selectedMovie, true);
   });
 
+  const modalHdfcBtn = $('modalHdfcWatchBtn');
+  if (modalHdfcBtn) {
+    modalHdfcBtn.addEventListener('click', async () => {
+      if (!state.selectedMovie) return;
+      $('movieModal').classList.add('hidden');
+      if (state.room) {
+        switchView('room');
+        await loadZ01ForMovieInRoom(state.selectedMovie, true, 'hdfilmcehennemi');
+      } else {
+        await startRoomWithMovie(state.selectedMovie, true, 'hdfilmcehennemi');
+      }
+    });
+  }
+
   $('modalBookmarkBtn').addEventListener('click', async () => {
     if (!(await ensureAuthenticated()) || !state.selectedMovie) return;
     try {
@@ -1517,7 +1540,7 @@
     return el;
   }
 
-  async function startRoomWithMovie(movie, isPublic = true) {
+  async function startRoomWithMovie(movie, isPublic = true, preferredSource = null) {
     if (!movie) return;
     showToast(`Запуск фильма «${movie.title || 'Фильм'}»...`);
     if (!(await ensureAuthenticated())) return;
@@ -1529,7 +1552,8 @@
         backdrop: movie.backdrop,
         movie: movie,
         streamUrl: '',
-        streamType: 'hls'
+        streamType: 'hls',
+        balancerKey: preferredSource || ''
       };
       const res = await api('/api/rooms', {
         method: 'POST',
@@ -1737,7 +1761,7 @@
   });
 
   // ================= Z01 ONLINE ENGINE IN ROOM =================
-  async function loadZ01ForMovieInRoom(movie, autoBroadcastFirstStream = false) {
+  async function loadZ01ForMovieInRoom(movie, autoBroadcastFirstStream = false, forceBalancerKey = null) {
     if (!movie) return;
     $('z01Panel').classList.remove('hidden');
     setPlayerOverlay(true, true, `Опрашиваем источники Z01 для «${movie.title}»...`);
@@ -1778,7 +1802,7 @@
 
       // If room already has a selected balancer (or user has saved server-side progress), prefer it
       const savedProg = state.progress?.[String(movie.id)];
-      const preferredKey = state.room?.media?.balancerKey || savedProg?.balancerKey;
+      const preferredKey = forceBalancerKey || state.room?.media?.balancerKey || savedProg?.balancerKey;
       const targetSource = state.z01.sources.find(s => s.key === preferredKey) || firstSource;
       await selectZ01Balancer(targetSource.key, autoBroadcastFirstStream);
     } catch (e) {
@@ -2190,6 +2214,18 @@
 
   document.querySelectorAll('.btn-toggle-proxy, #toggleProxyStreamBtn').forEach(btn => {
     btn.addEventListener('click', toggleProxyStreamMode);
+  });
+
+  // Dedicated Turkish Parser Option (HDFilmCehennemi)
+  document.querySelectorAll('.btn-toggle-hdfc, #toggleTurkishHdfcBtn, #optionsHdfcBtn, #roomSettingsHdfcBtn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!state.room && !state.z01?.movie) {
+        showToast('Откройте фильм или комнату для включения турецкого парсера');
+        return;
+      }
+      showToast('🇹🇷 Включение HDFilmCehennemi (TR)...');
+      await selectZ01Balancer('hdfilmcehennemi', true);
+    });
   });
 
   // ================= VIDEO & YOUTUBE PLAYER + SYNC =================

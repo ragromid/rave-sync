@@ -282,6 +282,14 @@ async function getCatalogFeed(category = 'trending', page = 1) {
       });
       forceType = 'movie';
       break;
+    case 'turkish':
+      data = await fetchTmdb('discover/movie', {
+        page: p,
+        with_original_language: 'tr',
+        sort_by: 'popularity.desc'
+      });
+      forceType = 'movie';
+      break;
     case 'trending':
     default:
       data = await fetchTmdb('trending/all/week', { page: p });
