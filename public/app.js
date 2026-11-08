@@ -2287,7 +2287,7 @@
         btn.className = `z01-opt ${s.key === activeSourceKey ? 'active' : ''}`;
         btn.innerHTML = `
           <div class="z01-opt-title">${s.badge ? `<span class="z01-tag">${esc(s.badge)}</span> ` : ''}${esc(s.name)}</div>
-          <div class="z01-opt-note">${s.show ? '🟢 Онлайн' : '⚪ Доп. источник'}</div>
+          <div class="z01-opt-note">${s.show ? 'Онлайн' : 'Доп. источник'}</div>
         `;
         btn.onclick = () => selectZ01Balancer(s.key, true);
         dropGrid.appendChild(btn);
@@ -2361,6 +2361,13 @@
 
     // Episodes Strip for TV series
     const isSeriesEpisodes = videos.length > 1 && (seasons.length > 0 || videos.some(v => v.episode > 0));
+    if ($('mobileZ01TabLabel')) {
+      $('mobileZ01TabLabel').textContent = isSeriesEpisodes ? 'Озвучка и серии' : 'Озвучка';
+    }
+    const tvSrcLbl = document.querySelector('#tvSourceBtn .tv-ctrl-lbl');
+    if (tvSrcLbl) {
+      tvSrcLbl.textContent = isSeriesEpisodes ? 'Озвучка и серии' : 'Озвучка';
+    }
     if (isSeriesEpisodes) {
       epStrip.classList.remove('hidden');
       epStrip.innerHTML = '';
