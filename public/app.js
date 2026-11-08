@@ -4217,6 +4217,37 @@
     handleDeleteMessage(msg, contextType, friendId);
   });
 
+  function getMsgDayKey(ts) {
+    if (!ts) return '';
+    const d = new Date(Number(ts) || ts);
+    if (isNaN(d.getTime())) return '';
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  function formatMsgDayLabel(ts) {
+    if (!ts) return '';
+    const d = new Date(Number(ts) || ts);
+    if (isNaN(d.getTime())) return '';
+    const now = new Date();
+    const todayKey = getMsgDayKey(now);
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayKey = getMsgDayKey(yesterday);
+    const key = getMsgDayKey(d);
+    if (key === todayKey) return 'Сегодня';
+    if (key === yesterdayKey) return 'Вчера';
+    const opts = { day: 'numeric', month: 'long' };
+    if (d.getFullYear() !== now.getFullYear()) opts.year = 'numeric';
+    return d.toLocaleDateString('ru-RU', opts);
+  }
+
+  function renderTickIcon(isRead) {
+    if (isRead) {
+      return `<span class="chat-ticks read" title="Прочитано"><svg class="chat-tick-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg></span>`;
+    }
+    return `<span class="chat-ticks" title="Отправлено"><svg class="chat-tick-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>`;
+  }
+
   function buildRichBubbleInner(msg, options = {}) {
     const { showAuthor = false, isOwn = false, contextType = 'room' } = options;
     const u = msg.user || msg.sender || {};
@@ -4264,7 +4295,7 @@
     const timeStr = formatMsgTime(msg.createdAt);
     const editedTag = msg.editedAt ? 'изм. ' : '';
     const ticksHtml = (contextType === 'dm' && isOwn)
-      ? `<span class="chat-ticks">${msg.read ? '✓✓' : '✓'}</span>`
+      ? renderTickIcon(!!msg.read)
       : '';
     const metaInline = `<span class="chat-meta-inline">${esc(editedTag)}${esc(timeStr)}${ticksHtml}</span>`;
 
@@ -4410,6 +4441,8 @@
     const u = msg.user || msg.sender || (isOwn ? state.user : {});
     el.className = `chat-msg ${isOwn ? 'own' : ''}`;
     el.dataset.authorId = uid;
+    el.dataset.dayKey = getMsgDayKey(msg.createdAt);
+    el.dataset.createdAt = msg.createdAt || '';
     el.dataset.msgSig = JSON.stringify({
       t: msg.text,
       e: msg.editedAt,
@@ -4424,7 +4457,6 @@
         <div class="chat-bubble">
           ${buildRichBubbleInner(msg, { showAuthor: contextType === 'room', isOwn, contextType })}
         </div>
-        <button type="button" class="tg-hover-trigger" title="Реакции и меню">😊</button>
       </div>
     `;
 
@@ -4432,18 +4464,29 @@
     return el;
   }
 
-  // Group consecutive messages from the same sender like Telegram
+  // Group consecutive messages from the same sender and insert day dividers
   function refreshMessageGrouping(container) {
     if (!container) return;
+    container.querySelectorAll('.chat-day-divider').forEach(d => d.remove());
     const items = Array.from(container.querySelectorAll('.chat-msg'));
+    let lastDayKey = '';
     for (let i = 0; i < items.length; i++) {
       const cur = items[i];
       const prev = items[i - 1];
       const next = items[i + 1];
+      const curDay = cur.dataset.dayKey || '';
+      if (curDay && curDay !== lastDayKey) {
+        const div = document.createElement('div');
+        div.className = 'chat-day-divider';
+        div.dataset.day = curDay;
+        div.innerHTML = `<span>${esc(formatMsgDayLabel(cur.dataset.createdAt))}</span>`;
+        container.insertBefore(div, cur);
+        lastDayKey = curDay;
+      }
       const curAuthor = cur.dataset.authorId;
       if (!curAuthor || cur.classList.contains('system')) continue;
-      const samePrev = prev && !prev.classList.contains('system') && prev.dataset.authorId === curAuthor;
-      const sameNext = next && !next.classList.contains('system') && next.dataset.authorId === curAuthor;
+      const samePrev = prev && !prev.classList.contains('system') && prev.dataset.authorId === curAuthor && (prev.dataset.dayKey || '') === curDay;
+      const sameNext = next && !next.classList.contains('system') && next.dataset.authorId === curAuthor && (next.dataset.dayKey || '') === curDay;
       cur.classList.toggle('grouped-prev', !!samePrev);
       cur.classList.toggle('grouped-next', !!sameNext);
     }
@@ -5490,6 +5533,28 @@
   socket.on('dm:deleted', ({ id }) => {
     removeChatMessageDom(id);
   });
+
+  socket.on('dm:read_ack', ({ readerId }) => {
+    if (!readerId) return;
+    ['dmMessages', 'roomDmMessages'].forEach(boxId => {
+      const box = $(boxId);
+      if (!box) return;
+      const isTarget = (boxId === 'dmMessages' && activeDmFriendId === readerId) ||
+                       (boxId === 'roomDmMessages' && roomActiveDmFriendId === readerId);
+      if (!isTarget) return;
+      box.querySelectorAll('.chat-msg.own .chat-ticks:not(.read)').forEach(t => {
+        t.outerHTML = renderTickIcon(true);
+      });
+    });
+  });
+
+  // Refresh day divider labels across midnight
+  setInterval(() => {
+    ['chatMessages', 'dmMessages', 'roomDmMessages'].forEach(id => {
+      const box = $(id);
+      if (box && box.children.length > 0) refreshMessageGrouping(box);
+    });
+  }, 60000);
 
   async function respondFriend(requestId, accept) {
     try {

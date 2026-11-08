@@ -646,6 +646,12 @@ app.get('/api/dms/:friendId', authMiddleware, (req, res) => {
   const friend = db.getUserById(req.params.friendId);
   if (!friend) return res.status(404).json({ error: 'Друг не найден' });
   const messages = db.getDirectMessages(req.user.id, friend.id);
+  const friendSids = userSockets.get(friend.id);
+  if (friendSids) {
+    for (const sid of friendSids) {
+      io.to(sid).emit('dm:read_ack', { readerId: req.user.id });
+    }
+  }
   res.json({
     friend: {
       ...friend,
@@ -2328,6 +2334,12 @@ io.on('connection', (socket) => {
   socket.on('dm:read', ({ friendId }) => {
     if (!currentUser || !friendId) return;
     db.markDirectMessagesRead(currentUser.id, friendId);
+    const friendSids = userSockets.get(friendId);
+    if (friendSids) {
+      for (const sid of friendSids) {
+        io.to(sid).emit('dm:read_ack', { readerId: currentUser.id });
+      }
+    }
   });
 
   // WebRTC Voice Chat signaling inside room
