@@ -135,13 +135,16 @@ button {
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
-  transition: all 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.25s ease;
 }
 .brand:hover .brand-icon {
   background: #141414;
   border-color: #00e676;
-  box-shadow: 0 0 14px rgba(0, 230, 118, 0.3);
-  transform: scale(1.04);
+  box-shadow: 0 0 16px rgba(0, 230, 118, 0.4);
+  transform: rotate(5deg) scale(1.06);
+}
+.brand:active .brand-icon {
+  transform: scale(0.93);
 }
 .brand-icon svg {
   width: 22px;
@@ -400,13 +403,13 @@ button {
 }
 
 @keyframes viewEnter {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(8px);
+    transform: scale(0.99) translateY(4px);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
   }
 }
 @keyframes viewFadeIn {
@@ -426,6 +429,11 @@ button {
   align-items: flex-end;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
+  transition: border-color 0.3s ease, box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hero-banner:hover {
+  border-color: rgba(0, 230, 118, 0.35);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.8), 0 0 24px rgba(0, 230, 118, 0.12);
 }
 .hero-backdrop {
   position: absolute;
@@ -433,10 +441,9 @@ button {
   background-size: cover;
   background-position: center 25%;
   transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform;
 }
 .hero-banner:hover .hero-backdrop {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 .hero-gradient {
   position: absolute;
@@ -646,23 +653,23 @@ button {
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
 }
 .cat-pill:hover {
-  color: var(--text-main);
+  color: #ffffff;
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.22);
   transform: translateY(-2px);
 }
 .cat-pill:active {
-  transform: scale(0.96);
+  transform: scale(0.94);
 }
 .cat-pill.active {
   background: #00e676;
   color: #000000;
   border-color: #00e676;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(0, 230, 118, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 230, 118, 0.35);
   transform: translateY(-1px);
 }
 .cat-pill.active .cat-ico {
@@ -673,10 +680,10 @@ button {
   height: 15px;
   stroke: currentColor;
   flex-shrink: 0;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .cat-pill:hover .cat-ico {
-  transform: scale(1.12);
+  transform: scale(1.15);
 }
 
 /* Poster Grid (Lampa style clean cards) */
@@ -701,28 +708,31 @@ button {
   display: flex;
   flex-direction: column;
   gap: 7px;
-  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s ease;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease;
   border-radius: var(--radius-md);
   outline: none;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   position: relative;
   z-index: 1;
-  will-change: transform;
 }
 .poster-card:focus-visible {
-  transform: translateY(-5px) scale(1.025);
+  transform: translateY(-4px) scale(1.02);
   z-index: 4;
 }
 /* Hover effects only on real mouse devices — on iPhone/iPad Safari a :hover style change makes the first tap only "hover" instead of clicking */
 @media (hover: hover) and (pointer: fine) {
   .poster-card:hover {
-    transform: translateY(-5px) scale(1.025);
+    transform: translateY(-4px) scale(1.02);
     z-index: 4;
   }
   .poster-card:hover .poster-art {
     border-color: #00e676;
-    box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.75), 0 0 18px rgba(0, 230, 118, 0.22);
+    box-shadow: 0 14px 28px -4px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 230, 118, 0.25);
+  }
+  .poster-card:hover .poster-art img {
+    transform: scale(1.05);
+    filter: brightness(1.06) contrast(1.02);
   }
 }
 .poster-card:active {
@@ -733,7 +743,7 @@ button {
 }
 .poster-card:focus-visible .poster-art {
   border-color: #00e676;
-  box-shadow: 0 0 0 3px #00e676, 0 8px 28px rgba(0, 230, 118, 0.45);
+  box-shadow: 0 0 0 3px #00e676, 0 8px 24px rgba(0, 230, 118, 0.45);
 }
 .poster-art {
   position: relative;
@@ -743,13 +753,14 @@ button {
   overflow: hidden;
   background: var(--bg-card);
   border: 2px solid var(--border-subtle);
-  transition: border-color 0.22s ease, box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 0.2s ease, box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .poster-art img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
 }
 .poster-rating {
   position: absolute;
