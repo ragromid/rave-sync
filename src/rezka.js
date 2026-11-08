@@ -551,8 +551,7 @@ async function getDetails(idOrUrl, domain = DEFAULT_MIRROR) {
   const isSeries = Boolean(html.match(/sof\.tv\.initCDNSeriesEvents\(/i) || html.match(/id="simple-episodes-tabs"/i));
 
   // Extract Translators / Voice Studios
-  const translators = [];
-  const seenTrIds = new Set();
+  const translatorsMap = new Map();
   const ulMatch = html.match(/<ul[^>]*id="translators-list"[^>]*>([\s\S]*?)<\/ul>/i);
   const searchBlock = ulMatch ? ulMatch[1] : html;
 
@@ -563,9 +562,6 @@ async function getDetails(idOrUrl, domain = DEFAULT_MIRROR) {
     const trId = trm[2];
     const innerHtml = trm[3];
 
-    if (seenTrIds.has(trId)) continue;
-    seenTrIds.add(trId);
-
     const titleAttrMatch = attrStr.match(/\btitle=["']([^"']+)["']/i);
     let name = titleAttrMatch ? titleAttrMatch[1].trim() : '';
     if (!name) {
@@ -573,13 +569,25 @@ async function getDetails(idOrUrl, domain = DEFAULT_MIRROR) {
     }
 
     const isActive = /\bclass=["'][^"']*\bactive\b[^"']*["']/i.test(attrStr) || /\bclass=["'][^"']*\bactive\b[^"']*["']/i.test(trm[0]);
+    const isPremium = /\bb-prem_translator\b|\bprem_translator\b|data-premium=["']?1["']?/i.test(attrStr) ||
+                      /\bb-prem_translator\b|\bprem_translator\b/i.test(trm[0]);
 
-    translators.push({
-      id: trId,
-      name,
-      isDefault: isActive
-    });
+    if (!translatorsMap.has(trId)) {
+      translatorsMap.set(trId, {
+        id: trId,
+        name,
+        isDefault: isActive,
+        isPremium
+      });
+    } else {
+      const existing = translatorsMap.get(trId);
+      if (isActive) existing.isDefault = true;
+      if (isPremium) existing.isPremium = true;
+      if (!existing.name && name) existing.name = name;
+    }
   }
+
+  let translators = Array.from(translatorsMap.values());
 
   // If no multiple translators list, check default single translator from init
   if (!translators.length) {
@@ -588,12 +596,18 @@ async function getDetails(idOrUrl, domain = DEFAULT_MIRROR) {
       translators.push({
         id: singleMatch[1],
         name: 'Оригинал / Дубляж',
-        isDefault: true
+        isDefault: true,
+        isPremium: false
       });
     }
   }
 
-  // Ensure at least one is active/default
+  // Filter out HDRezka premium stub translators (which play a 1-minute "Buy Premium" stub video instead of actual content)
+  const freeTranslators = translators.filter(t => !t.isPremium);
+  // Only fallback to premium if there are literally zero free translators
+  translators = freeTranslators.length > 0 ? freeTranslators : translators;
+
+  // Ensure at least one is active/default among the valid translators
   if (translators.length > 0 && !translators.some(t => t.isDefault)) {
     translators[0].isDefault = true;
   }
@@ -672,17 +686,21 @@ async function getEpisodes(id, translatorId, refererUrl = `${DEFAULT_MIRROR}/`, 
  */
 async function getStream({ id, translatorId, season = null, episode = null, isMovie = false, refererUrl = null, domain = DEFAULT_MIRROR }) {
   if (!id) throw new Error('Missing ID for stream resolution');
-  const tId = translatorId || '0';
+  let tId = translatorId && translatorId !== '0' ? String(translatorId) : '';
   let ref = refererUrl || idToUrlMap.get(String(id));
 
-  if (!ref || !ref.includes('://')) {
+  if (!ref || !ref.includes('://') || !tId) {
     try {
-      const d = await getDetails(id, domain);
+      const d = await getDetails(ref || id, domain);
       if (d && d.url) ref = d.url;
+      if (!tId && d && d.defaultTranslatorId) {
+        tId = String(d.defaultTranslatorId);
+      }
     } catch {
-      ref = `${domain}/films/fiction/${id}.html`;
+      if (!ref) ref = `${domain}/films/fiction/${id}.html`;
     }
   }
+  if (!tId) tId = '0';
 
   // Ensure page has been visited in current session so HDRezka sets proper session cookies
   if (ref && /^https?:\/\//i.test(ref) && !visitedPages.has(ref)) {
