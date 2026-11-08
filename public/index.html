@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_22" />
+  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_23" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -589,7 +589,7 @@
   <!-- MODAL 1: MOVIE DETAILS & START WATCH PARTY -->
   <div id="movieModal" class="modal-backdrop hidden">
     <div class="modal-card movie-modal-card">
-      <button class="modal-close" data-close="movieModal">✕</button>
+      <button class="modal-close" data-close="movieModal" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       <div class="movie-modal-hero" id="modalBackdrop">
         <div class="movie-modal-gradient"></div>
         <img id="modalPoster" class="movie-modal-poster" src="" alt="" />
@@ -636,7 +636,7 @@
   <!-- MODAL 2: AUTH / PROFILE -->
   <div id="authModal" class="modal-backdrop hidden">
     <div class="modal-card auth-modal-card">
-      <button class="modal-close" data-close="authModal">✕</button>
+      <button class="modal-close" data-close="authModal" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
 
       <!-- Guest: Login / Register -->
       <div id="authGuestView">
@@ -990,7 +990,7 @@
   <!-- MODAL: USER PUBLIC PROFILE CARD -->
   <div id="userCardModal" class="modal-backdrop hidden">
     <div class="modal-card small-modal-card">
-      <button class="modal-close" data-close="userCardModal">✕</button>
+      <button class="modal-close" data-close="userCardModal" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       <div class="profile-header-box">
         <div id="ucAvatar" class="profile-big-avatar">🦊</div>
         <div class="profile-meta-col">
@@ -1008,7 +1008,7 @@
   <!-- MODAL 3: CUSTOM LINK / JOIN CODE / INVITE FRIENDS -->
   <div id="customLinkModal" class="modal-backdrop hidden">
     <div class="modal-card small-modal-card">
-      <button class="modal-close" data-close="customLinkModal">✕</button>
+      <button class="modal-close" data-close="customLinkModal" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       <h3>Своя ссылка на видео</h3>
       <p class="modal-hint">Поддерживаются ссылки YouTube, прямые потоки HLS (.m3u8) и видео (.mp4)</p>
       <form id="customLinkForm" class="auth-form">
@@ -1027,7 +1027,7 @@
 
   <div id="joinCodeModal" class="modal-backdrop hidden">
     <div class="modal-card small-modal-card">
-      <button class="modal-close" data-close="joinCodeModal">✕</button>
+      <button class="modal-close" data-close="joinCodeModal" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       <h3>Войти по коду комнаты</h3>
       <form id="joinCodeForm" class="auth-form">
         <div class="form-group">
@@ -1046,7 +1046,7 @@
           <h3 id="settingsModalRoomTitle">Настройки комнаты</h3>
           <span id="settingsModalPrivacyBadge" class="badge tiny">Публичная</span>
         </div>
-        <button class="modal-close" data-close="roomSettingsModal">✕</button>
+        <button class="modal-close" data-close="roomSettingsModal" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
 
       <div class="room-settings-content">
@@ -1156,7 +1156,7 @@
 
   <div id="inviteModal" class="modal-backdrop hidden">
     <div class="modal-card small-modal-card">
-      <button class="modal-close" data-close="inviteModal">✕</button>
+      <button class="modal-close" data-close="inviteModal" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       <h3>Пригласить в комнату</h3>
       <div class="invite-share-box">
         <input type="text" id="inviteShareUrl" readonly />
@@ -1211,7 +1211,7 @@
   <!-- MODAL: SMART TV REMOTE CONTROL DECK (Управление ТВ с пульта или телефона) -->
   <div id="tvRemoteModal" class="modal-backdrop hidden">
     <div class="modal-card tv-remote-card">
-      <button class="modal-close" data-close="tvRemoteModal">✕</button>
+      <button class="modal-close" data-close="tvRemoteModal" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       <div class="tv-remote-header">
         <div class="tv-remote-badge">📺 ПУЛЬТ УПРАВЛЕНИЯ ТВ</div>
         <h3 id="tvRemoteMovieTitle">Управление видео в комнате</h3>
@@ -1297,7 +1297,7 @@
       <div id="photoViewerTimerWrap" class="photo-viewer-timer-wrap hidden">
         <div id="photoViewerTimerBar" class="photo-viewer-timer-bar"></div>
       </div>
-      <button class="modal-close" data-close="photoViewerModal">✕</button>
+      <button class="modal-close" data-close="photoViewerModal" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       <div id="photoViewerBadge" class="photo-viewer-badge hidden">🔥 Одноразовое фото — исчезнет после закрытия</div>
       <img id="photoViewerImg" class="photo-viewer-img" src="" alt="Фото" />
       <div id="photoViewerCaption" class="photo-viewer-caption"></div>
@@ -1310,6 +1310,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261109_oulo_22"></script>
+  <script src="/app.js?v=20261109_oulo_23"></script>
 </body>
 </html>
