@@ -11,6 +11,18 @@ const webPush = require('./src/push');
 
 async function sendPushToUser(userId, payload) {
   if (!userId || !payload) return;
+  // Skip OS Web Push if user has an active visible window connected via Socket.IO
+  if (!payload.forcePush) {
+    const sids = userSockets.get(userId);
+    if (sids && sids.size > 0) {
+      for (const sid of sids) {
+        const meta = socketMeta.get(sid);
+        if (meta && meta.visible !== false) {
+          return;
+        }
+      }
+    }
+  }
   const subs = db.getUserPushSubscriptions(userId);
   if (!subs || subs.length === 0) return;
   await Promise.all(subs.map(async (sub) => {
@@ -1831,18 +1843,30 @@ app.post('/api/rooms/:code/invite', authMiddleware, async (req, res) => {
 io.on('connection', (socket) => {
   let currentUser = null;
 
-  socket.on('auth:identify', ({ token }) => {
+  socket.on('auth:identify', ({ token, visible }) => {
     const payload = db.verifyToken(token);
     if (!payload || !payload.id) return;
     const user = db.getUserById(payload.id);
     if (!user || (user.username && user.username.startsWith('guest_'))) return;
     currentUser = user;
-    socketMeta.set(socket.id, { userId: user.id, roomCode: null });
+    const prevMeta = socketMeta.get(socket.id);
+    socketMeta.set(socket.id, {
+      userId: user.id,
+      roomCode: prevMeta?.roomCode || null,
+      visible: typeof visible === 'boolean' ? visible : true
+    });
 
     if (!userSockets.has(user.id)) userSockets.set(user.id, new Set());
     userSockets.get(user.id).add(socket.id);
 
     notifyFriendsPresence(user.id);
+  });
+
+  socket.on('app:visibility', ({ visible }) => {
+    const meta = socketMeta.get(socket.id);
+    if (meta) {
+      meta.visible = !!visible;
+    }
   });
 
   function leaveCurrentRoom(isExplicitLeave = false) {
@@ -1977,8 +2001,13 @@ io.on('connection', (socket) => {
     // Remove stale http_ placeholder for this user if upgrading to Socket.io
     room.participants.delete('http_' + currentUser.id);
 
+    const prevMeta = socketMeta.get(socket.id);
     socket.join(cleanCode);
-    socketMeta.set(socket.id, { userId: currentUser.id, roomCode: cleanCode });
+    socketMeta.set(socket.id, {
+      userId: currentUser.id,
+      roomCode: cleanCode,
+      visible: prevMeta ? prevMeta.visible !== false : true
+    });
 
     room.participants.set(socket.id, {
       socketId: socket.id,

@@ -323,7 +323,7 @@
 
   socket.on('connect', () => {
     if (state.token) {
-      socket.emit('auth:identify', { token: state.token });
+      socket.emit('auth:identify', { token: state.token, visible: !document.hidden });
     }
     // Auto-rejoin active room if connection was interrupted (server restart, deploy, Wi-Fi blink)
     let activeCode = state.room?.code;
@@ -333,6 +333,19 @@
     if (activeCode) {
       socket.emit('room:join', { code: activeCode, token: state.token });
     }
+  });
+
+  function syncAppVisibilityToServer() {
+    if (socket && socket.connected) {
+      socket.emit('app:visibility', { visible: !document.hidden });
+    }
+  }
+  document.addEventListener('visibilitychange', syncAppVisibilityToServer);
+  window.addEventListener('focus', () => {
+    if (socket && socket.connected) socket.emit('app:visibility', { visible: true });
+  });
+  window.addEventListener('pagehide', () => {
+    if (socket && socket.connected) socket.emit('app:visibility', { visible: false });
   });
 
   function urlBase64ToUint8Array(base64String) {
@@ -396,25 +409,6 @@
         const p = msg.payload;
         if (p.type === 'dm_message' && p.msg) {
           const dm = p.msg;
-          if (dm.id && !notifiedDmIds.has(dm.id)) {
-            notifiedDmIds.add(dm.id);
-            playNotificationSound('message');
-            flashTabTitle(p.title || 'Новое сообщение');
-            showTelegramTopCard({
-              title: p.title || 'Друг',
-              body: p.body || 'Новое сообщение',
-              user: dm.sender,
-              onClick: () => {
-                if (state.currentView === 'room') {
-                  setMobileRoomTab('dms');
-                  openRoomDmChat(dm.fromId);
-                } else {
-                  switchView('friends');
-                  openFriendChat(dm.fromId);
-                }
-              }
-            });
-          }
           handleIncomingOrOutgoingDm(dm);
           if (activeDmFriendId === dm.fromId || roomActiveDmFriendId === dm.fromId) {
             pollActiveDmChat();
@@ -422,12 +416,12 @@
         } else if (p.type === 'room_chat' && p.msg) {
           appendChatMessage(p.msg, true);
         } else if (p.title) {
-          playNotificationSound('invite');
-          flashTabTitle(p.title);
-          showTelegramTopCard({
+          triggerAppNotification({
             title: p.title,
             body: p.body || '',
             user: p.invitePayload?.from || null,
+            kind: 'invite',
+            data: { ...(p.data || {}), tag: p.tag || ('push-' + Date.now()) },
             onClick: () => {
               if (p.data?.roomCode) joinRoomByCode(p.data.roomCode);
               else switchView('friends');
@@ -628,17 +622,44 @@
     }, 5000);
   }
 
+  const recentNotifTags = new Set();
+
   function triggerAppNotification({ title, body, user, onClick, data = {}, kind = 'message', forceSystem = false }) {
+    const tag = data.tag || '';
+    if (!forceSystem && tag) {
+      if (recentNotifTags.has(tag)) return;
+      recentNotifTags.add(tag);
+      if (recentNotifTags.size > 300) {
+        const first = recentNotifTags.values().next().value;
+        recentNotifTags.delete(first);
+      }
+    }
+
+    // Do not show banner if user is already actively looking at that exact chat
+    if (!forceSystem && !document.hidden) {
+      if (data.friendId) {
+        const viewingDm = (state.currentView === 'friends' && activeDmFriendId === data.friendId) ||
+                          (state.currentView === 'room' && state.mobileRoomTab === 'dms' && roomActiveDmFriendId === data.friendId);
+        if (viewingDm) return;
+      }
+      if (data.roomCode && String(tag).startsWith('roomchat-')) {
+        const viewingRoomChat = state.currentView === 'room' && (window.innerWidth > 900 || state.mobileRoomTab === 'chat');
+        if (viewingRoomChat) return;
+      }
+    }
+
     playNotificationSound(kind);
     showTelegramTopCard({ title, body, user, onClick });
     flashTabTitle(title);
 
-    if ('Notification' in window && Notification.permission === 'granted') {
+    // Only show OS/iPhone system notification when explicitly testing (`forceSystem`)
+    // Background lock-screen notifications are delivered via Service Worker Web Push when app is hidden
+    if (forceSystem && 'Notification' in window && Notification.permission === 'granted') {
       const opts = {
         body,
-        tag: data.tag || 'ravelampa-' + Date.now(),
+        tag: tag || 'oulo-' + Date.now(),
         data,
-        renotify: true
+        renotify: false
       };
       if (swRegistration && typeof swRegistration.showNotification === 'function') {
         swRegistration.showNotification(title, opts).catch(() => {
@@ -876,7 +897,7 @@
     updateNotificationBellUi();
     ensureWebPushSubscribed();
     if (state.token) {
-      socket.emit('auth:identify', { token: state.token });
+      socket.emit('auth:identify', { token: state.token, visible: !document.hidden });
     }
   }
 

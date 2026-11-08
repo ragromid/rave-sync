@@ -15,24 +15,29 @@ self.addEventListener('push', (event) => {
     payload = { title: 'RaveLampa', body: event.data ? event.data.text() : 'Новое сообщение' };
   }
 
-  const title = payload.title || 'RaveLampa';
+  const title = payload.title || 'oulo';
   const options = {
     body: payload.body || 'Новое сообщение',
-    tag: payload.tag || ('ravelampa-push-' + Date.now()),
+    tag: payload.tag || ('oulo-push-' + Date.now()),
     data: payload.data || {},
-    renotify: true,
-    vibrate: [180, 80, 180]
+    renotify: false
   };
 
   event.waitUntil(
-    Promise.all([
-      self.registration.showNotification(title, options),
-      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-        for (const client of clientList) {
-          client.postMessage({ type: 'RAVELAMPA_PUSH_EVENT', payload });
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      let anyVisible = false;
+      for (const client of clientList) {
+        if (client.visibilityState === 'visible' || client.focused) {
+          anyVisible = true;
         }
-      })
-    ])
+        client.postMessage({ type: 'RAVELAMPA_PUSH_EVENT', payload });
+      }
+      // Do not show OS/iPhone system push banner if user is currently inside the app
+      if (anyVisible) {
+        return Promise.resolve();
+      }
+      return self.registration.showNotification(title, options);
+    })
   );
 });
 
