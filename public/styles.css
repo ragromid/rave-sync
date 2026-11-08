@@ -995,8 +995,10 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px;
-  background: rgba(12, 14, 22, 0.92);
+  height: 48px;
+  min-height: 48px;
+  padding: 0 14px;
+  background: var(--bg-elevated);
   border-bottom: 1px solid var(--border-subtle);
   flex-shrink: 0;
 }
@@ -1209,17 +1211,9 @@ button {
   display: none !important;
 }
 
-/* In-Chat Emoji Reaction Strip (right above chat message input) */
+/* In-Chat Emoji Reaction Strip (hidden for clean minimalist UI) */
 .chat-reactions-strip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: var(--bg-surface);
-  border-top: 1px solid var(--border-subtle);
-  overflow-x: auto;
-  scrollbar-width: none;
-  flex-shrink: 0;
+  display: none !important;
 }
 .chat-reactions-strip::-webkit-scrollbar {
   display: none;
@@ -1427,19 +1421,34 @@ button {
 
 .sidebar-tabs {
   display: flex;
+  height: 48px;
+  min-height: 48px;
+  background: var(--bg-elevated);
   border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
 }
 .side-tab {
   flex: 1;
-  height: 44px;
-  font-size: 0.84rem;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-muted);
   border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
+}
+.side-tab:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.03);
 }
 .side-tab.active {
-  color: var(--text-main);
-  border-bottom-color: var(--accent);
+  color: #ffffff;
+  border-bottom-color: #00e676;
 }
 
 .rtab-content {
@@ -1553,13 +1562,23 @@ body.keyboard-open .chat-input-row {
 .send-btn {
   width: 38px;
   height: 38px;
+  min-width: 38px;
   border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  display: flex;
+  background: #00e676;
+  color: #000000;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.16s ease, box-shadow 0.16s ease;
+}
+.send-btn:hover {
+  background: #00c853;
+  transform: scale(1.05);
+  box-shadow: 0 2px 12px rgba(0, 230, 118, 0.35);
+}
+.send-btn:active {
+  transform: scale(0.94);
 }
 .send-btn svg {
   width: 17px;
@@ -2128,31 +2147,34 @@ body.keyboard-open .chat-input-row {
 
 /* Composer Bar (Reply / Edit / Photo Preview above Input) */
 .attach-photo-btn {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  flex-shrink: 0;
   border-radius: 50%;
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border-subtle);
-  display: flex;
+  color: var(--text-muted);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s ease;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
   will-change: transform;
+}
+.attach-photo-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  flex-shrink: 0;
 }
 .attach-photo-btn:hover {
   background: rgba(255, 255, 255, 0.12);
-  transform: scale(1.08);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  transform: scale(1.05);
 }
 .attach-photo-btn:active {
-  transform: scale(0.92);
-}
-  font-size: 1.05rem;
-  flex-shrink: 0;
-  transition: all 0.15s;
-}
-.attach-photo-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.35);
+  transform: scale(0.94);
 }
 
 .composer-bar {
@@ -3793,17 +3815,17 @@ body.mobile-landscape .chat-bubble {
   white-space: nowrap;
 }
 
-/* Smart TV On-Screen Display (OSD) Bottom Bar inside #playerWrapper */
+/* Classic Modern Video Player On-Screen Display (OSD) Bottom Bar inside #playerWrapper */
 .tv-player-osd {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 28px 18px 16px;
-  background: linear-gradient(to top, rgba(4, 5, 10, 0.95) 0%, rgba(4, 5, 10, 0.78) 65%, transparent 100%);
+  padding: 28px 16px 12px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.65) 60%, transparent 100%);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   z-index: 20;
   transition: opacity 0.22s ease, transform 0.22s ease;
 }
@@ -3811,105 +3833,158 @@ body.mobile-landscape .chat-bubble {
 .tv-timeline-row {
   display: flex;
   align-items: center;
-  gap: 12px;
   width: 100%;
-}
-.tv-time-label {
-  font-size: 0.85rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: #e6e9f4;
-  min-width: 48px;
-  text-align: center;
+  padding: 4px 0;
 }
 .tv-timeline-bar {
   position: relative;
   flex: 1;
-  height: 10px;
-  background: rgba(255, 255, 255, 0.22);
+  height: 4px;
+  background: rgba(255, 255, 255, 0.24);
   border-radius: 99px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  transition: height 0.15s ease, box-shadow 0.15s ease;
+  transition: height 0.15s ease;
 }
 .tv-timeline-bar:hover,
 .tv-timeline-bar:focus,
 .tv-timeline-bar:focus-visible {
-  height: 14px;
+  height: 7px;
   outline: none;
-  box-shadow: 0 0 0 3px var(--accent-cyan), 0 0 18px rgba(0, 229, 255, 0.55);
 }
 .tv-timeline-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, var(--accent), var(--accent-cyan));
+  background: #00e676;
   border-radius: 99px;
   pointer-events: none;
 }
 .tv-timeline-thumb {
   position: absolute;
   left: 0%;
-  width: 18px;
-  height: 18px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
-  background: #fff;
-  border: 3px solid var(--accent-cyan);
-  transform: translateX(-50%);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.65);
+  background: #ffffff;
+  border: 2.5px solid #00e676;
+  transform: translateX(-50%) scale(0.85);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
   pointer-events: none;
+  transition: transform 0.15s ease;
+}
+.tv-timeline-bar:hover .tv-timeline-thumb {
+  transform: translateX(-50%) scale(1.1);
 }
 
 .tv-controls-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+.tv-controls-left,
+.tv-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .tv-ctrl-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 9px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(10px);
-  border: 1.5px solid rgba(255, 255, 255, 0.18);
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 700;
+  gap: 5px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
   cursor: pointer;
-  transition: transform 0.14s ease, background 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+.tv-ctrl-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.tv-ctrl-btn.icon-only {
+  width: 34px;
+  padding: 0;
 }
 .tv-ctrl-btn:hover {
-  background: rgba(255, 255, 255, 0.22);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+.tv-ctrl-btn:active {
+  transform: scale(0.94);
 }
 .tv-ctrl-btn.primary {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
   background: #00e676;
   color: #000000;
   border-color: #00e676;
-  box-shadow: 0 4px 16px rgba(0, 230, 118, 0.3);
-  padding: 10px 20px;
-  font-size: 0.92rem;
+  box-shadow: 0 2px 10px rgba(0, 230, 118, 0.35);
+  margin-right: 2px;
+}
+.tv-ctrl-btn.primary:hover {
+  background: #00c853;
+  border-color: #00c853;
+  color: #000000;
+  transform: scale(1.06);
 }
 .tv-ctrl-ico {
-  font-size: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
+}
+.tv-ctrl-ico svg {
+  width: 18px;
+  height: 18px;
+}
+#tvSourceBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+#tvSourceBtn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.pill-btn.ghost.active {
+  border-color: rgba(0, 230, 118, 0.45);
+  color: #00e676;
+  background: rgba(0, 230, 118, 0.1);
+}
+.tv-time-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+  user-select: none;
+}
+.tv-time-sep {
+  color: rgba(255, 255, 255, 0.4);
 }
 
 /* Strong D-Pad / TV Remote Focus Ring across buttons, cards, and episodes */
-.tv-focusable:focus,
 .tv-focusable:focus-visible,
-.poster-card:focus,
 .poster-card:focus-visible,
-.room-card:focus,
 .room-card:focus-visible,
 button:focus-visible,
-body.tv-mode button:focus,
 body.tv-mode .poster-card:focus,
 body.tv-mode .room-card:focus,
 body.tv-mode .cat-pill:focus,
@@ -3917,21 +3992,15 @@ body.tv-mode .ep-btn:focus,
 body.tv-mode .z01-seg-btn:focus,
 body.tv-mode .z01-opt:focus {
   outline: none !important;
-  border-color: var(--accent-cyan) !important;
-  box-shadow: 0 0 0 3px var(--accent-cyan), 0 0 22px rgba(0, 229, 255, 0.65) !important;
-  transform: scale(1.04);
+  border-color: #00e676 !important;
+  box-shadow: 0 0 0 2px #00e676, 0 0 16px rgba(0, 230, 118, 0.45) !important;
   z-index: 5;
 }
 
-/* Smart TV Mode (larger buttons & always-ready TV controls) */
-body.tv-mode .tv-ctrl-btn {
-  padding: 12px 18px;
-  font-size: 0.96rem;
-  border-radius: 16px;
-}
+/* Smart TV Mode */
 body.tv-mode .ep-btn,
 body.tv-mode .z01-seg-btn {
-  padding: 12px 18px;
+  padding: 10px 16px;
   font-size: 0.95rem;
 }
 

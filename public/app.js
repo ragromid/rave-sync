@@ -2270,7 +2270,7 @@
   // Proxy Mode Toggle button
   function toggleProxyStreamMode() {
     const modes = ['auto', 'always', 'off'];
-    const labels = { auto: '⚡ Прокси: Авто', always: '🛡️ Прокси: Вкл', off: '🌐 Прокси: Выкл' };
+    const labels = { auto: 'Прокси: Авто', always: 'Прокси: Вкл', off: 'Прокси: Выкл' };
     const nextIdx = (modes.indexOf(state.proxyMode) + 1) % modes.length;
     state.proxyMode = modes[nextIdx];
 
@@ -2797,12 +2797,20 @@
     if ($('tvTimelineThumb')) $('tvTimelineThumb').style.left = `${pct.toFixed(2)}%`;
 
     const isPaused = mainVideo.paused;
-    if ($('tvPlayPauseIcon')) $('tvPlayPauseIcon').textContent = isPaused ? '▶️' : '⏸️';
+    if ($('tvPlayPauseIcon')) {
+      $('tvPlayPauseIcon').innerHTML = isPaused
+        ? '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
+    }
     if ($('tvPlayPauseLabel')) $('tvPlayPauseLabel').textContent = isPaused ? 'Плей' : 'Пауза';
 
     const effectiveVol = (typeof currentVolumeMultiplier !== 'undefined' && currentVolumeMultiplier !== null) ? currentVolumeMultiplier : (mainVideo.volume ?? 1);
     const volPct = mainVideo.muted ? 'Выкл' : `${Math.round(effectiveVol * 100)}%`;
-    if ($('tvMuteIcon')) $('tvMuteIcon').textContent = (mainVideo.muted || effectiveVol === 0) ? '🔇' : (effectiveVol > 1 ? '📢' : '🔊');
+    if ($('tvMuteIcon')) {
+      $('tvMuteIcon').innerHTML = (mainVideo.muted || effectiveVol === 0)
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+    }
     if ($('tvVolumeLabel')) $('tvVolumeLabel').textContent = volPct;
 
     // Also update Remote Deck modal if open
@@ -5609,14 +5617,7 @@
     const cur = mainVideo.currentTime || 0;
     const dur = (mainVideo.duration && isFinite(mainVideo.duration)) ? mainVideo.duration : 0;
 
-    // 1. Skip Intro button: show between 10s and 115s on videos longer than 10 minutes
-    const skipBtn = $('skipIntroBtn');
-    if (skipBtn) {
-      const shouldShowSkip = dur > 600 && cur >= 10 && cur <= 115 && !mainVideo.paused;
-      skipBtn.classList.toggle('hidden', !shouldShowSkip);
-    }
-
-    // 2. Auto-Next Episode / Queue countdown during the last 12 seconds
+    // Auto-Next Episode / Queue countdown during the last 12 seconds
     const nextPrompt = $('nextEpisodePrompt');
     if (nextPrompt) {
       const rem = dur - cur;
@@ -5696,10 +5697,10 @@
   function activateSleepStop() {
     clearTimeout(sleepTimeoutId);
     sleepTimerMode = 'off';
-    if ($('sleepTimerBtn')) $('sleepTimerBtn').textContent = '🌙 Таймер';
+    if ($('sleepTimerBtn')) $('sleepTimerBtn').textContent = 'Таймер';
     if (!mainVideo.paused) mainVideo.pause();
     if (state.voiceActive) stopVoiceChat();
-    showToast('🌙 Таймер сна сработал — просмотр поставлен на паузу');
+    showToast('Таймер сна сработал — просмотр поставлен на паузу');
   }
 
   $('sleepTimerBtn')?.addEventListener('click', () => {
@@ -5708,19 +5709,19 @@
     sleepTimerMode = modes[(modes.indexOf(sleepTimerMode) + 1) % modes.length];
     const btn = $('sleepTimerBtn');
     if (sleepTimerMode === 'off') {
-      if (btn) btn.textContent = '🌙 Таймер';
+      if (btn) btn.textContent = 'Таймер';
       showToast('Таймер сна выключен');
     } else if (sleepTimerMode === '30') {
-      if (btn) btn.textContent = '🌙 30 мин';
+      if (btn) btn.textContent = '30 мин';
       sleepTimeoutId = setTimeout(activateSleepStop, 30 * 60 * 1000);
-      showToast('🌙 Таймер сна: пауза через 30 минут');
+      showToast('Таймер сна: пауза через 30 минут');
     } else if (sleepTimerMode === '60') {
-      if (btn) btn.textContent = '🌙 60 мин';
+      if (btn) btn.textContent = '60 мин';
       sleepTimeoutId = setTimeout(activateSleepStop, 60 * 60 * 1000);
-      showToast('🌙 Таймер сна: пауза через 60 минут');
+      showToast('Таймер сна: пауза через 60 минут');
     } else if (sleepTimerMode === 'episode') {
-      if (btn) btn.textContent = '🌙 До конца';
-      showToast('🌙 Таймер сна: пауза после окончания серии/фильма');
+      if (btn) btn.textContent = 'До конца';
+      showToast('Таймер сна: пауза после окончания серии/фильма');
     }
   });
 

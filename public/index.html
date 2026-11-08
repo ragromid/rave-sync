@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_19" />
+  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_20" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -240,9 +240,11 @@
 
                 <div id="dmMessages" class="chat-messages dm-messages"></div>
 
-                <div id="dmComposerBar" class="composer-bar hidden"></div>
+                <div class=" dm-composer-wrap composer-bar hidden" id="dmComposerBar"></div>
                 <div id="dmForm" class="chat-input-row">
-                  <button type="button" class="attach-photo-btn" data-chat-target="dm" title="Прикрепить фото (обычное или одноразовое)">📷</button>
+                  <button type="button" class="attach-photo-btn" data-chat-target="dm" title="Прикрепить фото">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" ry="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  </button>
                   <input type="text" id="dmInput" class="chat-input-field" placeholder="Написать сообщение..." autocomplete="off" autocorrect="on" autocapitalize="sentences" enterkeyhint="send">
                   <button type="button" id="dmSendBtn" class="send-btn" title="Отправить">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
@@ -323,13 +325,10 @@
                 <!-- Fullscreen Voice Speakers Overlay -->
                 <div id="voiceSpeakersOverlay" class="voice-speakers-overlay"></div>
 
-                <!-- Skip Intro (+85s) & Auto-Next Episode Floating Controls -->
-                <button id="skipIntroBtn" class="skip-intro-btn hidden" type="button">
-                  ⏭ Пропустить заставку (+85с)
-                </button>
+                <!-- Auto-Next Episode Floating Control -->
                 <div id="nextEpisodePrompt" class="next-ep-prompt hidden">
                   <span id="nextEpCountdownText">Следующая серия через 10с</span>
-                  <button type="button" id="playNextEpNowBtn" class="pill-btn tiny accent">Включить ▶️</button>
+                  <button type="button" id="playNextEpNowBtn" class="pill-btn tiny accent">Далее</button>
                   <button type="button" id="cancelNextEpBtn" class="icon-btn tiny" title="Отмена">✕</button>
                 </div>
 
@@ -350,102 +349,100 @@
                   <div class="tv-feedback-text" id="tvFeedbackText">Воспроизведение</div>
                 </div>
 
-                <!-- Smart TV / Remote Control On-Screen Overlay (OSD) -->
+                <!-- Custom Player Controls Overlay (OSD) -->
                 <div id="tvPlayerOsd" class="tv-player-osd hidden">
                   <div class="tv-timeline-row">
-                    <span id="tvTimeCurrent" class="tv-time-label">00:00</span>
                     <div id="tvTimelineBar" class="tv-timeline-bar tv-focusable" tabindex="0" role="slider" aria-label="Полоса перемотки видео">
                       <div id="tvTimelineFill" class="tv-timeline-fill"></div>
                       <div id="tvTimelineThumb" class="tv-timeline-thumb"></div>
                     </div>
-                    <span id="tvTimeDuration" class="tv-time-label">00:00</span>
                   </div>
                   <div class="tv-controls-row" id="tvControlsRow">
-                    <button type="button" id="tvPrevEpBtn" class="tv-ctrl-btn tv-focusable" title="Предыдущая серия (P)">
-                      <span class="tv-ctrl-ico">⏮</span>
-                      <span class="tv-ctrl-lbl">Пред.</span>
-                    </button>
-                    <button type="button" id="tvRewindBtn" class="tv-ctrl-btn tv-focusable" title="Назад 10 сек (←)">
-                      <span class="tv-ctrl-ico">⏪</span>
-                      <span class="tv-ctrl-lbl">-10 сек</span>
-                    </button>
-                    <button type="button" id="tvPlayPauseBtn" class="tv-ctrl-btn primary tv-focusable" title="Плей / Пауза (OK / Enter / Пробел)">
-                      <span class="tv-ctrl-ico" id="tvPlayPauseIcon">▶️</span>
-                      <span class="tv-ctrl-lbl" id="tvPlayPauseLabel">Плей</span>
-                    </button>
-                    <button type="button" id="tvForwardBtn" class="tv-ctrl-btn tv-focusable" title="Вперёд 10 сек (→)">
-                      <span class="tv-ctrl-ico">⏩</span>
-                      <span class="tv-ctrl-lbl">+10 сек</span>
-                    </button>
-                    <button type="button" id="tvNextEpBtn" class="tv-ctrl-btn tv-focusable" title="Следующая серия (N)">
-                      <span class="tv-ctrl-ico">⏭</span>
-                      <span class="tv-ctrl-lbl">След.</span>
-                    </button>
-                    <button type="button" id="tvMuteBtn" class="tv-ctrl-btn tv-focusable" title="Звук Вкл/Выкл (M / ↑↓)">
-                      <span class="tv-ctrl-ico" id="tvMuteIcon">🔊</span>
-                      <span class="tv-ctrl-lbl" id="tvVolumeLabel">100%</span>
-                    </button>
-                    <button type="button" id="tvSourceBtn" class="tv-ctrl-btn tv-focusable" title="Озвучка, серии и источник">
-                      <span class="tv-ctrl-ico">🎞️</span>
-                      <span class="tv-ctrl-lbl">Серии / Озв.</span>
-                    </button>
-                    <button type="button" id="tvCinemaBtn" class="tv-ctrl-btn tv-focusable" title="Режим ТВ (широкий экран без чата)">
-                      <span class="tv-ctrl-ico">📺</span>
-                      <span class="tv-ctrl-lbl">На весь ТВ</span>
-                    </button>
-                    <button type="button" id="tvFullscreenBtn" class="tv-ctrl-btn tv-focusable" title="Полный экран (F)">
-                      <span class="tv-ctrl-ico">⛶</span>
-                      <span class="tv-ctrl-lbl">Экран</span>
-                    </button>
+                    <div class="tv-controls-left">
+                      <button type="button" id="tvPlayPauseBtn" class="tv-ctrl-btn primary tv-focusable" title="Плей / Пауза (Пробел)">
+                        <span class="tv-ctrl-ico" id="tvPlayPauseIcon">
+                          <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                        </span>
+                      </button>
+                      <button type="button" id="tvPrevEpBtn" class="tv-ctrl-btn icon-only tv-focusable" title="Предыдущая серия (P)">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+                      </button>
+                      <button type="button" id="tvNextEpBtn" class="tv-ctrl-btn icon-only tv-focusable" title="Следующая серия (N)">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+                      </button>
+                      <button type="button" id="tvRewindBtn" class="tv-ctrl-btn tv-focusable" title="Назад 10 сек (←)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                        <span class="tv-ctrl-lbl">10с</span>
+                      </button>
+                      <button type="button" id="tvForwardBtn" class="tv-ctrl-btn tv-focusable" title="Вперёд 10 сек (→)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                        <span class="tv-ctrl-lbl">10с</span>
+                      </button>
+                      <button type="button" id="tvMuteBtn" class="tv-ctrl-btn tv-focusable" title="Звук (M / ↑↓)">
+                        <span class="tv-ctrl-ico" id="tvMuteIcon">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                        </span>
+                        <span class="tv-ctrl-lbl" id="tvVolumeLabel">100%</span>
+                      </button>
+                      <div class="tv-time-display">
+                        <span id="tvTimeCurrent">00:00</span>
+                        <span class="tv-time-sep">/</span>
+                        <span id="tvTimeDuration">00:00</span>
+                      </div>
+                    </div>
+                    <div class="tv-controls-right">
+                      <button type="button" id="tvSourceBtn" class="tv-ctrl-btn tv-focusable" title="Озвучка, серии и источник">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+                        <span class="tv-ctrl-lbl">Озвучка</span>
+                      </button>
+                      <button type="button" id="tvCinemaBtn" class="tv-ctrl-btn icon-only tv-focusable" title="Широкий экран (скрыть чат)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
+                      </button>
+                      <button type="button" id="tvFullscreenBtn" class="tv-ctrl-btn icon-only tv-focusable" title="Полный экран (F)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Mobile Room Quick Switcher (Clean SVG tabs right under player) -->
+              <!-- Mobile Room Quick Switcher -->
               <div class="mobile-room-tabs" id="mobileRoomTabs">
                 <button type="button" class="m-rtab active" data-mrtab="chat">
-                  <svg class="m-rtab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                   <span>Чат</span>
                   <span id="chatUnreadBadge" class="nav-badge inline-badge hidden">0</span>
                 </button>
                 <button type="button" class="m-rtab" data-mrtab="z01">
-                  <svg class="m-rtab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <span>Серии</span>
                 </button>
                 <button type="button" class="m-rtab" data-mrtab="users">
-                  <svg class="m-rtab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                   <span>Зрители (<span id="roomUserCountMobile">1</span>)</span>
                 </button>
                 <button type="button" class="m-rtab" data-mrtab="dms">
-                  <svg class="m-rtab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                   <span>Друзья</span>
                   <span id="roomDmBadgeMobile" class="nav-badge inline-badge hidden">0</span>
-                </button>
-                <button type="button" class="m-rtab" data-mrtab="options">
-                  <svg class="m-rtab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                  <span>Опции</span>
                 </button>
               </div>
 
               <!-- Z01 Online Selector Panel (Balancers, Seasons, Voices, Episodes, Qualities) -->
               <div id="z01Panel" class="z01-panel hidden">
                 <div class="z01-top-tools">
-                  <div class="z01-top-tools-title">🎞️ Источник и поток</div>
+                  <div class="z01-top-tools-title">Поток и параметры</div>
                   <div class="z01-top-tools-actions">
                     <button type="button" id="toggleAmbientBtn" class="pill-btn tiny ghost active" title="Фоновая подсветка вокруг плеера">
-                      <span>✨ Подсветка</span>
+                      <span>Подсветка</span>
                     </button>
                     <button type="button" id="togglePipBtn" class="pill-btn tiny ghost" title="Режим Картинка в картинке (PiP)">
-                      <span>🖼️ PiP</span>
+                      <span>PiP</span>
                     </button>
                     <button type="button" id="sleepTimerBtn" class="pill-btn tiny ghost" title="Таймер сна">
-                      <span>🌙 Сон</span>
+                      <span>Таймер</span>
                     </button>
                     <button type="button" id="toggleProxyStreamBtn" class="pill-btn tiny ghost btn-toggle-proxy" title="Переключить прокси потока (если видео не грузится)">
-                      <span>⚡ Прокси: Авто</span>
+                      <span>Прокси: Авто</span>
                     </button>
                     <button type="button" id="resyncPlayerBtn" class="pill-btn tiny ghost btn-resync-player" title="Синхронизировать таймкод с комнатой">
-                      <span>🔄 Синхр.</span>
+                      <span>Синхр.</span>
                     </button>
                   </div>
                 </div>
@@ -462,28 +459,19 @@
             <!-- Right / Bottom: Rave Chat, Friends Chat, Participants & Room Options Sidebar -->
             <aside class="room-sidebar" id="roomSidebar">
               <div class="sidebar-tabs">
-                <button class="side-tab active" data-rtab="chat">💬 Чат</button>
-                <button class="side-tab" data-rtab="users">👥 Зрители (<span id="roomUserCount">1</span>)</button>
-                <button class="side-tab" data-rtab="dms">💌 Друзья <span id="roomDmBadge" class="nav-badge inline-badge hidden">0</span></button>
-                <button class="side-tab" data-rtab="options">⚙️ Опции</button>
+                <button class="side-tab active" data-rtab="chat">Чат</button>
+                <button class="side-tab" data-rtab="users">Зрители (<span id="roomUserCount">1</span>)</button>
+                <button class="side-tab" data-rtab="dms">Друзья <span id="roomDmBadge" class="nav-badge inline-badge hidden">0</span></button>
               </div>
 
               <!-- Tab 1: Live Room Chat -->
               <div id="rtab-chat" class="rtab-content active">
                 <div id="chatMessages" class="chat-messages"></div>
                 <div id="chatComposerBar" class="composer-bar hidden"></div>
-                <div class="chat-reactions-strip">
-                  <button type="button" class="emoji-btn" data-emoji="🔥">🔥</button>
-                  <button type="button" class="emoji-btn" data-emoji="😂">😂</button>
-                  <button type="button" class="emoji-btn" data-emoji="❤️">❤️</button>
-                  <button type="button" class="emoji-btn" data-emoji="😱">😱</button>
-                  <button type="button" class="emoji-btn" data-emoji="🍿">🍿</button>
-                  <button type="button" class="emoji-btn" data-emoji="👏">👏</button>
-                  <button type="button" class="emoji-btn" data-emoji="😢">😢</button>
-                  <button type="button" class="emoji-btn" data-emoji="🤯">🤯</button>
-                </div>
                 <div id="chatForm" class="chat-input-row">
-                  <button type="button" class="attach-photo-btn" data-chat-target="room" title="Прикрепить фото (обычное или одноразовое)">📷</button>
+                  <button type="button" class="attach-photo-btn" data-chat-target="room" title="Прикрепить фото">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" ry="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  </button>
                   <input type="text" id="chatInput" class="chat-input-field" placeholder="Написать в комнату..." autocomplete="off" autocorrect="on" autocapitalize="sentences" enterkeyhint="send">
                   <button type="button" id="chatSendBtn" class="send-btn" title="Отправить">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
@@ -503,12 +491,14 @@
                       <div id="roomDmFriendAvatar" class="avatar-circle" style="width:26px;height:26px;font-size:0.85rem;">🦊</div>
                       <div id="roomDmFriendName" class="user-row-name" style="font-size:0.85rem;">Друг</div>
                     </div>
-                    <button type="button" id="roomDmInviteBtn" class="pill-btn tiny accent">🍿 Позвать</button>
+                    <button type="button" id="roomDmInviteBtn" class="pill-btn tiny accent">Позвать</button>
                   </div>
                   <div id="roomDmMessages" class="chat-messages"></div>
                   <div id="roomDmComposerBar" class="composer-bar hidden"></div>
                   <div id="roomDmForm" class="chat-input-row">
-                    <button type="button" class="attach-photo-btn" data-chat-target="roomDm" title="Прикрепить фото (обычное или одноразовое)">📷</button>
+                    <button type="button" class="attach-photo-btn" data-chat-target="roomDm" title="Прикрепить фото">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" ry="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    </button>
                     <input type="text" id="roomDmInput" class="chat-input-field" placeholder="Личное сообщение другу..." autocomplete="off" autocorrect="on" autocapitalize="sentences" enterkeyhint="send">
                     <button type="button" id="roomDmSendBtn" class="send-btn" title="Отправить">
                       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
@@ -1312,6 +1302,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261109_oulo_19"></script>
+  <script src="/app.js?v=20261109_oulo_20"></script>
 </body>
 </html>
