@@ -317,9 +317,53 @@
   const notifiedDmIds = new Set();
   const notifiedReqIds = new Set();
   const notifiedEventIds = new Set();
+  const recentNotifTags = new Set();
   let initialFriendsLoaded = false;
   let friendsPollInFlight = false;
   let dmPollInFlight = false;
+  let lastVisibilityResumeAt = 0;
+
+  try {
+    const savedDmIds = JSON.parse(sessionStorage.getItem('oulo_notified_dm_ids') || '[]');
+    savedDmIds.forEach(id => notifiedDmIds.add(id));
+    const savedTags = JSON.parse(sessionStorage.getItem('oulo_notified_tags') || '[]');
+    savedTags.forEach(t => recentNotifTags.add(t));
+  } catch {}
+
+  function markDmNotified(id) {
+    if (!id) return;
+    notifiedDmIds.add(id);
+    try {
+      const arr = Array.from(notifiedDmIds).slice(-250);
+      sessionStorage.setItem('oulo_notified_dm_ids', JSON.stringify(arr));
+    } catch {}
+  }
+
+  function markTagNotified(tag) {
+    if (!tag) return;
+    recentNotifTags.add(tag);
+    if (recentNotifTags.size > 300) {
+      const first = recentNotifTags.values().next().value;
+      recentNotifTags.delete(first);
+    }
+    try {
+      const arr = Array.from(recentNotifTags).slice(-250);
+      sessionStorage.setItem('oulo_notified_tags', JSON.stringify(arr));
+    } catch {}
+  }
+
+  function clearActiveOsNotifications() {
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_NOTIFICATIONS' });
+      }
+      if (swRegistration && typeof swRegistration.getNotifications === 'function') {
+        swRegistration.getNotifications().then(list => {
+          list.forEach(n => { try { n.close(); } catch {} });
+        }).catch(() => {});
+      }
+    } catch {}
+  }
 
   socket.on('connect', () => {
     if (state.token) {
@@ -336,12 +380,19 @@
   });
 
   function syncAppVisibilityToServer() {
+    const isVisible = !document.hidden;
+    if (isVisible) {
+      lastVisibilityResumeAt = Date.now();
+      clearActiveOsNotifications();
+    }
     if (socket && socket.connected) {
-      socket.emit('app:visibility', { visible: !document.hidden });
+      socket.emit('app:visibility', { visible: isVisible });
     }
   }
   document.addEventListener('visibilitychange', syncAppVisibilityToServer);
   window.addEventListener('focus', () => {
+    lastVisibilityResumeAt = Date.now();
+    clearActiveOsNotifications();
     if (socket && socket.connected) socket.emit('app:visibility', { visible: true });
   });
   window.addEventListener('pagehide', () => {
@@ -392,19 +443,28 @@
       if (!msg) return;
       if (msg.type === 'RAVELAMPA_NOTIFICATION_CLICK') {
         const d = msg.data || {};
-        if (d.roomCode) {
-          joinRoomByCode(d.roomCode);
-        } else if (d.friendId) {
-          if (state.currentView === 'room') {
+        clearActiveOsNotifications();
+        if (d.friendId) {
+          if (state.currentView === 'room' && state.room) {
             setMobileRoomTab('dms');
             openRoomDmChat(d.friendId);
           } else {
             switchView('friends');
             openFriendChat(d.friendId);
           }
+        } else if (d.roomCode) {
+          if (state.room && state.room.code === d.roomCode) {
+            switchView('room');
+            setMobileRoomTab('chat');
+          } else {
+            joinRoomByCode(d.roomCode);
+          }
         } else if (d.view) {
           switchView(d.view);
         }
+      } else if (msg.type === 'RAVELAMPA_PUSH_SILENT_ACK') {
+        if (msg.msgId) markDmNotified(msg.msgId);
+        if (msg.tag) markTagNotified(msg.tag);
       } else if (msg.type === 'RAVELAMPA_PUSH_EVENT' && msg.payload) {
         const p = msg.payload;
         if (p.type === 'dm_message' && p.msg) {
@@ -622,17 +682,17 @@
     }, 5000);
   }
 
-  const recentNotifTags = new Set();
-
   function triggerAppNotification({ title, body, user, onClick, data = {}, kind = 'message', forceSystem = false }) {
     const tag = data.tag || '';
     if (!forceSystem && tag) {
       if (recentNotifTags.has(tag)) return;
-      recentNotifTags.add(tag);
-      if (recentNotifTags.size > 300) {
-        const first = recentNotifTags.values().next().value;
-        recentNotifTags.delete(first);
-      }
+      markTagNotified(tag);
+    }
+
+    // Never fire notifications while app is in background (OS Web Push handles lock-screen notifications)
+    // Also suppress stale sync notifications within 2.5s of waking the app back up from background
+    if (!forceSystem && (document.hidden || (Date.now() - lastVisibilityResumeAt < 2500))) {
+      return;
     }
 
     // Do not show banner if user is already actively looking at that exact chat
@@ -5218,9 +5278,9 @@
         for (const msgItem of incomingCandidates) {
           if (!msgItem || !msgItem.id || msgItem.fromId === state.user.id) continue;
           if (!initialFriendsLoaded) {
-            notifiedDmIds.add(msgItem.id);
+            markDmNotified(msgItem.id);
           } else if (!notifiedDmIds.has(msgItem.id)) {
-            notifiedDmIds.add(msgItem.id);
+            markDmNotified(msgItem.id);
             triggerAppNotification({
               title: f.displayName,
               body: msgItem.text || 'Новое сообщение',
@@ -5263,7 +5323,7 @@
         if (!n) continue;
         if (!initialFriendsLoaded) {
           if (n.id) notifiedEventIds.add(n.id);
-          if (n.msgId) notifiedDmIds.add(n.msgId);
+          if (n.msgId) markDmNotified(n.msgId);
           continue;
         }
         if (n.id && notifiedEventIds.has(n.id)) continue;
@@ -5281,7 +5341,7 @@
           });
         } else if (n.type === 'dm_message') {
           if (!n.msgId || !notifiedDmIds.has(n.msgId)) {
-            if (n.msgId) notifiedDmIds.add(n.msgId);
+            if (n.msgId) markDmNotified(n.msgId);
             const senderId = n.fromId || n.from?.id;
             triggerAppNotification({
               title: n.title || n.from?.displayName || 'Новое сообщение',
@@ -5697,7 +5757,7 @@
       }
 
       if (!notifiedDmIds.has(msg.id)) {
-        notifiedDmIds.add(msg.id);
+        markDmNotified(msg.id);
         triggerAppNotification({
           title: msg.sender?.displayName || friend?.displayName || 'Друг',
           body: previewText,
@@ -6316,9 +6376,30 @@
     await initAuth();
     updateNotificationBellUi();
 
-    // Check URL or session for active room
+    // Check URL or session for push deep-link (DM chat, view, or active room)
     const params = new URLSearchParams(window.location.search);
+    const dmFriendId = params.get('dm');
+    const targetView = params.get('view');
     let roomCode = params.get('room');
+
+    if (dmFriendId && state.user) {
+      // Clean ?dm= from URL bar and jump directly into friend DM chat
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete('dm');
+      window.history.replaceState({}, '', cleanUrl.toString());
+      switchView('friends');
+      await loadFriends();
+      openFriendChat(dmFriendId);
+      return;
+    }
+
+    if (targetView && state.user) {
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete('view');
+      window.history.replaceState({}, '', cleanUrl.toString());
+      switchView(targetView);
+    }
+
     if (!roomCode) {
       try { roomCode = sessionStorage.getItem('active_room_code'); } catch {}
     }

@@ -1700,7 +1700,7 @@ app.post('/api/rooms/:code/chat', authMiddleware, async (req, res) => {
         title: `${req.user.displayName} (в комнате)`,
         body: preview,
         tag: 'roomchat-' + msg.id,
-        data: { roomCode: code },
+        data: { roomCode: code, openChat: true },
         msg: { ...msg, imageUrl: '' }
       })),
       process.env.VERCEL ? db.flushCloudDb() : Promise.resolve()
