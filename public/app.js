@@ -5360,7 +5360,7 @@
       return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
     }
     if (diffDays < 7) {
-      const daysShort = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+      const daysShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       return daysShort[d.getDay()];
     }
     const dd = String(d.getDate()).padStart(2, '0');
