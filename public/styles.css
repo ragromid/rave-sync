@@ -5158,6 +5158,13 @@ body.tv-cinema-mode .player-wrapper {
   color: #00e676 !important;
   font-weight: 600;
 }
+.dialog-time-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.42);
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
 
 /* ================= HARDWARE-ACCELERATED TRENDY ANIMATIONS & ACCESSIBILITY ================= */
 @media (prefers-reduced-motion: reduce) {

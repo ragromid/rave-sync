@@ -5348,6 +5348,29 @@
     return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
   }
 
+  function formatDialogListTime(ts) {
+    if (!ts) return '';
+    const d = new Date(Number(ts) || ts);
+    if (isNaN(d.getTime())) return '';
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const msgDayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const diffDays = Math.round((todayStart - msgDayStart) / 86400000);
+    if (diffDays <= 0) {
+      return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    }
+    if (diffDays < 7) {
+      const daysShort = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+      return daysShort[d.getDay()];
+    }
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    if (d.getFullYear() === now.getFullYear()) {
+      return `${dd}.${mm}`;
+    }
+    return `${dd}.${mm}.${String(d.getFullYear()).slice(-2)}`;
+  }
+
   function updateDmBadges() {
     const unreadDmTotal = (state.friends || []).reduce((acc, f) => acc + (f.unreadCount || 0), 0);
     const totalNavBadge = (state.incomingRequests?.length || 0) + unreadDmTotal;
@@ -5609,6 +5632,7 @@
       const subHtml = isFriendTyping
         ? `<span class="dm-typing-status"><span>печатает</span>${renderTypingDotsHtml()}</span>`
         : esc(roomStatus);
+      const lastTimeLabel = f.lastMessage?.createdAt ? formatDialogListTime(f.lastMessage.createdAt) : '';
 
       row.innerHTML = `
         <div class="user-row-left">
@@ -5619,10 +5643,10 @@
             <div class="user-row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;">${subHtml}</div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-          ${f.unreadCount > 0 ? `<span class="nav-badge inline-badge">${f.unreadCount}</span>` : ''}
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
           ${f.currentRoom ? `<button class="pill-btn tiny accent" data-join-friend="${esc(f.currentRoom.code)}" title="Войти в комнату друга">▶️</button>` : ''}
-          <button class="pill-btn tiny" data-chat-friend="${esc(f.id)}">💬 Чат</button>
+          ${f.unreadCount > 0 ? `<span class="nav-badge inline-badge">${f.unreadCount}</span>` : ''}
+          ${lastTimeLabel ? `<span class="dialog-time-label">${esc(lastTimeLabel)}</span>` : ''}
         </div>
       `;
       row.addEventListener('click', (e) => {
@@ -5802,6 +5826,7 @@
       const subHtml = isFriendTyping
         ? `<span class="dm-typing-status"><span>печатает</span>${renderTypingDotsHtml()}</span>`
         : esc(sub);
+      const lastTimeLabel = f.lastMessage?.createdAt ? formatDialogListTime(f.lastMessage.createdAt) : '';
       row.innerHTML = `
         <div class="user-row-left">
           <span class="status-dot ${f.online ? 'online' : ''}"></span>
@@ -5811,9 +5836,9 @@
             <div class="user-row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;">${subHtml}</div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;">
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
           ${f.unreadCount > 0 ? `<span class="nav-badge inline-badge">${f.unreadCount}</span>` : ''}
-          <span class="pill-btn tiny">💬</span>
+          ${lastTimeLabel ? `<span class="dialog-time-label">${esc(lastTimeLabel)}</span>` : ''}
         </div>
       `;
       row.onclick = () => openRoomDmChat(f.id);
