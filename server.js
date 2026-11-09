@@ -2374,6 +2374,36 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('dm:typing', ({ toId, typing }) => {
+    if (!currentUser || !toId) return;
+    const friendSids = userSockets.get(toId);
+    if (friendSids) {
+      for (const sid of friendSids) {
+        io.to(sid).emit('dm:typing_state', {
+          fromId: currentUser.id,
+          displayName: currentUser.displayName,
+          avatar: currentUser.avatar,
+          avatarUrl: currentUser.avatarUrl || '',
+          color: currentUser.color || '#00e676',
+          typing: !!typing
+        });
+      }
+    }
+  });
+
+  socket.on('chat:typing', ({ typing }) => {
+    const meta = socketMeta.get(socket.id);
+    if (!meta || !meta.roomCode || !currentUser) return;
+    socket.to(meta.roomCode).emit('chat:typing_state', {
+      userId: currentUser.id,
+      displayName: currentUser.displayName,
+      avatar: currentUser.avatar,
+      avatarUrl: currentUser.avatarUrl || '',
+      color: currentUser.color || '#00e676',
+      typing: !!typing
+    });
+  });
+
   // WebRTC Voice Chat signaling inside room
   socket.on('voice:toggle', ({ active, muted }) => {
     const meta = socketMeta.get(socket.id);

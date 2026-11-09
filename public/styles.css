@@ -5088,6 +5088,77 @@ body.tv-cinema-mode .player-wrapper {
   }
 }
 
+/* ================= LIVE TYPING INDICATOR ANIMATION ================= */
+.chat-typing-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 2px 2px 4px;
+  animation: ouloFadeSlideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.chat-typing-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 13px;
+  border-radius: 18px 18px 18px 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+.chat-typing-label {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.75rem;
+}
+.typing-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 12px;
+}
+.typing-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #00e676;
+  animation: ouloTypingBounce 1.25s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) {
+  animation-delay: 0.16s;
+}
+.typing-dot:nth-child(3) {
+  animation-delay: 0.32s;
+}
+@keyframes ouloTypingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.38;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+@keyframes ouloFadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.dm-typing-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #00e676 !important;
+  font-weight: 600;
+}
+
 /* ================= HARDWARE-ACCELERATED TRENDY ANIMATIONS & ACCESSIBILITY ================= */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {

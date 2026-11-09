@@ -4697,7 +4697,129 @@
       cur.classList.toggle('grouped-prev', !!samePrev);
       cur.classList.toggle('grouped-next', !!sameNext);
     }
+    const typingRow = container.querySelector('.chat-typing-row');
+    if (typingRow) container.appendChild(typingRow);
   }
+
+  // ================= LIVE TYPING INDICATOR ENGINE (DM & ROOM CHAT) =================
+  const dmTypingUsers = new Map(); // friendId -> { displayName, avatar, avatarUrl, color, timer }
+  const roomTypingUsers = new Map(); // userId -> { displayName, avatar, avatarUrl, color, timer }
+  const localTypingTimers = new Map(); // key -> { lastSent, stopTimer }
+
+  function renderTypingDotsHtml() {
+    return '<span class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>';
+  }
+
+  function updateChatBoxTypingBubble(boxId, typers) {
+    const box = $(boxId);
+    if (!box) return;
+    let row = box.querySelector('.chat-typing-row');
+    if (!typers || typers.length === 0) {
+      if (row) row.remove();
+      return;
+    }
+    const nearBottom = (box.scrollHeight - box.scrollTop - box.clientHeight) < 120;
+    const first = typers[0];
+    const labelText = boxId === 'chatMessages'
+      ? (typers.length === 1 ? `${first.displayName} печатает` : `${first.displayName} и ещё ${typers.length - 1} печатают`)
+      : '';
+    if (!row) {
+      row = document.createElement('div');
+      row.className = 'chat-typing-row';
+      box.appendChild(row);
+    } else if (box.lastElementChild !== row) {
+      box.appendChild(row);
+    }
+    row.innerHTML = `
+      <div class="chat-av" style="background:${esc(first.color || '#00e676')}">${avatarInnerHtml(first)}</div>
+      <div class="chat-typing-bubble">
+        ${labelText ? `<span class="chat-typing-label">${esc(labelText)}</span>` : ''}
+        ${renderTypingDotsHtml()}
+      </div>
+    `;
+    if (nearBottom) {
+      box.scrollTop = box.scrollHeight;
+    }
+  }
+
+  function syncDmTypingUi(friendId) {
+    const entry = dmTypingUsers.get(friendId);
+    const typers = entry ? [entry] : [];
+    if (activeDmFriendId === friendId) {
+      updateChatBoxTypingBubble('dmMessages', typers);
+      const friend = state.friends.find(x => x.id === friendId);
+      if (friend) updateDmHeader(friend);
+    }
+    if (roomActiveDmFriendId === friendId) {
+      updateChatBoxTypingBubble('roomDmMessages', typers);
+    }
+    renderFriendsView();
+    renderRoomDmFriendsList();
+  }
+
+  function syncRoomTypingUi() {
+    const typers = Array.from(roomTypingUsers.values());
+    updateChatBoxTypingBubble('chatMessages', typers);
+  }
+
+  function emitLocalTyping(kind, targetId = '', isTyping = true) {
+    if (!socket || !socket.connected || !state.user) return;
+    const key = `${kind}:${targetId}`;
+    const prev = localTypingTimers.get(key) || { lastSent: 0, stopTimer: null };
+    clearTimeout(prev.stopTimer);
+
+    if (!isTyping) {
+      if (prev.lastSent > 0) {
+        if (kind === 'dm' && targetId) socket.emit('dm:typing', { toId: targetId, typing: false });
+        else if (kind === 'room') socket.emit('chat:typing', { typing: false });
+      }
+      localTypingTimers.delete(key);
+      return;
+    }
+
+    const now = Date.now();
+    if (now - prev.lastSent > 1400) {
+      prev.lastSent = now;
+      if (kind === 'dm' && targetId) socket.emit('dm:typing', { toId: targetId, typing: true });
+      else if (kind === 'room') socket.emit('chat:typing', { typing: true });
+    }
+    prev.stopTimer = setTimeout(() => {
+      emitLocalTyping(kind, targetId, false);
+    }, 2600);
+    localTypingTimers.set(key, prev);
+  }
+
+  socket.on('dm:typing_state', ({ fromId, displayName, avatar, avatarUrl, color, typing }) => {
+    if (!fromId || (state.user && fromId === state.user.id)) return;
+    const existing = dmTypingUsers.get(fromId);
+    if (existing?.timer) clearTimeout(existing.timer);
+    if (typing) {
+      const timer = setTimeout(() => {
+        dmTypingUsers.delete(fromId);
+        syncDmTypingUi(fromId);
+      }, 3600);
+      dmTypingUsers.set(fromId, { id: fromId, displayName: displayName || 'Друг', avatar, avatarUrl, color, timer });
+    } else {
+      dmTypingUsers.delete(fromId);
+    }
+    syncDmTypingUi(fromId);
+  });
+
+  socket.on('chat:typing_state', ({ userId, displayName, avatar, avatarUrl, color, typing }) => {
+    if (!userId || (state.user && userId === state.user.id)) return;
+    const existing = roomTypingUsers.get(userId);
+    if (existing?.timer) clearTimeout(existing.timer);
+    if (typing) {
+      const timer = setTimeout(() => {
+        roomTypingUsers.delete(userId);
+        syncRoomTypingUi();
+      }, 3600);
+      roomTypingUsers.set(userId, { id: userId, displayName: displayName || 'Участник', avatar, avatarUrl, color, timer });
+    } else {
+      roomTypingUsers.delete(userId);
+    }
+    syncRoomTypingUi();
+  });
 
   function updateChatMessageDom(msg, contextType = 'room') {
     if (!msg || !msg.id) return;
@@ -5029,6 +5151,12 @@
   function appendChatMessage(msg, isLive = false) {
     const box = $('chatMessages');
     if (msg.id && box.querySelector(`[data-msg-id="${CSS.escape(msg.id)}"]`)) return;
+    if (msg.user?.id && roomTypingUsers.has(msg.user.id)) {
+      const t = roomTypingUsers.get(msg.user.id);
+      if (t?.timer) clearTimeout(t.timer);
+      roomTypingUsers.delete(msg.user.id);
+      syncRoomTypingUi();
+    }
     const el = createRichMessageElement(msg, 'room', 'room', null);
     if (!msg.system && isLive) {
       spawnVideoChatPill(msg);
@@ -5095,6 +5223,7 @@
     };
 
     clearChatInput(input);
+    emitLocalTyping('room', '', false);
     focusChatInput(input);
     comp.imageUrl = '';
     comp.viewOnce = false;
@@ -5113,6 +5242,10 @@
   }
 
   attachChatInputHandlers('chatInput', 'chatSendBtn', sendActiveRoomChat);
+  $('chatInput')?.addEventListener('input', (e) => {
+    const val = (e.target.value || '').trim();
+    emitLocalTyping('room', '', val.length > 0);
+  });
 
   // Mobile Room Quick Switcher (💬 Чат | 🎬 Серии | 👥 Зрители | 💌 Друзья | ⚙️ Опции)
   function setMobileRoomTab(tabName) {
@@ -5469,9 +5602,13 @@
       const row = document.createElement('div');
       row.className = `user-row ${activeDmFriendId === f.id ? 'active-dm' : ''}`;
       row.style.cursor = 'pointer';
+      const isFriendTyping = dmTypingUsers.has(f.id);
       const roomStatus = f.currentRoom
         ? `🍿 Смотрит: ${f.currentRoom.mediaTitle}`
         : (f.lastMessage ? `${f.lastMessage.fromId === state.user?.id ? 'Вы: ' : ''}${f.lastMessage.text}` : (f.online ? 'В сети' : 'Не в сети'));
+      const subHtml = isFriendTyping
+        ? `<span class="dm-typing-status"><span>печатает</span>${renderTypingDotsHtml()}</span>`
+        : esc(roomStatus);
 
       row.innerHTML = `
         <div class="user-row-left">
@@ -5479,7 +5616,7 @@
           <div class="avatar-circle" style="background:${esc(f.color)}">${avatarInnerHtml(f)}</div>
           <div style="min-width:0;">
             <div class="user-row-name">${esc(f.displayName)}</div>
-            <div class="user-row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;">${esc(roomStatus)}</div>
+            <div class="user-row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;">${subHtml}</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
@@ -5505,7 +5642,9 @@
     setAvatarElement($('dmFriendAvatar'), friend, '🦊');
     $('dmFriendName').textContent = friend.displayName;
     if ($('dmFriendStatus')) {
-      if (friend.currentRoom) {
+      if (dmTypingUsers.has(friend.id)) {
+        $('dmFriendStatus').innerHTML = `<span class="dm-typing-status"><span>печатает</span>${renderTypingDotsHtml()}</span>`;
+      } else if (friend.currentRoom) {
         $('dmFriendStatus').innerHTML = `<span class="dm-status-dot online"></span><span>Смотрит: ${esc(friend.currentRoom.mediaTitle)}</span>`;
       } else if (friend.online) {
         $('dmFriendStatus').innerHTML = '<span class="dm-status-dot online"></span><span>В сети</span>';
@@ -5614,6 +5753,7 @@
     };
 
     clearChatInput(input);
+    emitLocalTyping('dm', friendId, false);
     focusChatInput(input);
     if (comp) {
       comp.imageUrl = '';
@@ -5636,6 +5776,11 @@
   attachChatInputHandlers('dmInput', 'dmSendBtn', () => {
     submitDirectMessageForm(activeDmFriendId, 'dmInput', 'dm');
   });
+  $('dmInput')?.addEventListener('input', (e) => {
+    if (!activeDmFriendId) return;
+    const val = (e.target.value || '').trim();
+    emitLocalTyping('dm', activeDmFriendId, val.length > 0);
+  });
 
   // Friends Private Chat inside Watch Party Room (#rtab-dms)
   function renderRoomDmFriendsList() {
@@ -5650,16 +5795,20 @@
       const row = document.createElement('div');
       row.className = 'user-row';
       row.style.cursor = 'pointer';
+      const isFriendTyping = dmTypingUsers.has(f.id);
       const sub = f.lastMessage
         ? `${f.lastMessage.fromId === state.user?.id ? 'Вы: ' : ''}${f.lastMessage.text}`
         : (f.online ? '🟢 В сети' : '⚪ Не в сети');
+      const subHtml = isFriendTyping
+        ? `<span class="dm-typing-status"><span>печатает</span>${renderTypingDotsHtml()}</span>`
+        : esc(sub);
       row.innerHTML = `
         <div class="user-row-left">
           <span class="status-dot ${f.online ? 'online' : ''}"></span>
           <div class="avatar-circle" style="background:${esc(f.color)}">${avatarInnerHtml(f)}</div>
           <div style="min-width:0;">
             <div class="user-row-name">${esc(f.displayName)}</div>
-            <div class="user-row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;">${esc(sub)}</div>
+            <div class="user-row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;">${subHtml}</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
@@ -5712,10 +5861,22 @@
   attachChatInputHandlers('roomDmInput', 'roomDmSendBtn', () => {
     submitDirectMessageForm(roomActiveDmFriendId, 'roomDmInput', 'roomDm');
   });
+  $('roomDmInput')?.addEventListener('input', (e) => {
+    if (!roomActiveDmFriendId) return;
+    const val = (e.target.value || '').trim();
+    emitLocalTyping('dm', roomActiveDmFriendId, val.length > 0);
+  });
 
   function handleIncomingOrOutgoingDm(msg) {
     if (!state.user) return;
     const otherId = msg.fromId === state.user.id ? msg.toId : msg.fromId;
+    if (msg.fromId !== state.user.id && dmTypingUsers.has(otherId)) {
+      const t = dmTypingUsers.get(otherId);
+      if (t?.timer) clearTimeout(t.timer);
+      dmTypingUsers.delete(otherId);
+      updateChatBoxTypingBubble('dmMessages', []);
+      updateChatBoxTypingBubble('roomDmMessages', []);
+    }
     const friend = state.friends.find(x => x.id === otherId);
     const previewText = msg.text || (msg.viewOnce ? '🔥 Одноразовое фото' : (msg.hasPhoto || msg.hasImage || msg.imageUrl ? '📷 Фотография' : ''));
     if (friend) {
