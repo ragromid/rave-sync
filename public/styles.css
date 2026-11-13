@@ -31,7 +31,7 @@
 
 html, body {
   position: fixed;
-  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   width: 100%;
   height: 100%;
   background: var(--bg-main);
@@ -486,7 +486,7 @@ button {
 }
 .hero-backdrop {
   position: absolute;
-  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   background-size: cover;
   background-position: center 25%;
   transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
@@ -496,7 +496,7 @@ button {
 }
 .hero-gradient {
   position: absolute;
-  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   background: linear-gradient(90deg, rgba(9, 10, 15, 0.95) 0%, rgba(9, 10, 15, 0.65) 55%, rgba(9, 10, 15, 0.2) 100%),
               linear-gradient(0deg, rgba(9, 10, 15, 0.95) 0%, transparent 65%);
 }
@@ -960,7 +960,7 @@ button {
 .room-card-banner::after {
   content: '';
   position: absolute;
-  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   background: linear-gradient(0deg, var(--bg-card) 10%, rgba(0, 0, 0, 0.4) 100%);
 }
 .room-live-pill {
@@ -1144,7 +1144,7 @@ button {
 
 .player-overlay {
   position: absolute;
-  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   background: radial-gradient(circle at center, rgba(23, 26, 41, 0.85), rgba(5, 6, 10, 0.96));
   display: flex;
   align-items: center;
@@ -1306,7 +1306,7 @@ button {
 /* Floating Reactions Layer */
 .reactions-layer {
   position: absolute;
-  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   pointer-events: none;
   overflow: hidden;
   z-index: 9;
@@ -2380,7 +2380,7 @@ body.keyboard-open .chat-input-row {
 .tg-viewonce-card::before {
   content: '';
   position: absolute;
-  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   background: linear-gradient(110deg, transparent 25%, rgba(255, 255, 255, 0.12) 50%, transparent 75%);
   background-size: 200% 100%;
   animation: tgShimmer 2.4s infinite linear;
@@ -2591,7 +2591,7 @@ body.keyboard-open .chat-input-row {
 /* TELEGRAM FLOATING REACTION STRIP + CONTEXT MENU POPUP */
 .tg-msg-overlay {
   position: fixed;
-  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   background: rgba(4, 6, 12, 0.35);
   backdrop-filter: blur(3px);
   z-index: 250;
@@ -2896,7 +2896,7 @@ body.keyboard-open .chat-input-row {
 /* Modals */
 .modal-backdrop {
   position: fixed;
-  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   background: rgba(4, 5, 10, 0.82);
   backdrop-filter: blur(10px);
   display: flex;
@@ -3006,7 +3006,7 @@ body.keyboard-open .chat-input-row {
 }
 .movie-modal-gradient {
   position: absolute;
-  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   background: linear-gradient(0deg, var(--bg-elevated) 5%, rgba(18, 20, 31, 0.35) 100%);
 }
 .movie-modal-poster {
@@ -3422,7 +3422,7 @@ body.keyboard-open .chat-input-row {
 .switch-slider {
   position: absolute;
   cursor: pointer;
-  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   background-color: rgba(255, 255, 255, 0.16);
   transition: 0.2s ease;
   border-radius: 99px;
@@ -4618,7 +4618,7 @@ body.tv-cinema-mode .player-wrapper {
 /* ================= AMBIENT CINEMA GLOW, SKIP INTRO, AUTO-NEXT, BUFFERING, VOICE SPEAKERS, QUEUE, BADGES & TASTE MATCH ================= */
 .ambient-glow-canvas {
   position: absolute;
-  inset: -12%;
+  top: -12%; right: -12%; bottom: -12%; left: -12%;
   width: 124%;
   height: 124%;
   pointer-events: none;
@@ -5182,20 +5182,46 @@ body.tv-cinema-mode .player-wrapper {
 /* ================= OLDER SMART TV WEBVIEW FALLBACKS (WebOS / Chrome 53 / Tizen) ================= */
 @supports not (display: grid) {
   .poster-grid {
-    display: flex;
-    flex-wrap: wrap;
+    display: block;
+    font-size: 0;
     margin: -8px;
   }
   .poster-card {
-    flex: 1 1 155px;
-    width: 165px;
-    max-width: 210px;
-    margin: 8px;
+    display: inline-block;
+    vertical-align: top;
+    width: 15.46%;
+    margin: 0.6%;
+    box-sizing: border-box;
+    font-size: 14px;
+    overflow: hidden;
   }
   body.tv-mode .poster-card {
-    flex: 1 1 180px;
-    width: 190px;
-    max-width: 230px;
+    width: 18.8%;
+    margin: 0.6%;
+  }
+  .poster-art,
+  .poster-meta,
+  .poster-title,
+  .poster-sub {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .poster-meta {
+    margin-top: 8px;
+  }
+  .category-bar .cat-pill {
+    margin-right: 8px;
+  }
+  .hero-badges .badge {
+    margin-right: 8px;
+    margin-bottom: 4px;
+  }
+  .hero-actions .pill-btn {
+    margin-right: 10px;
+  }
+  .sidebar-nav .nav-item {
+    margin-bottom: 8px;
   }
 }
 
