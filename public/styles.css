@@ -5178,3 +5178,42 @@ body.tv-cinema-mode .player-wrapper {
     animation: none !important;
   }
 }
+
+/* ================= OLDER SMART TV WEBVIEW FALLBACKS (WebOS / Chrome 53 / Tizen) ================= */
+@supports not (display: grid) {
+  .poster-grid {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -8px;
+  }
+  .poster-card {
+    flex: 1 1 155px;
+    width: 165px;
+    max-width: 210px;
+    margin: 8px;
+  }
+  body.tv-mode .poster-card {
+    flex: 1 1 180px;
+    width: 190px;
+    max-width: 230px;
+  }
+}
+
+@supports not (aspect-ratio: 2 / 3) {
+  .poster-art {
+    height: 0;
+    padding-bottom: 150%;
+  }
+  .poster-art img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+body.tv-mode .poster-card {
+  content-visibility: visible;
+  contain-intrinsic-size: auto;
+}
