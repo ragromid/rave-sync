@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>oulo — Media Station X Interaction Plugin</title>
+  <script src="https://msx.benzac.de/js/tvx-plugin.min.js"></script>
+  <script>
+    (function () {
+      var origin = window.location.origin || 'https://oulo.duckdns.org';
+      var appUrl = origin + '/?msx=1&tv=1';
+
+      function OuloMsxHandler() {}
+
+      OuloMsxHandler.prototype.init = function () {
+        // Ready
+      };
+
+      OuloMsxHandler.prototype.ready = function () {
+        // Immediately launch oulo full-screen TV interface (like lampa.mx)
+        if (window.TVXInteractionPlugin) {
+          TVXInteractionPlugin.executeAction('link:' + appUrl);
+        }
+      };
+
+      OuloMsxHandler.prototype.handleEvent = function (data) {
+        if (data && data.event === 'back') {
+          TVXInteractionPlugin.executeAction('back');
+        }
+      };
+
+      OuloMsxHandler.prototype.handleData = function (data) {
+        if (data && data.data && data.data.action) {
+          TVXInteractionPlugin.executeAction(data.data.action);
+        }
+      };
+
+      OuloMsxHandler.prototype.handleRequest = function (dataId, data, callback) {
+        if (dataId === 'init') {
+          callback({
+            name: 'oulo',
+            version: '1.0.0',
+            headline: 'oulo — совместный просмотр',
+            menu: [
+              {
+                icon: 'play-circle-filled',
+                label: 'Запустить oulo',
+                data: 'link:' + appUrl
+              },
+              {
+                icon: 'live-tv',
+                label: 'Комнаты',
+                data: 'link:' + appUrl + '&view=rooms'
+              },
+              {
+                icon: 'bookmark',
+                label: 'Моё (Закладки и История)',
+                data: 'link:' + appUrl + '&view=saved'
+              },
+              {
+                icon: 'refresh',
+                label: 'Перезагрузить',
+                data: 'reload'
+              }
+            ]
+          });
+        } else {
+          callback();
+        }
+      };
+
+      window.onload = function () {
+        if (window.TVXPluginTools && window.TVXInteractionPlugin) {
+          TVXPluginTools.onReady(function () {
+            TVXInteractionPlugin.setupHandler(new OuloMsxHandler());
+            TVXInteractionPlugin.init();
+          });
+        } else {
+          window.location.replace(appUrl);
+        }
+      };
+    })();
+  </script>
+</head>
+<body style="background:#000000;color:#ffffff;margin:0;padding:0;overflow:hidden;"></body>
+</html>

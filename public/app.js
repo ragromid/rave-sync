@@ -60,7 +60,7 @@
     // Player & Sync
     clientId: 'dev_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now().toString(36),
     lastAppliedActionId: '',
-    tvMode: /SmartTV|Tizen|Web0S|WebOS|NetCast|BRAVIA|AFT|Android TV|GoogleTV|Viera|Hisense|VIDAA|PhilipsTV|Opera TV|HbbTV/i.test(navigator.userAgent || ''),
+    tvMode: /[?&](msx|tv)=1/i.test(window.location.search || '') || /SmartTV|Tizen|Web0S|WebOS|NetCast|BRAVIA|AFT|Android TV|GoogleTV|Viera|Hisense|VIDAA|PhilipsTV|Opera TV|HbbTV|MSX|Xbox|PlayStation/i.test(navigator.userAgent || ''),
     tvCinemaMode: false,
     hls: null,
     ytPlayer: null,
@@ -1140,6 +1140,12 @@
   $('profileClearCacheBtn')?.addEventListener('click', () => {
     localStorage.removeItem('ravelampa_progress');
     showToast('Кэш просмотра очищен');
+  });
+
+  $('copyMsxUrlBtn')?.addEventListener('click', () => {
+    const msxHost = window.location.host || 'oulo.duckdns.org';
+    navigator.clipboard?.writeText(msxHost).catch(() => {});
+    showToast(`Скопировано: ${msxHost} (вставьте в Start Parameter в Media Station X)`);
   });
 
   $('savePersonalizationBtn')?.addEventListener('click', () => {
@@ -3665,8 +3671,8 @@
       return;
     }
 
-    // Back button on Tizen (10009) / webOS (461) / Escape
-    if (key === 'Escape' || key === 'GoBack' || kc === 10009 || kc === 461) {
+    // Back button on Tizen (10009) / webOS (461) / MSX Backspace (8) / Escape (27)
+    if (key === 'Escape' || key === 'GoBack' || key === 'Backspace' || key === 'BrowserBack' || kc === 10009 || kc === 461 || kc === 8 || kc === 27) {
       const openModals = document.querySelectorAll('.modal-backdrop:not(.hidden)');
       if (openModals.length > 0) {
         e.preventDefault();
@@ -3676,6 +3682,16 @@
       if (state.tvCinemaMode) {
         e.preventDefault();
         toggleTvCinemaMode();
+        return;
+      }
+      if (state.currentView === 'room') {
+        e.preventDefault();
+        leaveRoom();
+        return;
+      }
+      if (state.currentView !== 'explore') {
+        e.preventDefault();
+        switchView('explore');
         return;
       }
     }

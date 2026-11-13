@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261109_oulo_38" />
+  <link rel="stylesheet" href="/styles.css?v=20261113_oulo_40" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -910,6 +910,18 @@
               </div>
               <button type="button" id="profileClearCacheBtn" class="pill-btn tiny">Очистить</button>
             </div>
+          <div class="settings-group" style="margin-top:14px;">
+            <div class="settings-group-label">Телевизор (Media Station X)</div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <span class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg></span>
+                <div class="settings-item-info">
+                  <span class="settings-item-title">Адрес для Media Station X</span>
+                  <span class="settings-item-sub">Settings → Start Parameter → oulo.duckdns.org</span>
+                </div>
+              </div>
+              <button type="button" id="copyMsxUrlBtn" class="pill-btn tiny accent">Копировать</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1281,6 +1293,6 @@
   <!-- Toast Container (also shows interactive room invites) -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/app.js?v=20261109_oulo_39"></script>
+  <script src="/app.js?v=20261113_oulo_40"></script>
 </body>
 </html>

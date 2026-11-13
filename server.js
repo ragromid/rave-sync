@@ -121,6 +121,37 @@ app.get('/', (req, res, next) => {
   return res.send(injected);
 });
 
+// ================= MEDIA STATION X (MSX) SMART TV PORTAL (LIKE LAMPA.MX) =================
+function buildMsxStartJson(req) {
+  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+  const host = req.headers['x-forwarded-host'] || req.headers.host || CANONICAL_DOMAIN;
+  const origin = `${proto}://${host}`;
+  return {
+    name: 'oulo',
+    version: '1.0.0',
+    parameter: `menu:request:interaction:init@${origin}/msx/plugin.html`
+  };
+}
+
+app.options(['/msx/*', '/start.json'], (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.sendStatus(204);
+});
+
+app.get(['/msx/start.json', '/start.json', '/msx', '/msx/'], (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  res.json(buildMsxStartJson(req));
+});
+
+app.get(['/msx/plugin.html', '/msx/index.html'], (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  res.sendFile(path.join(__dirname, 'public', 'msx', 'plugin.html'));
+});
+
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders(res, filePath) {
     // Always revalidate HTML/JS/CSS so phones & TVs never run a stale app version

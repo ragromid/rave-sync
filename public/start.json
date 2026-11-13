@@ -1,0 +1,5 @@
+{
+  "name": "oulo",
+  "version": "1.0.0",
+  "parameter": "menu:request:interaction:init@https://oulo.duckdns.org/msx/plugin.html"
+}
