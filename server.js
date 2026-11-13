@@ -123,9 +123,9 @@ app.get('/', (req, res, next) => {
 
 // ================= MEDIA STATION X (MSX) SMART TV PORTAL (LIKE LAMPA.MX) =================
 function buildMsxStartJson(req) {
-  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
-  const host = req.headers['x-forwarded-host'] || req.headers.host || CANONICAL_DOMAIN;
-  const origin = `${proto}://${host}`;
+  const rawHost = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(':')[0].toLowerCase();
+  const isLocal = rawHost === 'localhost' || rawHost === '127.0.0.1';
+  const origin = isLocal ? `http://${req.headers.host}` : `https://${CANONICAL_DOMAIN}`;
   return {
     name: 'oulo',
     version: '1.0.0',

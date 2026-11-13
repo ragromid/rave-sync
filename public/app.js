@@ -6578,6 +6578,15 @@
     await initAuth();
     updateNotificationBellUi();
 
+    // Media Station X / Smart TV: enable big-button TV mode and focus first card for remote D-Pad
+    if (state.tvMode) {
+      setSmartTvMode(true);
+      setTimeout(() => {
+        const first = document.querySelector('#catalogGrid .poster-card, #heroWatchPartyBtn');
+        if (first && (!document.activeElement || document.activeElement === document.body)) first.focus();
+      }, 1200);
+    }
+
     // Check URL or session for push deep-link (DM chat, view, or active room)
     const params = new URLSearchParams(window.location.search);
     const dmFriendId = params.get('dm');
