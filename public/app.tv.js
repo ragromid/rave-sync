@@ -7574,23 +7574,31 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     }));
     return _loadFriends.apply(this, arguments);
   }
+  var lastTvBgSyncAt = 0;
   function runBackgroundSyncTick() {
     if (!state.user) return;
+    if (state.tvMode && state.currentView !== 'friends') {
+      var now = Date.now();
+      if (now - lastTvBgSyncAt < 15000) return;
+      lastTvBgSyncAt = now;
+    }
     loadFriends();
     pollActiveDmChat();
   }
   setInterval(runBackgroundSyncTick, 1500);
-  try {
-    var workerBlob = new Blob(['setInterval(function(){ postMessage("tick"); }, 2000);'], {
-      type: 'application/javascript'
-    });
-    var bgWorker = new Worker(URL.createObjectURL(workerBlob));
-    bgWorker.onmessage = () => {
-      if (document.hidden && state.user) {
-        runBackgroundSyncTick();
-      }
-    };
-  } catch (_unused29) {}
+  if (!state.tvMode) {
+    try {
+      var workerBlob = new Blob(['setInterval(function(){ postMessage("tick"); }, 2000);'], {
+        type: 'application/javascript'
+      });
+      var bgWorker = new Worker(URL.createObjectURL(workerBlob));
+      bgWorker.onmessage = () => {
+        if (document.hidden && state.user) {
+          runBackgroundSyncTick();
+        }
+      };
+    } catch (_unused29) {}
+  }
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden && state.user) {
       loadFriends();
@@ -8669,7 +8677,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     showToast(ambientEnabled ? 'Фоновая подсветка включена' : 'Фоновая подсветка выключена');
   });
   setInterval(() => {
-    if (!ambientEnabled || mainVideo.paused || mainVideo.ended || state.currentView !== 'room') return;
+    if (state.tvMode || !ambientEnabled || mainVideo.paused || mainVideo.ended || state.currentView !== 'room') return;
     var canvas = $('ambientGlowCanvas');
     if (!canvas) return;
     try {

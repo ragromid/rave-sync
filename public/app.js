@@ -5564,25 +5564,33 @@
     }
   }
 
-  // Fast background poll every 1.5s (plus unthrottled Web Worker ticker when tab is in background)
+  // Fast background poll every 1.5s (throttled to 15s on Smart TVs to eliminate CPU lag)
+  let lastTvBgSyncAt = 0;
   function runBackgroundSyncTick() {
     if (!state.user) return;
+    if (state.tvMode && state.currentView !== 'friends') {
+      const now = Date.now();
+      if (now - lastTvBgSyncAt < 15000) return;
+      lastTvBgSyncAt = now;
+    }
     loadFriends();
     pollActiveDmChat();
   }
   setInterval(runBackgroundSyncTick, 1500);
 
-  try {
-    const workerBlob = new Blob([
-      'setInterval(function(){ postMessage("tick"); }, 2000);'
-    ], { type: 'application/javascript' });
-    const bgWorker = new Worker(URL.createObjectURL(workerBlob));
-    bgWorker.onmessage = () => {
-      if (document.hidden && state.user) {
-        runBackgroundSyncTick();
-      }
-    };
-  } catch {}
+  if (!state.tvMode) {
+    try {
+      const workerBlob = new Blob([
+        'setInterval(function(){ postMessage("tick"); }, 2000);'
+      ], { type: 'application/javascript' });
+      const bgWorker = new Worker(URL.createObjectURL(workerBlob));
+      bgWorker.onmessage = () => {
+        if (document.hidden && state.user) {
+          runBackgroundSyncTick();
+        }
+      };
+    } catch {}
+  }
 
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden && state.user) {
@@ -6378,7 +6386,7 @@
   });
 
   setInterval(() => {
-    if (!ambientEnabled || mainVideo.paused || mainVideo.ended || state.currentView !== 'room') return;
+    if (state.tvMode || !ambientEnabled || mainVideo.paused || mainVideo.ended || state.currentView !== 'room') return;
     const canvas = $('ambientGlowCanvas');
     if (!canvas) return;
     try {
